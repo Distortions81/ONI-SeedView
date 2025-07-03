@@ -135,6 +135,8 @@ type nameTables struct {
 
 var names nameTables
 
+var legendZoomThreshold = math.Pow(1.1, 10)
+
 func init() {
 	if b, err := embeddedFiles.ReadFile("names.json"); err == nil {
 		_ = json.Unmarshal(b, &names)
@@ -436,6 +438,19 @@ var whitePixel = func() *ebiten.Image {
 	return img
 }()
 
+func drawTextWithBG(dst *ebiten.Image, text string, x, y int) {
+	lines := strings.Split(text, "\n")
+	width := 0
+	for _, l := range lines {
+		if len(l) > width {
+			width = len(l)
+		}
+	}
+	height := len(lines) * 10
+	vector.DrawFilledRect(dst, float32(x-1), float32(y-1), float32(width*6+2), float32(height+2), color.RGBA{0, 0, 0, 77}, false)
+	ebitenutil.DebugPrintAt(dst, text, x, y)
+}
+
 func drawPolygon(dst *ebiten.Image, pts []Point, clr color.Color, camX, camY, zoom float64) {
 	if len(pts) == 0 {
 		return
@@ -524,7 +539,7 @@ func drawLegend(dst *ebiten.Image, biomes []BiomePath) {
 			clr = color.RGBA{60, 60, 60, 255}
 		}
 		vector.DrawFilledRect(dst, 5, float32(y), 20, 10, clr, false)
-		ebitenutil.DebugPrintAt(dst, displayBiome(name), 30, y)
+		drawTextWithBG(dst, displayBiome(name), 30, y)
 		y += 15
 	}
 }
@@ -538,7 +553,7 @@ func drawNumberLegend(dst *ebiten.Image, entries []string) {
 	x := dst.Bounds().Dx() - 150
 	y := 10
 	for _, e := range entries {
-		ebitenutil.DebugPrintAt(dst, e, x, y)
+		drawTextWithBG(dst, e, x, y)
 		y += 10
 	}
 }
@@ -651,8 +666,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		screen.Fill(color.RGBA{30, 30, 30, 255})
 		labels := []label{}
 		legend := []string{}
-		useNumbers := g.zoom < 0.4
+		useNumbers := g.zoom < legendZoomThreshold
 		counter := 1
+		legendMap := make(map[string]int)
 
 		for _, bp := range g.biomes {
 			clr, ok := biomeColors[bp.Name]
@@ -676,10 +692,16 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					var formatted string
 					var width int
 					if useNumbers {
-						formatted = strconv.Itoa(counter)
+						name := displayGeyser(gy.ID)
+						num, ok := legendMap["g"+name]
+						if !ok {
+							num = counter
+							legendMap["g"+name] = num
+							legend = append(legend, fmt.Sprintf("%d: %s", num, name))
+							counter++
+						}
+						formatted = strconv.Itoa(num)
 						width = len(formatted)
-						legend = append(legend, fmt.Sprintf("%d: %s", counter, displayGeyser(gy.ID)))
-						counter++
 					} else {
 						d := displayGeyser(gy.ID)
 						formatted, width = formatLabel(d)
@@ -691,10 +713,16 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				var formatted string
 				var width int
 				if useNumbers {
-					formatted = strconv.Itoa(counter)
+					name := displayGeyser(gy.ID)
+					num, ok := legendMap["g"+name]
+					if !ok {
+						num = counter
+						legendMap["g"+name] = num
+						legend = append(legend, fmt.Sprintf("%d: %s", num, name))
+						counter++
+					}
+					formatted = strconv.Itoa(num)
 					width = len(formatted)
-					legend = append(legend, fmt.Sprintf("%d: %s", counter, displayGeyser(gy.ID)))
-					counter++
 				} else {
 					d := displayGeyser(gy.ID)
 					formatted, width = formatLabel(d)
@@ -717,10 +745,16 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					var formatted string
 					var width int
 					if useNumbers {
-						formatted = strconv.Itoa(counter)
+						name := displayPOI(poi.ID)
+						num, ok := legendMap["p"+name]
+						if !ok {
+							num = counter
+							legendMap["p"+name] = num
+							legend = append(legend, fmt.Sprintf("%d: %s", num, name))
+							counter++
+						}
+						formatted = strconv.Itoa(num)
 						width = len(formatted)
-						legend = append(legend, fmt.Sprintf("%d: %s", counter, displayPOI(poi.ID)))
-						counter++
 					} else {
 						d := displayPOI(poi.ID)
 						formatted, width = formatLabel(d)
@@ -731,10 +765,16 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				var formatted string
 				var width int
 				if useNumbers {
-					formatted = strconv.Itoa(counter)
+					name := displayPOI(poi.ID)
+					num, ok := legendMap["p"+name]
+					if !ok {
+						num = counter
+						legendMap["p"+name] = num
+						legend = append(legend, fmt.Sprintf("%d: %s", num, name))
+						counter++
+					}
+					formatted = strconv.Itoa(num)
 					width = len(formatted)
-					legend = append(legend, fmt.Sprintf("%d: %s", counter, displayPOI(poi.ID)))
-					counter++
 				} else {
 					d := displayPOI(poi.ID)
 					formatted, width = formatLabel(d)
@@ -745,7 +785,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		drawLegend(screen, g.biomes)
 		for _, l := range labels {
-			ebitenutil.DebugPrintAt(screen, l.text, l.x, l.y)
+			drawTextWithBG(screen, l.text, l.x, l.y)
 		}
 		if useNumbers {
 			drawNumberLegend(screen, legend)
