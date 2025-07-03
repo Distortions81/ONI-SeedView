@@ -22,7 +22,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/chai2010/webp"
 	"github.com/fxamacker/cbor/v2"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -274,8 +273,6 @@ func loadImage(cache map[string]*ebiten.Image, name string) (*ebiten.Image, erro
 		src, err = png.Decode(f)
 	case ".jpg", ".jpeg":
 		src, err = jpeg.Decode(f)
-	case ".webp":
-		src, err = webp.Decode(f)
 	default:
 		return nil, fmt.Errorf("unsupported image format: %s", ext)
 	}
@@ -283,11 +280,6 @@ func loadImage(cache map[string]*ebiten.Image, name string) (*ebiten.Image, erro
 		return nil, err
 	}
 	if nrgba, ok := src.(*image.NRGBA); ok {
-		for i := 3; i < len(nrgba.Pix); i += 4 {
-			if nrgba.Pix[i] < 64 {
-				nrgba.Pix[i] = 0
-			}
-		}
 		img := ebiten.NewImageFromImage(nrgba)
 		cache[name] = img
 		return img, nil
@@ -295,11 +287,6 @@ func loadImage(cache map[string]*ebiten.Image, name string) (*ebiten.Image, erro
 	bounds := src.Bounds()
 	dst := image.NewNRGBA(bounds)
 	draw.Draw(dst, bounds, src, bounds.Min, draw.Src)
-	for i := 3; i < len(dst.Pix); i += 4 {
-		if dst.Pix[i] < 64 {
-			dst.Pix[i] = 0
-		}
-	}
 	img := ebiten.NewImageFromImage(dst)
 	cache[name] = img
 	return img, nil
@@ -308,57 +295,57 @@ func loadImage(cache map[string]*ebiten.Image, name string) (*ebiten.Image, erro
 func iconForGeyser(id string) string {
 	switch id {
 	case "steam":
-		return "geyser_cool_steam_vent.webp"
+		return "geyser_cool_steam_vent.png"
 	case "hot_steam":
-		return "geyser_steam_vent.webp"
+		return "geyser_steam_vent.png"
 	case "hot_water":
-		return "geyser_water.webp"
+		return "geyser_water.png"
 	case "slush_water":
-		return "geyser_cool_slush_geyser.webp"
+		return "geyser_cool_slush_geyser.png"
 	case "filthy_water":
-		return "geyser_polluted_water_vent.webp"
+		return "geyser_polluted_water_vent.png"
 	case "slush_salt_water":
-		return "geyser_cool_salt_slush_geyser.webp"
+		return "geyser_cool_salt_slush_geyser.png"
 	case "salt_water":
-		return "geyser_salt_water.webp"
+		return "geyser_salt_water.png"
 	case "small_volcano":
-		return "geyser_minor_volcano.webp"
+		return "geyser_minor_volcano.png"
 	case "big_volcano":
-		return "geyser_volcano.webp"
+		return "geyser_volcano.png"
 	case "liquid_co2":
-		return "geyser_carbon_dioxide.webp"
+		return "geyser_carbon_dioxide.png"
 	case "hot_co2":
-		return "geyser_carbon_dioxide_vent.webp"
+		return "geyser_carbon_dioxide_vent.png"
 	case "hot_hydrogen":
-		return "geyser_hydrogen_vent.webp"
+		return "geyser_hydrogen_vent.png"
 	case "hot_po2":
-		return "geyser_hot_polluted_oxygen_vent.webp"
+		return "geyser_hot_polluted_oxygen_vent.png"
 	case "slimy_po2":
-		return "geyser_infectious_polluted_oxygen_vent.webp"
+		return "geyser_infectious_polluted_oxygen_vent.png"
 	case "chlorine_gas", "chlorine_gas_cool":
-		return "geyser_chlorine_gas_vent.webp"
+		return "geyser_chlorine_gas_vent.png"
 	case "methane":
-		return "geyser_natural_gas_geyser.webp"
+		return "geyser_natural_gas_geyser.png"
 	case "molten_copper":
-		return "geyser_copper_volcano.webp"
+		return "geyser_copper_volcano.png"
 	case "molten_iron":
-		return "geyser_iron_volcano.webp"
+		return "geyser_iron_volcano.png"
 	case "molten_gold":
-		return "geyser_gold_volcano.webp"
+		return "geyser_gold_volcano.png"
 	case "oil_drip":
-		return "geyser_leaky_oil_fissure.webp"
+		return "geyser_leaky_oil_fissure.png"
 	case "molten_aluminum":
-		return "geyser_aluminum_volcano.webp"
+		return "geyser_aluminum_volcano.png"
 	case "molten_cobalt":
-		return "geyser_cobalt_volcano.webp"
+		return "geyser_cobalt_volcano.png"
 	case "liquid_sulfur":
-		return "geyser_liquid_sulfur_geyser.webp"
+		return "geyser_liquid_sulfur_geyser.png"
 	case "molten_tungsten":
-		return "geyser_tungsten_volcano.webp"
+		return "geyser_tungsten_volcano.png"
 	case "molten_niobium":
-		return "geyser_niobium_volcano.webp"
+		return "geyser_niobium_volcano.png"
 	case "OilWell":
-		return "geyser_oil_reservoir.webp"
+		return "geyser_oil_reservoir.png"
 	default:
 		return ""
 	}
@@ -367,41 +354,41 @@ func iconForGeyser(id string) string {
 func iconForPOI(id string) string {
 	switch id {
 	case "Headquarters":
-		return "building_printing_pod.webp"
+		return "building_printing_pod.png"
 	case "WarpConduitSender":
-		return "building_supply_teleporter_input.webp"
+		return "building_supply_teleporter_input.png"
 	case "WarpConduitReceiver":
-		return "building_supply_teleporter_output.webp"
+		return "building_supply_teleporter_output.png"
 	case "WarpPortal":
-		return "building_teleporter_transmitter.webp"
+		return "building_teleporter_transmitter.png"
 	case "WarpReceiver":
-		return "building_teleporter_receiver.webp"
+		return "building_teleporter_receiver.png"
 	case "GeneShuffler":
-		return "building_neural_vacillator.webp"
+		return "building_neural_vacillator.png"
 	case "MassiveHeatSink":
-		return "building_anti_entropy_thermo_nullifier.webp"
+		return "building_anti_entropy_thermo_nullifier.png"
 	case "SapTree":
-		return "building_sap_tree.webp"
+		return "building_sap_tree.png"
 	case "GravitasPedestal":
-		return "poi_artifact_outline.webp"
+		return "poi_artifact_outline.png"
 	case "PropSurfaceSatellite1":
-		return "poi_crashed_satellite.webp"
+		return "poi_crashed_satellite.png"
 	case "PropSurfaceSatellite2":
-		return "poi_wrecked_satellite.webp"
+		return "poi_wrecked_satellite.png"
 	case "PropSurfaceSatellite3":
-		return "poi_crushed_satellite.webp"
+		return "poi_crushed_satellite.png"
 	case "TemporalTearOpener":
-		return "building_temporal_tear_opener.webp"
+		return "building_temporal_tear_opener.png"
 	case "CryoTank":
-		return "building_cryotank.webp"
+		return "building_cryotank.png"
 	case "PropFacilityStatue":
-		return "poi_prop_facility_statue.webp"
+		return "poi_prop_facility_statue.png"
 	case "GeothermalVentEntity":
-		return "poi_geothermal_vent_entity.webp"
+		return "poi_geothermal_vent_entity.png"
 	case "GeothermalControllerEntity":
-		return "poi_geothermal_controller_entity.webp"
+		return "poi_geothermal_controller_entity.png"
 	case "POICeresTechUnlock":
-		return "poi_ceres_tech_unlock.webp"
+		return "poi_ceres_tech_unlock.png"
 	default:
 		return ""
 	}
