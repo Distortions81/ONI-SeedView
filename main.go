@@ -30,9 +30,9 @@ import (
 
 // fetchSeedCBOR retrieves the seed data in CBOR format for a given coordinate.
 func fetchSeedCBOR(coordinate string) ([]byte, error) {
-	url := "https://ingest.mapsnotincluded.org/coordinate/" + coordinate
+	url := BaseURL + coordinate
 	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("Accept", "application/cbor")
+	req.Header.Set("Accept", AcceptCBORHeader)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -134,8 +134,6 @@ type nameTables struct {
 }
 
 var names nameTables
-
-var legendZoomThreshold = math.Pow(1.1, 10)
 
 func init() {
 	if b, err := embeddedFiles.ReadFile("names.json"); err == nil {
@@ -447,7 +445,7 @@ func drawTextWithBG(dst *ebiten.Image, text string, x, y int) {
 		}
 	}
 	height := len(lines) * 10
-	vector.DrawFilledRect(dst, float32(x-1), float32(y-1), float32(width*6+2), float32(height+2), color.RGBA{0, 0, 0, 77}, false)
+	vector.DrawFilledRect(dst, float32(x-1), float32(y-1), float32(width*LabelCharWidth+2), float32(height+2), color.RGBA{0, 0, 0, 77}, false)
 	ebitenutil.DebugPrintAt(dst, text, x, y)
 }
 
@@ -550,23 +548,11 @@ func (g *Game) initObjectLegend() {
 	if g.legendMap != nil {
 		return
 	}
-	g.legendMap = make(map[string]int)
-	counter := 1
-	for _, gy := range g.geysers {
-		name := displayGeyser(gy.ID)
-		if _, ok := g.legendMap["g"+name]; !ok {
-			g.legendMap["g"+name] = counter
-			g.legendEntries = append(g.legendEntries, fmt.Sprintf("%d: %s", counter, name))
-			counter++
-		}
-	}
-	for _, poi := range g.pois {
-		name := displayPOI(poi.ID)
-		if _, ok := g.legendMap["p"+name]; !ok {
-			g.legendMap["p"+name] = counter
-			g.legendEntries = append(g.legendEntries, fmt.Sprintf("%d: %s", counter, name))
-			counter++
-		}
+	x := dst.Bounds().Dx() - NumberLegendXOffset
+	y := 10
+	for _, e := range entries {
+		drawTextWithBG(dst, e, x, y)
+		y += 10
 	}
 }
 
@@ -631,7 +617,7 @@ type label struct {
 }
 
 func (g *Game) Update() error {
-	const panSpeed = 5
+	const panSpeed = PanSpeed
 
 	oldX, oldY, oldZoom := g.camX, g.camY, g.zoom
 
@@ -666,27 +652,27 @@ func (g *Game) Update() error {
 	// Zoom with keyboard
 	zoomFactor := 1.0
 	if ebiten.IsKeyPressed(ebiten.KeyEqual) || ebiten.IsKeyPressed(ebiten.KeyKPAdd) {
-		zoomFactor *= 1.05
+		zoomFactor *= KeyZoomFactor
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyMinus) || ebiten.IsKeyPressed(ebiten.KeyKPSubtract) {
-		zoomFactor /= 1.05
+		zoomFactor /= KeyZoomFactor
 	}
 
 	// Zoom with mouse wheel
 	_, wheelY := ebiten.Wheel()
 	if wheelY != 0 {
 		if wheelY > 0 {
-			zoomFactor *= 1.1
+			zoomFactor *= WheelZoomFactor
 		} else {
-			zoomFactor /= 1.1
+			zoomFactor /= WheelZoomFactor
 		}
 	}
 
 	if zoomFactor != 1.0 {
 		oldZoom := g.zoom
 		g.zoom *= zoomFactor
-		if g.zoom < 0.1 {
-			g.zoom = 0.1
+		if g.zoom < MinZoom {
+			g.zoom = MinZoom
 		}
 		cx, cy := float64(g.width)/2, float64(g.height)/2
 		worldX := (cx - g.camX) / oldZoom
@@ -710,10 +696,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	if g.needsRedraw {
 		screen.Fill(color.RGBA{30, 30, 30, 255})
 		labels := []label{}
-		useNumbers := g.zoom < legendZoomThreshold
-		if g.legendMap == nil {
-			g.initObjectLegend()
-		}
+		legend := []string{}
+		useNumbers := g.zoom < LegendZoomThreshold
+		counter := 1
+		legendMap := make(map[string]int)
 
 		for _, bp := range g.biomes {
 			clr, ok := biomeColors[bp.Name]
@@ -729,9 +715,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if iconName := iconForGeyser(gy.ID); iconName != "" {
 				if img, err := loadImage(g.icons, iconName); err == nil {
 					op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
-					op.GeoM.Scale(g.zoom*0.25, g.zoom*0.25)
-					w := float64(img.Bounds().Dx()) * g.zoom * 0.25
-					h := float64(img.Bounds().Dy()) * g.zoom * 0.25
+					op.GeoM.Scale(g.zoom*IconScale, g.zoom*IconScale)
+					w := float64(img.Bounds().Dx()) * g.zoom * IconScale
+					h := float64(img.Bounds().Dy()) * g.zoom * IconScale
 					op.GeoM.Translate(x-w/2, y-h/2)
 					screen.DrawImage(img, op)
 					var formatted string
@@ -745,7 +731,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 						d := displayGeyser(gy.ID)
 						formatted, width = formatLabel(d)
 					}
-					labels = append(labels, label{formatted, int(x) - (width*6)/2, int(y+h/2) + 2})
+					labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2})
 				}
 			} else {
 				vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, color.RGBA{255, 0, 0, 255}, false)
@@ -760,7 +746,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					d := displayGeyser(gy.ID)
 					formatted, width = formatLabel(d)
 				}
-				labels = append(labels, label{formatted, int(x) - (width*6)/2, int(y) + 4})
+				labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4})
 			}
 		}
 
@@ -770,9 +756,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if iconName := iconForPOI(poi.ID); iconName != "" {
 				if img, err := loadImage(g.icons, iconName); err == nil {
 					op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
-					op.GeoM.Scale(g.zoom*0.25, g.zoom*0.25)
-					w := float64(img.Bounds().Dx()) * g.zoom * 0.25
-					h := float64(img.Bounds().Dy()) * g.zoom * 0.25
+					op.GeoM.Scale(g.zoom*IconScale, g.zoom*IconScale)
+					w := float64(img.Bounds().Dx()) * g.zoom * IconScale
+					h := float64(img.Bounds().Dy()) * g.zoom * IconScale
 					op.GeoM.Translate(x-w/2, y-h/2)
 					screen.DrawImage(img, op)
 					var formatted string
@@ -786,7 +772,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 						d := displayPOI(poi.ID)
 						formatted, width = formatLabel(d)
 					}
-					labels = append(labels, label{formatted, int(x) - (width*6)/2, int(y+h/2) + 2})
+					labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2})
 				}
 			} else {
 				var formatted string
@@ -800,7 +786,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					d := displayPOI(poi.ID)
 					formatted, width = formatLabel(d)
 				}
-				labels = append(labels, label{formatted, int(x) - (width*6)/2, int(y) + 4})
+				labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4})
 			}
 		}
 
@@ -879,11 +865,11 @@ func main() {
 		pois:      ast.POIs,
 		biomes:    parseBiomePaths(ast.BiomePaths),
 		icons:     make(map[string]*ebiten.Image),
-		width:     600,
-		height:    800,
+		width:     DefaultWidth,
+		height:    DefaultHeight,
 		astWidth:  ast.SizeX,
 		astHeight: ast.SizeY,
-		zoom:      1.0,
+		zoom:      InitialZoom,
 	}
 	if *screenshot != "" {
 		game.screenshotPath = *screenshot
