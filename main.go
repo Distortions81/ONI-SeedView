@@ -3,6 +3,7 @@
 package main
 
 import (
+	"embed"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -122,6 +123,23 @@ type SeedData struct {
 	Asteroids []Asteroid `json:"asteroids"`
 }
 
+//go:embed assets/* names.json
+var embeddedFiles embed.FS
+
+type nameTables struct {
+	Biomes  map[string]string `json:"biomes"`
+	Geysers map[string]string `json:"geysers"`
+	POIs    map[string]string `json:"pois"`
+}
+
+var names nameTables
+
+func init() {
+	if b, err := embeddedFiles.ReadFile("names.json"); err == nil {
+		_ = json.Unmarshal(b, &names)
+	}
+}
+
 func colorFromARGB(hex uint32) color.RGBA {
 	return color.RGBA{
 		R: uint8(hex >> 16),
@@ -231,8 +249,7 @@ func loadImage(cache map[string]*ebiten.Image, name string) (*ebiten.Image, erro
 	if img, ok := cache[name]; ok {
 		return img, nil
 	}
-	path := filepath.Join("assets", name)
-	f, err := os.Open(path)
+	f, err := embeddedFiles.Open(filepath.Join("assets", name))
 	if err != nil {
 		return nil, err
 	}
@@ -359,6 +376,27 @@ func iconForPOI(id string) string {
 	}
 }
 
+func displayBiome(id string) string {
+	if v, ok := names.Biomes[id]; ok {
+		return v
+	}
+	return id
+}
+
+func displayGeyser(id string) string {
+	if v, ok := names.Geysers[id]; ok {
+		return v
+	}
+	return id
+}
+
+func displayPOI(id string) string {
+	if v, ok := names.POIs[id]; ok {
+		return v
+	}
+	return id
+}
+
 var whitePixel = func() *ebiten.Image {
 	img := ebiten.NewImage(1, 1)
 	img.Fill(color.White)
@@ -449,7 +487,7 @@ func drawLegend(dst *ebiten.Image, biomes []BiomePath) {
 			clr = color.RGBA{60, 60, 60, 255}
 		}
 		vector.DrawFilledRect(dst, 5, float32(y), 20, 10, clr, false)
-		ebitenutil.DebugPrintAt(dst, name, 30, y)
+		ebitenutil.DebugPrintAt(dst, displayBiome(name), 30, y)
 		y += 15
 	}
 }
@@ -575,11 +613,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					h := float64(img.Bounds().Dy()) * g.zoom * 0.25
 					op.GeoM.Translate(x-w/2, y-h/2)
 					screen.DrawImage(img, op)
-					labels = append(labels, label{gy.ID, int(x) - (len(gy.ID)*6)/2, int(y+h/2) + 2})
+					d := displayGeyser(gy.ID)
+					labels = append(labels, label{d, int(x) - (len(d)*6)/2, int(y+h/2) + 2})
 				}
 			} else {
 				vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, color.RGBA{255, 0, 0, 255}, false)
-				labels = append(labels, label{gy.ID, int(x) - (len(gy.ID)*6)/2, int(y) + 4})
+				d := displayGeyser(gy.ID)
+				labels = append(labels, label{d, int(x) - (len(d)*6)/2, int(y) + 4})
 			}
 		}
 
@@ -594,10 +634,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					h := float64(img.Bounds().Dy()) * g.zoom * 0.25
 					op.GeoM.Translate(x-w/2, y-h/2)
 					screen.DrawImage(img, op)
-					labels = append(labels, label{poi.ID, int(x) - (len(poi.ID)*6)/2, int(y+h/2) + 2})
+					d := displayPOI(poi.ID)
+					labels = append(labels, label{d, int(x) - (len(d)*6)/2, int(y+h/2) + 2})
 				}
 			} else {
-				labels = append(labels, label{poi.ID, int(x) - (len(poi.ID)*6)/2, int(y) + 4})
+				d := displayPOI(poi.ID)
+				labels = append(labels, label{d, int(x) - (len(d)*6)/2, int(y) + 4})
 			}
 		}
 
