@@ -544,18 +544,59 @@ func drawLegend(dst *ebiten.Image, biomes []BiomePath) {
 	}
 }
 
-// drawNumberLegend renders numeric labels and their associated names at the top
-// right of the screen.
-func drawNumberLegend(dst *ebiten.Image, entries []string) {
-	if len(entries) == 0 {
+// initObjectLegend prepares the mapping of object names to numeric labels and
+// caches the legend text.
+func (g *Game) initObjectLegend() {
+	if g.legendMap != nil {
 		return
 	}
-	x := dst.Bounds().Dx() - 150
-	y := 10
-	for _, e := range entries {
-		drawTextWithBG(dst, e, x, y)
-		y += 10
+	g.legendMap = make(map[string]int)
+	counter := 1
+	for _, gy := range g.geysers {
+		name := displayGeyser(gy.ID)
+		if _, ok := g.legendMap["g"+name]; !ok {
+			g.legendMap["g"+name] = counter
+			g.legendEntries = append(g.legendEntries, fmt.Sprintf("%d: %s", counter, name))
+			counter++
+		}
 	}
+	for _, poi := range g.pois {
+		name := displayPOI(poi.ID)
+		if _, ok := g.legendMap["p"+name]; !ok {
+			g.legendMap["p"+name] = counter
+			g.legendEntries = append(g.legendEntries, fmt.Sprintf("%d: %s", counter, name))
+			counter++
+		}
+	}
+}
+
+// drawNumberLegend draws the cached legend image on the top right corner with
+// a single semi-transparent background.
+func (g *Game) drawNumberLegend(dst *ebiten.Image) {
+	if len(g.legendEntries) == 0 {
+		return
+	}
+	if g.legendImage == nil {
+		width := 0
+		for _, e := range g.legendEntries {
+			if len(e) > width {
+				width = len(e)
+			}
+		}
+		img := ebiten.NewImage(width*6, len(g.legendEntries)*10)
+		for i, e := range g.legendEntries {
+			ebitenutil.DebugPrintAt(img, e, 0, i*10)
+		}
+		g.legendImage = img
+	}
+	w := g.legendImage.Bounds().Dx()
+	h := g.legendImage.Bounds().Dy()
+	x := dst.Bounds().Dx() - w - 12
+	y := 10
+	vector.DrawFilledRect(dst, float32(x-1), float32(y-1), float32(w+2), float32(h+2), color.RGBA{0, 0, 0, 77}, false)
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(x), float64(y))
+	dst.DrawImage(g.legendImage, op)
 }
 
 // Game implements ebiten.Game and displays geysers with their names.
@@ -577,6 +618,10 @@ type Game struct {
 	needsRedraw    bool
 	screenshotPath string
 	captured       bool
+
+	legendMap     map[string]int
+	legendEntries []string
+	legendImage   *ebiten.Image
 }
 
 type label struct {
@@ -665,10 +710,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	if g.needsRedraw {
 		screen.Fill(color.RGBA{30, 30, 30, 255})
 		labels := []label{}
-		legend := []string{}
 		useNumbers := g.zoom < legendZoomThreshold
-		counter := 1
-		legendMap := make(map[string]int)
+		if g.legendMap == nil {
+			g.initObjectLegend()
+		}
 
 		for _, bp := range g.biomes {
 			clr, ok := biomeColors[bp.Name]
@@ -693,13 +738,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					var width int
 					if useNumbers {
 						name := displayGeyser(gy.ID)
-						num, ok := legendMap["g"+name]
-						if !ok {
-							num = counter
-							legendMap["g"+name] = num
-							legend = append(legend, fmt.Sprintf("%d: %s", num, name))
-							counter++
-						}
+						num := g.legendMap["g"+name]
 						formatted = strconv.Itoa(num)
 						width = len(formatted)
 					} else {
@@ -714,13 +753,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				var width int
 				if useNumbers {
 					name := displayGeyser(gy.ID)
-					num, ok := legendMap["g"+name]
-					if !ok {
-						num = counter
-						legendMap["g"+name] = num
-						legend = append(legend, fmt.Sprintf("%d: %s", num, name))
-						counter++
-					}
+					num := g.legendMap["g"+name]
 					formatted = strconv.Itoa(num)
 					width = len(formatted)
 				} else {
@@ -746,13 +779,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					var width int
 					if useNumbers {
 						name := displayPOI(poi.ID)
-						num, ok := legendMap["p"+name]
-						if !ok {
-							num = counter
-							legendMap["p"+name] = num
-							legend = append(legend, fmt.Sprintf("%d: %s", num, name))
-							counter++
-						}
+						num := g.legendMap["p"+name]
 						formatted = strconv.Itoa(num)
 						width = len(formatted)
 					} else {
@@ -766,13 +793,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				var width int
 				if useNumbers {
 					name := displayPOI(poi.ID)
-					num, ok := legendMap["p"+name]
-					if !ok {
-						num = counter
-						legendMap["p"+name] = num
-						legend = append(legend, fmt.Sprintf("%d: %s", num, name))
-						counter++
-					}
+					num := g.legendMap["p"+name]
 					formatted = strconv.Itoa(num)
 					width = len(formatted)
 				} else {
@@ -788,7 +809,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			drawTextWithBG(screen, l.text, l.x, l.y)
 		}
 		if useNumbers {
-			drawNumberLegend(screen, legend)
+			g.drawNumberLegend(screen)
 		}
 
 		g.needsRedraw = false
