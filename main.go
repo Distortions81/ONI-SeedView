@@ -397,6 +397,38 @@ func drawPolygon(dst *ebiten.Image, pts []Point, clr color.Color, camX, camY, zo
 	dst.DrawTriangles(vs, is, whitePixel, op)
 }
 
+// drawBiome draws all polygons for a biome using a single path so holes render correctly.
+func drawBiome(dst *ebiten.Image, polys [][]Point, clr color.Color, camX, camY, zoom float64) {
+	if len(polys) == 0 {
+		return
+	}
+	var p vector.Path
+	for _, pts := range polys {
+		if len(pts) == 0 {
+			continue
+		}
+		p.MoveTo(float32(pts[0].X*2), float32(pts[0].Y*2))
+		for _, pt := range pts[1:] {
+			p.LineTo(float32(pt.X*2), float32(pt.Y*2))
+		}
+		p.Close()
+	}
+	vs, is := p.AppendVerticesAndIndicesForFilling(nil, nil)
+	r, g, b, a := clr.RGBA()
+	for i := range vs {
+		vs[i].DstX = vs[i].DstX*float32(zoom) + float32(camX)
+		vs[i].DstY = vs[i].DstY*float32(zoom) + float32(camY)
+		vs[i].SrcX = 0
+		vs[i].SrcY = 0
+		vs[i].ColorR = float32(r) / 0xffff
+		vs[i].ColorG = float32(g) / 0xffff
+		vs[i].ColorB = float32(b) / 0xffff
+		vs[i].ColorA = float32(a) / 0xffff
+	}
+	op := &ebiten.DrawTrianglesOptions{AntiAlias: true, ColorScaleMode: ebiten.ColorScaleModePremultipliedAlpha}
+	dst.DrawTriangles(vs, is, whitePixel, op)
+}
+
 // drawLegend renders a list of biome colors along the left side of the screen.
 func drawLegend(dst *ebiten.Image, biomes []BiomePath) {
 	set := make(map[string]struct{})
@@ -511,9 +543,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		if !ok {
 			clr = color.RGBA{60, 60, 60, 255}
 		}
-		for _, poly := range bp.Polygons {
-			drawPolygon(screen, poly, clr, g.camX, g.camY, g.zoom)
-		}
+		drawBiome(screen, bp.Polygons, clr, g.camX, g.camY, g.zoom)
 	}
 	for _, gy := range g.geysers {
 		x := (float64(gy.X) * 2 * g.zoom) + g.camX
