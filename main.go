@@ -494,13 +494,13 @@ var oceanPattern = func() *ebiten.Image {
 }()
 
 var sandPattern = func() *ebiten.Image {
-	const size = 8
+	const size = 16
 	img := ebiten.NewImage(size, size)
 	img.Fill(color.RGBA{0, 0, 0, 0})
-	dot := color.RGBA{255, 255, 255, 15}
+	dot := color.RGBA{255, 255, 255, 10}
 	for x := 0; x < size; x++ {
 		for y := 0; y < size; y++ {
-			if (x+y)%4 == 0 {
+			if (x+y)%8 == 0 {
 				img.Set(x, y, dot)
 			}
 		}
@@ -541,11 +541,11 @@ var oilPattern = func() *ebiten.Image {
 }()
 
 var marshPattern = func() *ebiten.Image {
-	const size = 8
+	const size = 16
 	img := ebiten.NewImage(size, size)
 	img.Fill(color.RGBA{0, 0, 0, 0})
-	grass := color.RGBA{255, 255, 255, 20}
-	for x := 0; x < size; x += 3 {
+	grass := color.RGBA{255, 255, 255, 15}
+	for x := 0; x < size; x += 5 {
 		for y := 0; y < size; y++ {
 			img.Set(x, y, grass)
 		}
