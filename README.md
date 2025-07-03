@@ -9,6 +9,7 @@ Oni View is a small utility for inspecting **Oxygen Not Included** seed data. It
 * Fetches seed data in [CBOR](https://en.wikipedia.org/wiki/CBOR) format from the MapsNotIncluded ingest API.
 * Converts the data to JSON and optionally saves it to disk with the `-out` flag.
 * Smooth panning via arrow keys, **WASD** or by dragging with the mouse.
+* Touch controls for panning and pinch-to-zoom on supported devices.
 * Mouse wheel and `+`/`-` keys control zoom. The window can be resized at any time.
 * Legends for biome colors along with icons for geysers and points of interest.
 * Supports running in headless environments using `Xvfb`.

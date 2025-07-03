@@ -956,6 +956,8 @@ type Game struct {
 	dragging       bool
 	lastX          int
 	lastY          int
+	touches        map[ebiten.TouchID]touchPoint
+	pinchDist      float64
 	needsRedraw    bool
 	screenshotPath string
 	captured       bool
@@ -971,6 +973,11 @@ type label struct {
 	x    int
 	y    int
 	clr  color.RGBA
+}
+
+type touchPoint struct {
+	x int
+	y int
 }
 
 func (g *Game) clampCamera() {
@@ -1022,6 +1029,49 @@ func (g *Game) Update() error {
 		g.dragging = true
 	} else {
 		g.dragging = false
+	}
+
+	// Touch gestures
+	touchIDs := ebiten.TouchIDs()
+	switch len(touchIDs) {
+	case 1:
+		id := touchIDs[0]
+		x, y := ebiten.TouchPosition(id)
+		if last, ok := g.touches[id]; ok {
+			g.camX += float64(x - last.x)
+			g.camY += float64(y - last.y)
+		}
+		g.touches = map[ebiten.TouchID]touchPoint{id: {x: x, y: y}}
+		g.pinchDist = 0
+	case 2:
+		id1, id2 := touchIDs[0], touchIDs[1]
+		x1, y1 := ebiten.TouchPosition(id1)
+		x2, y2 := ebiten.TouchPosition(id2)
+		dx := float64(x2 - x1)
+		dy := float64(y2 - y1)
+		dist := math.Hypot(dx, dy)
+		midX := float64(x1+x2) / 2
+		midY := float64(y1+y2) / 2
+		if g.pinchDist != 0 {
+			factor := dist / g.pinchDist
+			oldZoom := g.zoom
+			g.zoom *= factor
+			if g.zoom < MinZoom {
+				g.zoom = MinZoom
+			}
+			worldX := (midX - g.camX) / oldZoom
+			worldY := (midY - g.camY) / oldZoom
+			g.camX = midX - worldX*g.zoom
+			g.camY = midY - worldY*g.zoom
+		}
+		g.pinchDist = dist
+		g.touches = map[ebiten.TouchID]touchPoint{
+			id1: {x: x1, y: y1},
+			id2: {x: x2, y: y2},
+		}
+	default:
+		g.touches = nil
+		g.pinchDist = 0
 	}
 
 	// Zoom with keyboard
