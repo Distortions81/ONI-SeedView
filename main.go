@@ -9,9 +9,11 @@ import (
 	"image/jpeg"
 	"image/png"
 	"io"
+	"math"
 	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -165,6 +167,25 @@ func decodeSeed(cborData []byte) (*SeedData, error) {
 	return &seed, nil
 }
 
+// sortPolygon orders the points of a polygon by angle around its centroid.
+func sortPolygon(poly []Point) {
+	if len(poly) < 3 {
+		return
+	}
+	var sumX, sumY int
+	for _, p := range poly {
+		sumX += p.X
+		sumY += p.Y
+	}
+	cx := float64(sumX) / float64(len(poly))
+	cy := float64(sumY) / float64(len(poly))
+	sort.Slice(poly, func(i, j int) bool {
+		ai := math.Atan2(float64(poly[i].Y)-cy, float64(poly[i].X)-cx)
+		aj := math.Atan2(float64(poly[j].Y)-cy, float64(poly[j].X)-cx)
+		return ai < aj
+	})
+}
+
 // parseBiomePaths converts the raw biome path string into structured paths.
 func parseBiomePaths(data string) []BiomePath {
 	var paths []BiomePath
@@ -199,6 +220,7 @@ func parseBiomePaths(data string) []BiomePath {
 				poly = append(poly, Point{X: x, Y: y})
 			}
 			if len(poly) > 0 {
+				sortPolygon(poly)
 				bp.Polygons = append(bp.Polygons, poly)
 			}
 		}
@@ -372,6 +394,29 @@ func drawPolygon(dst *ebiten.Image, pts []Point, clr color.Color, camX, camY, zo
 	dst.DrawTriangles(vs, is, whitePixel, op)
 }
 
+// drawLegend renders a list of biome colors along the left side of the screen.
+func drawLegend(dst *ebiten.Image, biomes []BiomePath) {
+	set := make(map[string]struct{})
+	for _, b := range biomes {
+		set[b.Name] = struct{}{}
+	}
+	names := make([]string, 0, len(set))
+	for n := range set {
+		names = append(names, n)
+	}
+	sort.Strings(names)
+	y := 10
+	for _, name := range names {
+		clr, ok := biomeColors[name]
+		if !ok {
+			clr = color.RGBA{60, 60, 60, 255}
+		}
+		vector.DrawFilledRect(dst, 5, float32(y), 20, 10, clr, false)
+		ebitenutil.DebugPrintAt(dst, name, 30, y)
+		y += 15
+	}
+}
+
 // Game implements ebiten.Game and displays geysers with their names.
 type Game struct {
 	geysers   []Geyser
@@ -510,6 +555,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			ebitenutil.DebugPrintAt(screen, poi.ID, textX, textY)
 		}
 	}
+	drawLegend(screen, g.biomes)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
