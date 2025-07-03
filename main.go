@@ -545,21 +545,23 @@ func drawNumberLegend(dst *ebiten.Image, entries []string) {
 
 // Game implements ebiten.Game and displays geysers with their names.
 type Game struct {
-	geysers     []Geyser
-	pois        []PointOfInterest
-	biomes      []BiomePath
-	icons       map[string]*ebiten.Image
-	width       int
-	height      int
-	astWidth    int
-	astHeight   int
-	camX        float64
-	camY        float64
-	zoom        float64
-	dragging    bool
-	lastX       int
-	lastY       int
-	needsRedraw bool
+	geysers        []Geyser
+	pois           []PointOfInterest
+	biomes         []BiomePath
+	icons          map[string]*ebiten.Image
+	width          int
+	height         int
+	astWidth       int
+	astHeight      int
+	camX           float64
+	camY           float64
+	zoom           float64
+	dragging       bool
+	lastX          int
+	lastY          int
+	needsRedraw    bool
+	screenshotPath string
+	captured       bool
 }
 
 type label struct {
@@ -635,6 +637,10 @@ func (g *Game) Update() error {
 
 	if g.camX != oldX || g.camY != oldY || g.zoom != oldZoom {
 		g.needsRedraw = true
+	}
+
+	if g.captured {
+		return ebiten.Termination
 	}
 
 	return nil
@@ -747,6 +753,17 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		g.needsRedraw = false
 	}
+	if g.screenshotPath != "" && !g.captured {
+		b := screen.Bounds()
+		pixels := make([]byte, 4*b.Dx()*b.Dy())
+		screen.ReadPixels(pixels)
+		img := &image.RGBA{Pix: pixels, Stride: 4 * b.Dx(), Rect: b}
+		if f, err := os.Create(g.screenshotPath); err == nil {
+			_ = png.Encode(f, img)
+			f.Close()
+		}
+		g.captured = true
+	}
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -772,6 +789,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 func main() {
 	coord := flag.String("coord", "SNDST-A-7-0-0-0", "seed coordinate")
 	out := flag.String("out", "", "optional path to save JSON")
+	screenshot := flag.String("screenshot", "", "path to save a PNG screenshot and exit")
 	flag.Parse()
 
 	fmt.Println("Fetching:", *coord)
@@ -805,6 +823,9 @@ func main() {
 		astWidth:  ast.SizeX,
 		astHeight: ast.SizeY,
 		zoom:      1.0,
+	}
+	if *screenshot != "" {
+		game.screenshotPath = *screenshot
 	}
 	game.camX = (float64(game.width) - float64(game.astWidth)*2*game.zoom) / 2
 	game.camY = (float64(game.height) - float64(game.astHeight)*2*game.zoom) / 2
