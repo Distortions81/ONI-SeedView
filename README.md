@@ -15,3 +15,16 @@ arrow or **WASD** keys or drag with the mouse to pan, and the mouse wheel or
 `+`/`-` keys to zoom. Zooming keeps the center of the screen fixed and the
 icons scale with the current zoom level.
 
+## Running headless
+
+If you need to run the viewer without a physical display, install `Xvfb` and
+use the `run_headless.sh` script:
+
+```bash
+sudo apt-get install xvfb   # one-time setup
+./scripts/run_headless.sh -coord SNDST-A-7-0-0-0
+```
+
+The script uses `xvfb-run` to start a virtual framebuffer so the window can be
+created even on headless machines.
+
