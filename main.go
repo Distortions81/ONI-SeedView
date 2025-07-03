@@ -150,29 +150,38 @@ func colorFromARGB(hex uint32) color.RGBA {
 	}
 }
 
+func darkenColor(c color.RGBA, factor float64) color.RGBA {
+	return color.RGBA{
+		R: uint8(float64(c.R) * factor),
+		G: uint8(float64(c.G) * factor),
+		B: uint8(float64(c.B) * factor),
+		A: c.A,
+	}
+}
+
 var biomeColors = map[string]color.RGBA{
-	"Sandstone":           colorFromARGB(0xFFF2BB47),
-	"Barren":              colorFromARGB(0xFF97752C),
-	"Space":               colorFromARGB(0xFF242424),
-	"FrozenWastes":        colorFromARGB(0xFF4F80B5),
-	"BoggyMarsh":          colorFromARGB(0xFF7B974B),
-	"ToxicJungle":         colorFromARGB(0xFFCB95A3),
-	"Ocean":               colorFromARGB(0xFF4C4CFF),
-	"Rust":                colorFromARGB(0xFFFFA007),
-	"Forest":              colorFromARGB(0xFF8EC039),
-	"Radioactive":         colorFromARGB(0xFF4AE458),
-	"Swamp":               colorFromARGB(0xFFEB9B3F),
-	"Wasteland":           colorFromARGB(0xFFCC3636),
-	"Metallic":            colorFromARGB(0xFFFFA007),
-	"Moo":                 colorFromARGB(0xFF8EC039),
-	"IceCaves":            colorFromARGB(0xFF6C9BD3),
-	"CarrotQuarry":        colorFromARGB(0xFFCDA2C7),
-	"SugarWoods":          colorFromARGB(0xFFA2CDA4),
-	"PrehistoricGarden":   colorFromARGB(0xFF006127),
-	"PrehistoricRaptor":   colorFromARGB(0xFF352F8C),
-	"PrehistoricWetlands": colorFromARGB(0xFF645906),
-	"OilField":            colorFromARGB(0xFF52321D),
-	"MagmaCore":           colorFromARGB(0xFFDE5A3B),
+	"Sandstone":           darkenColor(colorFromARGB(0xFFF2BB47), 0.6),
+	"Barren":              darkenColor(colorFromARGB(0xFF97752C), 0.6),
+	"Space":               darkenColor(colorFromARGB(0xFF242424), 0.6),
+	"FrozenWastes":        darkenColor(colorFromARGB(0xFF4F80B5), 0.6),
+	"BoggyMarsh":          darkenColor(colorFromARGB(0xFF7B974B), 0.6),
+	"ToxicJungle":         darkenColor(colorFromARGB(0xFFCB95A3), 0.6),
+	"Ocean":               darkenColor(colorFromARGB(0xFF4C4CFF), 0.6),
+	"Rust":                darkenColor(colorFromARGB(0xFFFFA007), 0.6),
+	"Forest":              darkenColor(colorFromARGB(0xFF8EC039), 0.6),
+	"Radioactive":         darkenColor(colorFromARGB(0xFF4AE458), 0.6),
+	"Swamp":               darkenColor(colorFromARGB(0xFFEB9B3F), 0.6),
+	"Wasteland":           darkenColor(colorFromARGB(0xFFCC3636), 0.6),
+	"Metallic":            darkenColor(colorFromARGB(0xFFFFA007), 0.6),
+	"Moo":                 darkenColor(colorFromARGB(0xFF8EC039), 0.6),
+	"IceCaves":            darkenColor(colorFromARGB(0xFF6C9BD3), 0.6),
+	"CarrotQuarry":        darkenColor(colorFromARGB(0xFFCDA2C7), 0.6),
+	"SugarWoods":          darkenColor(colorFromARGB(0xFFA2CDA4), 0.6),
+	"PrehistoricGarden":   darkenColor(colorFromARGB(0xFF006127), 0.6),
+	"PrehistoricRaptor":   darkenColor(colorFromARGB(0xFF352F8C), 0.6),
+	"PrehistoricWetlands": darkenColor(colorFromARGB(0xFF645906), 0.6),
+	"OilField":            darkenColor(colorFromARGB(0xFF52321D), 0.6),
+	"MagmaCore":           darkenColor(colorFromARGB(0xFFDE5A3B), 0.6),
 }
 
 // decodeSeed parses the CBOR seed data into SeedData.
@@ -440,7 +449,7 @@ var tundraPattern = func() *ebiten.Image {
 	const size = 32
 	img := ebiten.NewImage(size, size)
 	img.Fill(color.RGBA{0, 0, 0, 0})
-	line := color.RGBA{255, 255, 255, 50}
+	line := color.RGBA{255, 255, 255, 25}
 	for i := 0; i < size; i++ {
 		img.Set(i, size-1-i, line)
 		if i+4 < size {
@@ -454,7 +463,7 @@ var magmaPattern = func() *ebiten.Image {
 	const size = 16
 	img := ebiten.NewImage(size, size)
 	img.Fill(color.RGBA{0, 0, 0, 0})
-	lava := color.RGBA{255, 80, 0, 80}
+	lava := color.RGBA{255, 80, 0, 40}
 	for x := 0; x < size; x++ {
 		y := int((math.Sin(float64(x)/3) + 1) * float64(size) / 4)
 		if y < size {
@@ -471,7 +480,7 @@ var oceanPattern = func() *ebiten.Image {
 	const size = 16
 	img := ebiten.NewImage(size, size)
 	img.Fill(color.RGBA{0, 0, 0, 0})
-	wave := color.RGBA{255, 255, 255, 40}
+	wave := color.RGBA{255, 255, 255, 20}
 	for x := 0; x < size; x++ {
 		y := int((math.Sin(float64(x)/2) + 1) * float64(size) / 4)
 		if y < size {
@@ -488,7 +497,7 @@ var sandPattern = func() *ebiten.Image {
 	const size = 8
 	img := ebiten.NewImage(size, size)
 	img.Fill(color.RGBA{0, 0, 0, 0})
-	dot := color.RGBA{255, 255, 255, 30}
+	dot := color.RGBA{255, 255, 255, 15}
 	for x := 0; x < size; x++ {
 		for y := 0; y < size; y++ {
 			if (x+y)%4 == 0 {
@@ -503,7 +512,7 @@ var toxicPattern = func() *ebiten.Image {
 	const size = 16
 	img := ebiten.NewImage(size, size)
 	img.Fill(color.RGBA{0, 0, 0, 0})
-	slime := color.RGBA{100, 255, 100, 40}
+	slime := color.RGBA{100, 255, 100, 20}
 	cx, cy := float64(size)/2, float64(size)/2
 	for x := 0; x < size; x++ {
 		for y := 0; y < size; y++ {
@@ -521,7 +530,7 @@ var oilPattern = func() *ebiten.Image {
 	const size = 16
 	img := ebiten.NewImage(size, size)
 	img.Fill(color.RGBA{0, 0, 0, 0})
-	line := color.RGBA{255, 255, 255, 40}
+	line := color.RGBA{255, 255, 255, 20}
 	for x := 0; x < size; x++ {
 		y := int((math.Sin(float64(x)/2) + 1) * float64(size) / 4)
 		if y < size {
@@ -535,7 +544,7 @@ var marshPattern = func() *ebiten.Image {
 	const size = 8
 	img := ebiten.NewImage(size, size)
 	img.Fill(color.RGBA{0, 0, 0, 0})
-	grass := color.RGBA{255, 255, 255, 40}
+	grass := color.RGBA{255, 255, 255, 20}
 	for x := 0; x < size; x += 3 {
 		for y := 0; y < size; y++ {
 			img.Set(x, y, grass)
@@ -757,12 +766,14 @@ func drawPattern(dst *ebiten.Image, polys [][]Point, camX, camY, zoom float64, p
 	}
 	vs, is := p.AppendVerticesAndIndicesForFilling(nil, nil)
 	for i := range vs {
-		x := float64(vs[i].DstX)*zoom + camX
-		y := float64(vs[i].DstY)*zoom + camY
+		worldX := float64(vs[i].DstX)
+		worldY := float64(vs[i].DstY)
+		x := worldX*zoom + camX
+		y := worldY*zoom + camY
 		vs[i].DstX = float32(math.Round(x))
 		vs[i].DstY = float32(math.Round(y))
-		vs[i].SrcX = float32(x)
-		vs[i].SrcY = float32(y)
+		vs[i].SrcX = float32(worldX * zoom)
+		vs[i].SrcY = float32(worldY * zoom)
 		vs[i].ColorR = 1
 		vs[i].ColorG = 1
 		vs[i].ColorB = 1
