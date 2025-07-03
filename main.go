@@ -470,9 +470,12 @@ func drawTextWithBGBorder(dst *ebiten.Image, text string, x, y int, border color
 // uniqueColor generates a visually distinct color for the given index.
 func uniqueColor(index int) color.RGBA {
 	h := float64((index * 137) % 360)
-	// Vary saturation and lightness based on the index to expand the palette
-	s := 0.5 + 0.4*math.Sin(float64(index)*0.6)
-	l := 0.45 + 0.3*math.Cos(float64(index)*0.4)
+	// Increase the oscillation period so the palette offers more
+	// distinct options before repeating. With a period of 30 we can
+	// generate a wider range of saturation and lightness values.
+	period := 30.0
+	s := 0.5 + 0.4*math.Sin(float64(index)*2*math.Pi/period)
+	l := 0.45 + 0.3*math.Cos(float64(index)*2*math.Pi/period)
 	if s < 0.3 {
 		s = 0.3
 	} else if s > 0.9 {
@@ -677,10 +680,16 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 		}
 		g.legendImage = img
 	}
-	x := dst.Bounds().Dx() - g.legendImage.Bounds().Dx() - 12
-	y := 10
+	scale := 1.0
+	if g.height > 850 {
+		scale = 2.0
+	}
+	w := float64(g.legendImage.Bounds().Dx()) * scale
+	x := float64(dst.Bounds().Dx()) - w - 12
+	y := 10.0
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(x), float64(y))
+	op.GeoM.Scale(scale, scale)
+	op.GeoM.Translate(x, y)
 	dst.DrawImage(g.legendImage, op)
 }
 
@@ -911,7 +920,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		if g.legend == nil {
 			g.legend = buildLegendImage(g.biomes)
 		}
-		screen.DrawImage(g.legend, nil)
+		opLegend := &ebiten.DrawImageOptions{}
+		if g.height > 850 {
+			opLegend.GeoM.Scale(2, 2)
+		}
+		screen.DrawImage(g.legend, opLegend)
 		for _, l := range labels {
 			if l.clr.A != 0 {
 				drawTextWithBGBorder(screen, l.text, l.x, l.y, l.clr)
