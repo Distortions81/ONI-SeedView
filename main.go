@@ -12,12 +12,14 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/chai2010/webp"
 	"github.com/fxamacker/cbor/v2"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 // fetchSeedCBOR retrieves the seed data in CBOR format for a given coordinate.
@@ -94,11 +96,22 @@ type PointOfInterest struct {
 	Y  int    `json:"y"`
 }
 
+type Point struct {
+	X int
+	Y int
+}
+
+type BiomePath struct {
+	Name     string
+	Polygons [][]Point
+}
+
 type Asteroid struct {
-	SizeX   int               `json:"sizeX"`
-	SizeY   int               `json:"sizeY"`
-	Geysers []Geyser          `json:"geysers"`
-	POIs    []PointOfInterest `json:"pointsOfInterest"`
+	SizeX      int               `json:"sizeX"`
+	SizeY      int               `json:"sizeY"`
+	Geysers    []Geyser          `json:"geysers"`
+	POIs       []PointOfInterest `json:"pointsOfInterest"`
+	BiomePaths string            `json:"biomePaths"`
 }
 
 type SeedData struct {
@@ -116,6 +129,48 @@ func decodeSeed(cborData []byte) (*SeedData, error) {
 		return nil, fmt.Errorf("JSON decode failed: %v", err)
 	}
 	return &seed, nil
+}
+
+// parseBiomePaths converts the raw biome path string into structured paths.
+func parseBiomePaths(data string) []BiomePath {
+	var paths []BiomePath
+	lines := strings.Split(strings.TrimSpace(data), "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		parts := strings.SplitN(line, ":", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		bp := BiomePath{Name: parts[0]}
+		segs := strings.Split(parts[1], ";")
+		for _, seg := range segs {
+			seg = strings.TrimSpace(seg)
+			if seg == "" {
+				continue
+			}
+			var poly []Point
+			for _, pair := range strings.Fields(seg) {
+				xy := strings.Split(pair, ",")
+				if len(xy) != 2 {
+					continue
+				}
+				x, err1 := strconv.Atoi(xy[0])
+				y, err2 := strconv.Atoi(xy[1])
+				if err1 != nil || err2 != nil {
+					continue
+				}
+				poly = append(poly, Point{X: x, Y: y})
+			}
+			if len(poly) > 0 {
+				bp.Polygons = append(bp.Polygons, poly)
+			}
+		}
+		paths = append(paths, bp)
+	}
+	return paths
 }
 
 // loadImage loads an image from the assets directory and caches it.
@@ -251,10 +306,43 @@ func iconForPOI(id string) string {
 	}
 }
 
+var whitePixel = func() *ebiten.Image {
+	img := ebiten.NewImage(1, 1)
+	img.Fill(color.White)
+	return img
+}()
+
+func drawPolygon(dst *ebiten.Image, pts []Point, clr color.Color, camX, camY, zoom float64) {
+	if len(pts) == 0 {
+		return
+	}
+	var p vector.Path
+	p.MoveTo(float32(pts[0].X*2), float32(pts[0].Y*2))
+	for _, pt := range pts[1:] {
+		p.LineTo(float32(pt.X*2), float32(pt.Y*2))
+	}
+	p.Close()
+	vs, is := p.AppendVerticesAndIndicesForFilling(nil, nil)
+	r, g, b, a := clr.RGBA()
+	for i := range vs {
+		vs[i].DstX = vs[i].DstX*float32(zoom) + float32(camX)
+		vs[i].DstY = vs[i].DstY*float32(zoom) + float32(camY)
+		vs[i].SrcX = 1
+		vs[i].SrcY = 1
+		vs[i].ColorR = float32(r) / 0xffff
+		vs[i].ColorG = float32(g) / 0xffff
+		vs[i].ColorB = float32(b) / 0xffff
+		vs[i].ColorA = float32(a) / 0xffff
+	}
+	op := &ebiten.DrawTrianglesOptions{AntiAlias: true, ColorScaleMode: ebiten.ColorScaleModePremultipliedAlpha}
+	dst.DrawTriangles(vs, is, whitePixel, op)
+}
+
 // Game implements ebiten.Game and displays geysers with their names.
 type Game struct {
 	geysers   []Geyser
 	pois      []PointOfInterest
+	biomes    []BiomePath
 	icons     map[string]*ebiten.Image
 	width     int
 	height    int
@@ -336,49 +424,54 @@ func (g *Game) Update() error {
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{30, 30, 30, 255})
+	for _, bp := range g.biomes {
+		for _, poly := range bp.Polygons {
+			drawPolygon(screen, poly, color.RGBA{60, 60, 60, 255}, g.camX, g.camY, g.zoom)
+		}
+	}
 	for _, gy := range g.geysers {
-               x := (float64(gy.X) * 2 * g.zoom) + g.camX
-               y := (float64(gy.Y) * 2 * g.zoom) + g.camY
-               if iconName := iconForGeyser(gy.ID); iconName != "" {
-                       if img, err := loadImage(g.icons, iconName); err == nil {
-                               op := &ebiten.DrawImageOptions{}
-                               op.GeoM.Scale(g.zoom*0.25, g.zoom*0.25)
-                               w := float64(img.Bounds().Dx()) * g.zoom * 0.25
-                               h := float64(img.Bounds().Dy()) * g.zoom * 0.25
-                               op.GeoM.Translate(x-w/2, y-h/2)
-                               screen.DrawImage(img, op)
-                               textX := int(x) - (len(gy.ID)*6)/2
-                               textY := int(y+h/2) + 2
-                               ebitenutil.DebugPrintAt(screen, gy.ID, textX, textY)
-                       }
-               } else {
-                       ebitenutil.DrawRect(screen, x-2, y-2, 4, 4, color.RGBA{255, 0, 0, 255})
-                       textX := int(x) - (len(gy.ID)*6)/2
-                       textY := int(y) + 4
-                       ebitenutil.DebugPrintAt(screen, gy.ID, textX, textY)
-               }
-       }
-       for _, poi := range g.pois {
-               x := (float64(poi.X) * 2 * g.zoom) + g.camX
-               y := (float64(poi.Y) * 2 * g.zoom) + g.camY
-               if iconName := iconForPOI(poi.ID); iconName != "" {
-                       if img, err := loadImage(g.icons, iconName); err == nil {
-                               op := &ebiten.DrawImageOptions{}
-                               op.GeoM.Scale(g.zoom*0.25, g.zoom*0.25)
-                               w := float64(img.Bounds().Dx()) * g.zoom * 0.25
-                               h := float64(img.Bounds().Dy()) * g.zoom * 0.25
-                               op.GeoM.Translate(x-w/2, y-h/2)
-                               screen.DrawImage(img, op)
-                               textX := int(x) - (len(poi.ID)*6)/2
-                               textY := int(y+h/2) + 2
-                               ebitenutil.DebugPrintAt(screen, poi.ID, textX, textY)
-                       }
-               } else {
-                       textX := int(x) - (len(poi.ID)*6)/2
-                       textY := int(y) + 4
-                       ebitenutil.DebugPrintAt(screen, poi.ID, textX, textY)
-               }
-       }
+		x := (float64(gy.X) * 2 * g.zoom) + g.camX
+		y := (float64(gy.Y) * 2 * g.zoom) + g.camY
+		if iconName := iconForGeyser(gy.ID); iconName != "" {
+			if img, err := loadImage(g.icons, iconName); err == nil {
+				op := &ebiten.DrawImageOptions{}
+				op.GeoM.Scale(g.zoom*0.25, g.zoom*0.25)
+				w := float64(img.Bounds().Dx()) * g.zoom * 0.25
+				h := float64(img.Bounds().Dy()) * g.zoom * 0.25
+				op.GeoM.Translate(x-w/2, y-h/2)
+				screen.DrawImage(img, op)
+				textX := int(x) - (len(gy.ID)*6)/2
+				textY := int(y+h/2) + 2
+				ebitenutil.DebugPrintAt(screen, gy.ID, textX, textY)
+			}
+		} else {
+			vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, color.RGBA{255, 0, 0, 255}, false)
+			textX := int(x) - (len(gy.ID)*6)/2
+			textY := int(y) + 4
+			ebitenutil.DebugPrintAt(screen, gy.ID, textX, textY)
+		}
+	}
+	for _, poi := range g.pois {
+		x := (float64(poi.X) * 2 * g.zoom) + g.camX
+		y := (float64(poi.Y) * 2 * g.zoom) + g.camY
+		if iconName := iconForPOI(poi.ID); iconName != "" {
+			if img, err := loadImage(g.icons, iconName); err == nil {
+				op := &ebiten.DrawImageOptions{}
+				op.GeoM.Scale(g.zoom*0.25, g.zoom*0.25)
+				w := float64(img.Bounds().Dx()) * g.zoom * 0.25
+				h := float64(img.Bounds().Dy()) * g.zoom * 0.25
+				op.GeoM.Translate(x-w/2, y-h/2)
+				screen.DrawImage(img, op)
+				textX := int(x) - (len(poi.ID)*6)/2
+				textY := int(y+h/2) + 2
+				ebitenutil.DebugPrintAt(screen, poi.ID, textX, textY)
+			}
+		} else {
+			textX := int(x) - (len(poi.ID)*6)/2
+			textY := int(y) + 4
+			ebitenutil.DebugPrintAt(screen, poi.ID, textX, textY)
+		}
+	}
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
@@ -416,6 +509,7 @@ func main() {
 	game := &Game{
 		geysers:   ast.Geysers,
 		pois:      ast.POIs,
+		biomes:    parseBiomePaths(ast.BiomePaths),
 		icons:     make(map[string]*ebiten.Image),
 		width:     1280,
 		height:    720,
