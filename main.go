@@ -169,43 +169,67 @@ func decodeSeed(cborData []byte) (*SeedData, error) {
 // parseBiomePaths converts the raw biome path string into structured paths.
 func parseBiomePaths(data string) []BiomePath {
 	var paths []BiomePath
-	lines := strings.Split(strings.TrimSpace(data), "\n")
+	lines := strings.Split(strings.ReplaceAll(strings.TrimSpace(data), "\r", ""), "\n")
+
+	var current string
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
 		if line == "" {
 			continue
 		}
-		parts := strings.SplitN(line, ":", 2)
-		if len(parts) != 2 {
+		if strings.Contains(line, ":") {
+			// flush previous accumulated line
+			if current != "" {
+				bp := parseBiomeLine(current)
+				if bp.Name != "" {
+					paths = append(paths, bp)
+				}
+			}
+			current = line
+		} else if current != "" {
+			current += " " + line
+		}
+	}
+	if current != "" {
+		bp := parseBiomeLine(current)
+		if bp.Name != "" {
+			paths = append(paths, bp)
+		}
+	}
+
+	return paths
+}
+
+func parseBiomeLine(line string) BiomePath {
+	parts := strings.SplitN(strings.TrimSpace(line), ":", 2)
+	if len(parts) != 2 {
+		return BiomePath{}
+	}
+	bp := BiomePath{Name: parts[0]}
+	segs := strings.Split(parts[1], ";")
+	for _, seg := range segs {
+		seg = strings.TrimSpace(seg)
+		if seg == "" {
 			continue
 		}
-		bp := BiomePath{Name: parts[0]}
-		segs := strings.Split(parts[1], ";")
-		for _, seg := range segs {
-			seg = strings.TrimSpace(seg)
-			if seg == "" {
+		var poly []Point
+		for _, pair := range strings.Fields(seg) {
+			xy := strings.Split(pair, ",")
+			if len(xy) != 2 {
 				continue
 			}
-			var poly []Point
-			for _, pair := range strings.Fields(seg) {
-				xy := strings.Split(pair, ",")
-				if len(xy) != 2 {
-					continue
-				}
-				x, err1 := strconv.Atoi(xy[0])
-				y, err2 := strconv.Atoi(xy[1])
-				if err1 != nil || err2 != nil {
-					continue
-				}
-				poly = append(poly, Point{X: x, Y: y})
+			x, err1 := strconv.Atoi(xy[0])
+			y, err2 := strconv.Atoi(xy[1])
+			if err1 != nil || err2 != nil {
+				continue
 			}
-			if len(poly) > 0 {
-				bp.Polygons = append(bp.Polygons, poly)
-			}
+			poly = append(poly, Point{X: x, Y: y})
 		}
-		paths = append(paths, bp)
+		if len(poly) > 0 {
+			bp.Polygons = append(bp.Polygons, poly)
+		}
 	}
-	return paths
+	return bp
 }
 
 // loadImage loads an image from the assets directory and caches it.
