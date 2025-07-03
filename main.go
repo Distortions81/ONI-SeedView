@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -168,35 +169,26 @@ func decodeSeed(cborData []byte) (*SeedData, error) {
 
 // parseBiomePaths converts the raw biome path string into structured paths.
 func parseBiomePaths(data string) []BiomePath {
+	data = strings.ReplaceAll(strings.ReplaceAll(strings.TrimSpace(data), "\r", ""), "\n", " ")
+	re := regexp.MustCompile(`([A-Za-z0-9_]+:)`)
+	locs := re.FindAllStringIndex(data, -1)
 	var paths []BiomePath
-	lines := strings.Split(strings.ReplaceAll(strings.TrimSpace(data), "\r", ""), "\n")
-
-	var current string
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if line == "" {
+	for i, loc := range locs {
+		name := strings.TrimSuffix(data[loc[0]:loc[1]], ":")
+		start := loc[1]
+		end := len(data)
+		if i+1 < len(locs) {
+			end = locs[i+1][0]
+		}
+		segment := strings.TrimSpace(data[start:end])
+		if segment == "" {
 			continue
 		}
-		if strings.Contains(line, ":") {
-			// flush previous accumulated line
-			if current != "" {
-				bp := parseBiomeLine(current)
-				if bp.Name != "" {
-					paths = append(paths, bp)
-				}
-			}
-			current = line
-		} else if current != "" {
-			current += " " + line
-		}
-	}
-	if current != "" {
-		bp := parseBiomeLine(current)
+		bp := parseBiomeLine(name + ":" + segment)
 		if bp.Name != "" {
 			paths = append(paths, bp)
 		}
 	}
-
 	return paths
 }
 
