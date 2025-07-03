@@ -335,7 +335,21 @@ func loadImage(cache map[string]*ebiten.Image, name string) (*ebiten.Image, erro
 	return img, nil
 }
 
+// simplifyID strips namespace prefixes from an ID string. The seed data often
+// includes paths like "expansion1::geysers/liquid_sulfur". This helper returns
+// only the final identifier ("liquid_sulfur" in that example).
+func simplifyID(id string) string {
+	if idx := strings.LastIndex(id, "/"); idx >= 0 {
+		id = id[idx+1:]
+	}
+	if idx := strings.LastIndex(id, "::"); idx >= 0 {
+		id = id[idx+2:]
+	}
+	return id
+}
+
 func iconForGeyser(id string) string {
+	id = simplifyID(id)
 	switch id {
 	case "steam":
 		return "geyser_cool_steam_vent.png"
@@ -395,6 +409,7 @@ func iconForGeyser(id string) string {
 }
 
 func iconForPOI(id string) string {
+	id = simplifyID(id)
 	switch id {
 	case "Headquarters":
 		return "building_printing_pod.png"
@@ -445,6 +460,7 @@ func displayBiome(id string) string {
 }
 
 func displayGeyser(id string) string {
+	id = simplifyID(id)
 	if v, ok := names.Geysers[id]; ok {
 		return v
 	}
@@ -452,6 +468,7 @@ func displayGeyser(id string) string {
 }
 
 func displayPOI(id string) string {
+	id = simplifyID(id)
 	if v, ok := names.POIs[id]; ok {
 		return v
 	}
