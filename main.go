@@ -154,7 +154,7 @@ var biomeColors = map[string]color.RGBA{
 	"Sandstone":           colorFromARGB(0xFFF2BB47),
 	"Barren":              colorFromARGB(0xFF97752C),
 	"Space":               colorFromARGB(0xFF242424),
-	"FrozenWastes":        colorFromARGB(0xFF9DC9D6),
+	"FrozenWastes":        colorFromARGB(0xFF4F80B5),
 	"BoggyMarsh":          colorFromARGB(0xFF7B974B),
 	"ToxicJungle":         colorFromARGB(0xFFCB95A3),
 	"Ocean":               colorFromARGB(0xFF4C4CFF),
@@ -165,7 +165,7 @@ var biomeColors = map[string]color.RGBA{
 	"Wasteland":           colorFromARGB(0xFFCC3636),
 	"Metallic":            colorFromARGB(0xFFFFA007),
 	"Moo":                 colorFromARGB(0xFF8EC039),
-	"IceCaves":            colorFromARGB(0xFFABCFEA),
+	"IceCaves":            colorFromARGB(0xFF6C9BD3),
 	"CarrotQuarry":        colorFromARGB(0xFFCDA2C7),
 	"SugarWoods":          colorFromARGB(0xFFA2CDA4),
 	"PrehistoricGarden":   colorFromARGB(0xFF006127),
@@ -437,14 +437,108 @@ var whitePixel = func() *ebiten.Image {
 }()
 
 var tundraPattern = func() *ebiten.Image {
-	const size = 8
+	const size = 32
 	img := ebiten.NewImage(size, size)
 	img.Fill(color.RGBA{0, 0, 0, 0})
 	line := color.RGBA{255, 255, 255, 50}
 	for i := 0; i < size; i++ {
 		img.Set(i, size-1-i, line)
-		if i+2 < size {
-			img.Set(i, size-1-(i+2), line)
+		if i+4 < size {
+			img.Set(i, size-1-(i+4), line)
+		}
+	}
+	return img
+}()
+
+var magmaPattern = func() *ebiten.Image {
+	const size = 16
+	img := ebiten.NewImage(size, size)
+	img.Fill(color.RGBA{0, 0, 0, 0})
+	lava := color.RGBA{255, 80, 0, 80}
+	for x := 0; x < size; x++ {
+		y := int((math.Sin(float64(x)/3) + 1) * float64(size) / 4)
+		if y < size {
+			img.Set(x, y, lava)
+		}
+		if y+4 < size {
+			img.Set(x, y+4, lava)
+		}
+	}
+	return img
+}()
+
+var oceanPattern = func() *ebiten.Image {
+	const size = 16
+	img := ebiten.NewImage(size, size)
+	img.Fill(color.RGBA{0, 0, 0, 0})
+	wave := color.RGBA{255, 255, 255, 40}
+	for x := 0; x < size; x++ {
+		y := int((math.Sin(float64(x)/2) + 1) * float64(size) / 4)
+		if y < size {
+			img.Set(x, y, wave)
+		}
+		if y+6 < size {
+			img.Set(x, y+6, wave)
+		}
+	}
+	return img
+}()
+
+var sandPattern = func() *ebiten.Image {
+	const size = 8
+	img := ebiten.NewImage(size, size)
+	img.Fill(color.RGBA{0, 0, 0, 0})
+	dot := color.RGBA{255, 255, 255, 30}
+	for x := 0; x < size; x++ {
+		for y := 0; y < size; y++ {
+			if (x+y)%4 == 0 {
+				img.Set(x, y, dot)
+			}
+		}
+	}
+	return img
+}()
+
+var toxicPattern = func() *ebiten.Image {
+	const size = 16
+	img := ebiten.NewImage(size, size)
+	img.Fill(color.RGBA{0, 0, 0, 0})
+	slime := color.RGBA{100, 255, 100, 40}
+	cx, cy := float64(size)/2, float64(size)/2
+	for x := 0; x < size; x++ {
+		for y := 0; y < size; y++ {
+			dx := float64(x) - cx
+			dy := float64(y) - cy
+			if dx*dx+dy*dy < float64(size) {
+				img.Set(x, y, slime)
+			}
+		}
+	}
+	return img
+}()
+
+var oilPattern = func() *ebiten.Image {
+	const size = 16
+	img := ebiten.NewImage(size, size)
+	img.Fill(color.RGBA{0, 0, 0, 0})
+	line := color.RGBA{255, 255, 255, 40}
+	for x := 0; x < size; x++ {
+		y := int((math.Sin(float64(x)/2) + 1) * float64(size) / 4)
+		if y < size {
+			img.Set(x, y, line)
+		}
+	}
+	return img
+}()
+
+var marshPattern = func() *ebiten.Image {
+	const size = 8
+	img := ebiten.NewImage(size, size)
+	img.Fill(color.RGBA{0, 0, 0, 0})
+	grass := color.RGBA{255, 255, 255, 40}
+	for x := 0; x < size; x += 3 {
+		for y := 0; y < size; y++ {
+			img.Set(x, y, grass)
 		}
 	}
 	return img
@@ -643,7 +737,7 @@ func drawTundraGradient(dst *ebiten.Image, polys [][]Point, camX, camY, zoom flo
 	dst.DrawTriangles(vs, is, whitePixel, op)
 }
 
-func drawTundraLines(dst *ebiten.Image, polys [][]Point, camX, camY, zoom float64, pattern *ebiten.Image) {
+func drawPattern(dst *ebiten.Image, polys [][]Point, camX, camY, zoom float64, pattern *ebiten.Image) {
 	if len(polys) == 0 {
 		return
 	}
@@ -928,9 +1022,22 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				clr = color.RGBA{60, 60, 60, 255}
 			}
 			drawBiome(screen, bp.Polygons, clr, g.camX, g.camY, g.zoom)
-			if bp.Name == "FrozenWastes" || bp.Name == "IceCaves" {
+			switch bp.Name {
+			case "FrozenWastes", "IceCaves":
 				drawTundraGradient(screen, bp.Polygons, g.camX, g.camY, g.zoom)
-				drawTundraLines(screen, bp.Polygons, g.camX, g.camY, g.zoom, tundraPattern)
+				drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, tundraPattern)
+			case "MagmaCore":
+				drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, magmaPattern)
+			case "Ocean":
+				drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, oceanPattern)
+			case "Sandstone":
+				drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, sandPattern)
+			case "ToxicJungle":
+				drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, toxicPattern)
+			case "OilField":
+				drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, oilPattern)
+			case "BoggyMarsh":
+				drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, marshPattern)
 			}
 			drawBiomeOutline(screen, bp.Polygons, g.camX, g.camY, g.zoom)
 		}
