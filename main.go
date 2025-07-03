@@ -414,13 +414,19 @@ func formatLabel(name string) (string, int) {
 		line := strings.Join(words[i:end], " ")
 		lines = append(lines, line)
 	}
-	formatted := strings.Join(lines, "\n")
 	width := 0
 	for _, l := range lines {
 		if len(l) > width {
 			width = len(l)
 		}
 	}
+	for i, l := range lines {
+		if len(l) < width {
+			pad := (width - len(l)) / 2
+			lines[i] = strings.Repeat(" ", pad) + l
+		}
+	}
+	formatted := strings.Join(lines, "\n")
 	return formatted, width
 }
 
@@ -520,6 +526,20 @@ func drawLegend(dst *ebiten.Image, biomes []BiomePath) {
 		vector.DrawFilledRect(dst, 5, float32(y), 20, 10, clr, false)
 		ebitenutil.DebugPrintAt(dst, displayBiome(name), 30, y)
 		y += 15
+	}
+}
+
+// drawNumberLegend renders numeric labels and their associated names at the top
+// right of the screen.
+func drawNumberLegend(dst *ebiten.Image, entries []string) {
+	if len(entries) == 0 {
+		return
+	}
+	x := dst.Bounds().Dx() - 150
+	y := 10
+	for _, e := range entries {
+		ebitenutil.DebugPrintAt(dst, e, x, y)
+		y += 10
 	}
 }
 
@@ -624,6 +644,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	if g.needsRedraw {
 		screen.Fill(color.RGBA{30, 30, 30, 255})
 		labels := []label{}
+		legend := []string{}
+		useNumbers := g.zoom < 0.4
+		counter := 1
 
 		for _, bp := range g.biomes {
 			clr, ok := biomeColors[bp.Name]
@@ -644,14 +667,32 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					h := float64(img.Bounds().Dy()) * g.zoom * 0.25
 					op.GeoM.Translate(x-w/2, y-h/2)
 					screen.DrawImage(img, op)
-					d := displayGeyser(gy.ID)
-					formatted, width := formatLabel(d)
+					var formatted string
+					var width int
+					if useNumbers {
+						formatted = strconv.Itoa(counter)
+						width = len(formatted)
+						legend = append(legend, fmt.Sprintf("%d: %s", counter, displayGeyser(gy.ID)))
+						counter++
+					} else {
+						d := displayGeyser(gy.ID)
+						formatted, width = formatLabel(d)
+					}
 					labels = append(labels, label{formatted, int(x) - (width*6)/2, int(y+h/2) + 2})
 				}
 			} else {
 				vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, color.RGBA{255, 0, 0, 255}, false)
-				d := displayGeyser(gy.ID)
-				formatted, width := formatLabel(d)
+				var formatted string
+				var width int
+				if useNumbers {
+					formatted = strconv.Itoa(counter)
+					width = len(formatted)
+					legend = append(legend, fmt.Sprintf("%d: %s", counter, displayGeyser(gy.ID)))
+					counter++
+				} else {
+					d := displayGeyser(gy.ID)
+					formatted, width = formatLabel(d)
+				}
 				labels = append(labels, label{formatted, int(x) - (width*6)/2, int(y) + 4})
 			}
 		}
@@ -667,13 +708,31 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					h := float64(img.Bounds().Dy()) * g.zoom * 0.25
 					op.GeoM.Translate(x-w/2, y-h/2)
 					screen.DrawImage(img, op)
-					d := displayPOI(poi.ID)
-					formatted, width := formatLabel(d)
+					var formatted string
+					var width int
+					if useNumbers {
+						formatted = strconv.Itoa(counter)
+						width = len(formatted)
+						legend = append(legend, fmt.Sprintf("%d: %s", counter, displayPOI(poi.ID)))
+						counter++
+					} else {
+						d := displayPOI(poi.ID)
+						formatted, width = formatLabel(d)
+					}
 					labels = append(labels, label{formatted, int(x) - (width*6)/2, int(y+h/2) + 2})
 				}
 			} else {
-				d := displayPOI(poi.ID)
-				formatted, width := formatLabel(d)
+				var formatted string
+				var width int
+				if useNumbers {
+					formatted = strconv.Itoa(counter)
+					width = len(formatted)
+					legend = append(legend, fmt.Sprintf("%d: %s", counter, displayPOI(poi.ID)))
+					counter++
+				} else {
+					d := displayPOI(poi.ID)
+					formatted, width = formatLabel(d)
+				}
 				labels = append(labels, label{formatted, int(x) - (width*6)/2, int(y) + 4})
 			}
 		}
@@ -681,6 +740,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		drawLegend(screen, g.biomes)
 		for _, l := range labels {
 			ebitenutil.DebugPrintAt(screen, l.text, l.x, l.y)
+		}
+		if useNumbers {
+			drawNumberLegend(screen, legend)
 		}
 
 		g.needsRedraw = false
