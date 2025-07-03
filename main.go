@@ -557,7 +557,7 @@ func buildLegendImage(biomes []BiomePath) *ebiten.Image {
 	}
 
 	width := 30 + maxLen*6 + 5
-	height := 15*len(names) + 5
+	height := LegendRowSpacing*len(names) + 7
 
 	img := ebiten.NewImage(width, height)
 	img.Fill(color.RGBA{0, 0, 0, 77})
@@ -570,7 +570,7 @@ func buildLegendImage(biomes []BiomePath) *ebiten.Image {
 		}
 		vector.DrawFilledRect(img, 5, float32(y), 20, 10, clr, false)
 		drawTextWithBGBorder(img, displayBiome(name), 30, y, clr)
-		y += 15
+		y += LegendRowSpacing
 	}
 
 	return img
@@ -583,12 +583,14 @@ func (g *Game) initObjectLegend() {
 		return
 	}
 	g.legendMap = make(map[string]int)
+	g.legendColors = nil
 	counter := 1
 	for _, gy := range g.geysers {
 		name := displayGeyser(gy.ID)
 		if _, ok := g.legendMap["g"+name]; !ok {
 			g.legendMap["g"+name] = counter
 			g.legendEntries = append(g.legendEntries, fmt.Sprintf("%d: %s", counter, name))
+			g.legendColors = append(g.legendColors, color.RGBA{255, 165, 0, 255})
 			counter++
 		}
 	}
@@ -597,6 +599,7 @@ func (g *Game) initObjectLegend() {
 		if _, ok := g.legendMap["p"+name]; !ok {
 			g.legendMap["p"+name] = counter
 			g.legendEntries = append(g.legendEntries, fmt.Sprintf("%d: %s", counter, name))
+			g.legendColors = append(g.legendColors, color.RGBA{0, 170, 255, 255})
 			counter++
 		}
 	}
@@ -609,23 +612,29 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 		return
 	}
 	if g.legendImage == nil {
-		width := 0
+		maxLen := 0
 		for _, e := range g.legendEntries {
-			if len(e) > width {
-				width = len(e)
+			if len(e) > maxLen {
+				maxLen = len(e)
 			}
 		}
-		img := ebiten.NewImage(width*6, len(g.legendEntries)*10)
+		width := maxLen*6 + 10
+		height := LegendRowSpacing*len(g.legendEntries) + 7
+		img := ebiten.NewImage(width, height)
+		img.Fill(color.RGBA{0, 0, 0, 77})
+		y := 10
 		for i, e := range g.legendEntries {
-			ebitenutil.DebugPrintAt(img, e, 0, i*10)
+			clr := color.White
+			if i < len(g.legendColors) {
+				clr = g.legendColors[i]
+			}
+			drawTextWithBGBorder(img, e, 5, y, clr)
+			y += LegendRowSpacing
 		}
 		g.legendImage = img
 	}
-	w := g.legendImage.Bounds().Dx()
-	h := g.legendImage.Bounds().Dy()
-	x := dst.Bounds().Dx() - w - 12
+	x := dst.Bounds().Dx() - g.legendImage.Bounds().Dx() - 12
 	y := 10
-	vector.DrawFilledRect(dst, float32(x-1), float32(y-1), float32(w+2), float32(h+2), color.RGBA{0, 0, 0, 77}, false)
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(x), float64(y))
 	dst.DrawImage(g.legendImage, op)
@@ -653,6 +662,7 @@ type Game struct {
 	legend         *ebiten.Image
 	legendMap      map[string]int
 	legendEntries  []string
+	legendColors   []color.Color
 	legendImage    *ebiten.Image
 }
 
