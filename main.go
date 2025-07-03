@@ -300,25 +300,35 @@ func (g *Game) Update() error {
 	}
 
 	// Zoom with keyboard
+	zoomFactor := 1.0
 	if ebiten.IsKeyPressed(ebiten.KeyEqual) || ebiten.IsKeyPressed(ebiten.KeyKPAdd) {
-		g.zoom *= 1.05
+		zoomFactor *= 1.05
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyMinus) || ebiten.IsKeyPressed(ebiten.KeyKPSubtract) {
-		g.zoom /= 1.05
+		zoomFactor /= 1.05
 	}
 
 	// Zoom with mouse wheel
 	_, wheelY := ebiten.Wheel()
 	if wheelY != 0 {
 		if wheelY > 0 {
-			g.zoom *= 1.1
+			zoomFactor *= 1.1
 		} else {
-			g.zoom /= 1.1
+			zoomFactor /= 1.1
 		}
 	}
 
-	if g.zoom < 0.1 {
-		g.zoom = 0.1
+	if zoomFactor != 1.0 {
+		oldZoom := g.zoom
+		g.zoom *= zoomFactor
+		if g.zoom < 0.1 {
+			g.zoom = 0.1
+		}
+		cx, cy := float64(g.width)/2, float64(g.height)/2
+		worldX := (cx - g.camX) / oldZoom
+		worldY := (cy - g.camY) / oldZoom
+		g.camX = cx - worldX*g.zoom
+		g.camY = cy - worldY*g.zoom
 	}
 
 	return nil
@@ -327,12 +337,15 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{30, 30, 30, 255})
 	for _, gy := range g.geysers {
-		x := (float64(g.astWidth-gy.X) * 2 * g.zoom) + g.camX
-		y := (float64(g.astHeight-gy.Y) * 2 * g.zoom) + g.camY
+		x := (float64(g.astWidth-1-gy.X) * 2 * g.zoom) + g.camX
+		y := (float64(g.astHeight-1-gy.Y) * 2 * g.zoom) + g.camY
 		if iconName := iconForGeyser(gy.ID); iconName != "" {
 			if img, err := loadImage(g.icons, iconName); err == nil {
 				op := &ebiten.DrawImageOptions{}
-				op.GeoM.Translate(x-float64(img.Bounds().Dx())/2, y-float64(img.Bounds().Dy())/2)
+				op.GeoM.Scale(g.zoom, g.zoom)
+				w := float64(img.Bounds().Dx()) * g.zoom
+				h := float64(img.Bounds().Dy()) * g.zoom
+				op.GeoM.Translate(x-w/2, y-h/2)
 				screen.DrawImage(img, op)
 			}
 		} else {
@@ -340,12 +353,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 	}
 	for _, poi := range g.pois {
-		x := (float64(g.astWidth-poi.X) * 2 * g.zoom) + g.camX
-		y := (float64(g.astHeight-poi.Y) * 2 * g.zoom) + g.camY
+		x := (float64(g.astWidth-1-poi.X) * 2 * g.zoom) + g.camX
+		y := (float64(g.astHeight-1-poi.Y) * 2 * g.zoom) + g.camY
 		if iconName := iconForPOI(poi.ID); iconName != "" {
 			if img, err := loadImage(g.icons, iconName); err == nil {
 				op := &ebiten.DrawImageOptions{}
-				op.GeoM.Translate(x-float64(img.Bounds().Dx())/2, y-float64(img.Bounds().Dy())/2)
+				op.GeoM.Scale(g.zoom, g.zoom)
+				w := float64(img.Bounds().Dx()) * g.zoom
+				h := float64(img.Bounds().Dy()) * g.zoom
+				op.GeoM.Translate(x-w/2, y-h/2)
 				screen.DrawImage(img, op)
 			}
 		}
