@@ -519,8 +519,8 @@ func drawBiome(dst *ebiten.Image, polys [][]Point, clr color.Color, camX, camY, 
 	dst.DrawTriangles(vs, is, whitePixel, op)
 }
 
-// drawLegend renders a list of biome colors along the left side of the screen.
-func drawLegend(dst *ebiten.Image, biomes []BiomePath) {
+// buildLegendImage returns an image of biome colors with a single background.
+func buildLegendImage(biomes []BiomePath) *ebiten.Image {
 	set := make(map[string]struct{})
 	for _, b := range biomes {
 		set[b.Name] = struct{}{}
@@ -530,16 +530,32 @@ func drawLegend(dst *ebiten.Image, biomes []BiomePath) {
 		names = append(names, n)
 	}
 	sort.Strings(names)
+
+	maxLen := 0
+	for _, name := range names {
+		if l := len(displayBiome(name)); l > maxLen {
+			maxLen = l
+		}
+	}
+
+	width := 30 + maxLen*6 + 5
+	height := 15*len(names) + 5
+
+	img := ebiten.NewImage(width, height)
+	img.Fill(color.RGBA{0, 0, 0, 77})
+
 	y := 10
 	for _, name := range names {
 		clr, ok := biomeColors[name]
 		if !ok {
 			clr = color.RGBA{60, 60, 60, 255}
 		}
-		vector.DrawFilledRect(dst, 5, float32(y), 20, 10, clr, false)
-		drawTextWithBG(dst, displayBiome(name), 30, y)
+		vector.DrawFilledRect(img, 5, float32(y), 20, 10, clr, false)
+		ebitenutil.DebugPrintAt(img, displayBiome(name), 30, y)
 		y += 15
 	}
+
+	return img
 }
 
 // initObjectLegend prepares the mapping of object names to numeric labels and
@@ -604,10 +620,7 @@ type Game struct {
 	needsRedraw    bool
 	screenshotPath string
 	captured       bool
-
-	legendMap     map[string]int
-	legendEntries []string
-	legendImage   *ebiten.Image
+	legend         *ebiten.Image
 }
 
 type label struct {
@@ -790,7 +803,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 		}
 
-		drawLegend(screen, g.biomes)
+		if g.legend == nil {
+			g.legend = buildLegendImage(g.biomes)
+		}
+		screen.DrawImage(g.legend, nil)
 		for _, l := range labels {
 			drawTextWithBG(screen, l.text, l.x, l.y)
 		}
@@ -860,16 +876,18 @@ func main() {
 	}
 
 	ast := seed.Asteroids[0]
+	bps := parseBiomePaths(ast.BiomePaths)
 	game := &Game{
 		geysers:   ast.Geysers,
 		pois:      ast.POIs,
-		biomes:    parseBiomePaths(ast.BiomePaths),
+		biomes:    bps,
 		icons:     make(map[string]*ebiten.Image),
 		width:     DefaultWidth,
 		height:    DefaultHeight,
 		astWidth:  ast.SizeX,
 		astHeight: ast.SizeY,
-		zoom:      InitialZoom,
+		zoom:      1.0,
+		legend:    buildLegendImage(bps),
 	}
 	if *screenshot != "" {
 		game.screenshotPath = *screenshot
