@@ -253,35 +253,99 @@ func iconForPOI(id string) string {
 
 // Game implements ebiten.Game and displays geysers with their names.
 type Game struct {
-	geysers []Geyser
-	pois    []PointOfInterest
-	icons   map[string]*ebiten.Image
-	width   int
-	height  int
+	geysers   []Geyser
+	pois      []PointOfInterest
+	icons     map[string]*ebiten.Image
+	width     int
+	height    int
+	astWidth  int
+	astHeight int
+	camX      float64
+	camY      float64
+	zoom      float64
+	dragging  bool
+	lastX     int
+	lastY     int
 }
 
-func (g *Game) Update() error { return nil }
+func (g *Game) Update() error {
+	const panSpeed = 5
+
+	// Keyboard panning
+	if ebiten.IsKeyPressed(ebiten.KeyLeft) || ebiten.IsKeyPressed(ebiten.KeyA) {
+		g.camX += panSpeed
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyRight) || ebiten.IsKeyPressed(ebiten.KeyD) {
+		g.camX -= panSpeed
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyUp) || ebiten.IsKeyPressed(ebiten.KeyW) {
+		g.camY += panSpeed
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyDown) || ebiten.IsKeyPressed(ebiten.KeyS) {
+		g.camY -= panSpeed
+	}
+
+	// Mouse dragging
+	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+		x, y := ebiten.CursorPosition()
+		if g.dragging {
+			g.camX += float64(x - g.lastX)
+			g.camY += float64(y - g.lastY)
+		}
+		g.lastX = x
+		g.lastY = y
+		g.dragging = true
+	} else {
+		g.dragging = false
+	}
+
+	// Zoom with keyboard
+	if ebiten.IsKeyPressed(ebiten.KeyEqual) || ebiten.IsKeyPressed(ebiten.KeyKPAdd) {
+		g.zoom *= 1.05
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyMinus) || ebiten.IsKeyPressed(ebiten.KeyKPSubtract) {
+		g.zoom /= 1.05
+	}
+
+	// Zoom with mouse wheel
+	_, wheelY := ebiten.Wheel()
+	if wheelY != 0 {
+		if wheelY > 0 {
+			g.zoom *= 1.1
+		} else {
+			g.zoom /= 1.1
+		}
+	}
+
+	if g.zoom < 0.1 {
+		g.zoom = 0.1
+	}
+
+	return nil
+}
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{30, 30, 30, 255})
 	for _, gy := range g.geysers {
-		y := g.height - gy.Y
+		x := (float64(g.astWidth-gy.X) * 2 * g.zoom) + g.camX
+		y := (float64(g.astHeight-gy.Y) * 2 * g.zoom) + g.camY
 		if iconName := iconForGeyser(gy.ID); iconName != "" {
 			if img, err := loadImage(g.icons, iconName); err == nil {
 				op := &ebiten.DrawImageOptions{}
-				op.GeoM.Translate(float64(gy.X)-float64(img.Bounds().Dx())/2, float64(y)-float64(img.Bounds().Dy())/2)
+				op.GeoM.Translate(x-float64(img.Bounds().Dx())/2, y-float64(img.Bounds().Dy())/2)
 				screen.DrawImage(img, op)
 			}
 		} else {
-			ebitenutil.DrawRect(screen, float64(gy.X-2), float64(y-2), 4, 4, color.RGBA{255, 0, 0, 255})
+			ebitenutil.DrawRect(screen, x-2, y-2, 4, 4, color.RGBA{255, 0, 0, 255})
 		}
 	}
 	for _, poi := range g.pois {
-		y := g.height - poi.Y
+		x := (float64(g.astWidth-poi.X) * 2 * g.zoom) + g.camX
+		y := (float64(g.astHeight-poi.Y) * 2 * g.zoom) + g.camY
 		if iconName := iconForPOI(poi.ID); iconName != "" {
 			if img, err := loadImage(g.icons, iconName); err == nil {
 				op := &ebiten.DrawImageOptions{}
-				op.GeoM.Translate(float64(poi.X)-float64(img.Bounds().Dx())/2, float64(y)-float64(img.Bounds().Dy())/2)
+				op.GeoM.Translate(x-float64(img.Bounds().Dx())/2, y-float64(img.Bounds().Dy())/2)
 				screen.DrawImage(img, op)
 			}
 		}
@@ -289,7 +353,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return g.width, g.height
+	g.width = outsideWidth
+	g.height = outsideHeight
+	return outsideWidth, outsideHeight
 }
 
 func main() {
@@ -319,13 +385,17 @@ func main() {
 
 	ast := seed.Asteroids[0]
 	game := &Game{
-		geysers: ast.Geysers,
-		pois:    ast.POIs,
-		icons:   make(map[string]*ebiten.Image),
-		width:   ast.SizeX,
-		height:  ast.SizeY,
+		geysers:   ast.Geysers,
+		pois:      ast.POIs,
+		icons:     make(map[string]*ebiten.Image),
+		width:     1280,
+		height:    720,
+		astWidth:  ast.SizeX,
+		astHeight: ast.SizeY,
+		zoom:      1.0,
 	}
-	ebiten.SetWindowSize(game.width*2, game.height*2)
+	ebiten.SetWindowSize(game.width, game.height)
+	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	ebiten.SetWindowTitle("Geysers - " + *coord)
 	if err := ebiten.RunGame(game); err != nil {
 		fmt.Println("Error running game:", err)
