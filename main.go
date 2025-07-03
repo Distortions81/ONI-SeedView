@@ -568,8 +568,8 @@ func buildLegendImage(biomes []BiomePath) *ebiten.Image {
 		if !ok {
 			clr = color.RGBA{60, 60, 60, 255}
 		}
-		vector.DrawFilledRect(dst, 5, float32(y), 20, 10, clr, false)
-		drawTextWithBGBorder(dst, displayBiome(name), 30, y, clr)
+		vector.DrawFilledRect(img, 5, float32(y), 20, 10, clr, false)
+		drawTextWithBGBorder(img, displayBiome(name), 30, y, clr)
 		y += 15
 	}
 
@@ -582,11 +582,23 @@ func (g *Game) initObjectLegend() {
 	if g.legendMap != nil {
 		return
 	}
-	x := dst.Bounds().Dx() - NumberLegendXOffset
-	y := 10
-	for _, e := range entries {
-		drawTextWithBG(dst, e, x, y)
-		y += 10
+	g.legendMap = make(map[string]int)
+	counter := 1
+	for _, gy := range g.geysers {
+		name := displayGeyser(gy.ID)
+		if _, ok := g.legendMap["g"+name]; !ok {
+			g.legendMap["g"+name] = counter
+			g.legendEntries = append(g.legendEntries, fmt.Sprintf("%d: %s", counter, name))
+			counter++
+		}
+	}
+	for _, poi := range g.pois {
+		name := displayPOI(poi.ID)
+		if _, ok := g.legendMap["p"+name]; !ok {
+			g.legendMap["p"+name] = counter
+			g.legendEntries = append(g.legendEntries, fmt.Sprintf("%d: %s", counter, name))
+			counter++
+		}
 	}
 }
 
@@ -639,6 +651,9 @@ type Game struct {
 	screenshotPath string
 	captured       bool
 	legend         *ebiten.Image
+	legendMap      map[string]int
+	legendEntries  []string
+	legendImage    *ebiten.Image
 }
 
 type label struct {
@@ -727,10 +742,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	if g.needsRedraw {
 		screen.Fill(color.RGBA{30, 30, 30, 255})
 		labels := []label{}
-		legend := []string{}
 		useNumbers := g.zoom < LegendZoomThreshold
-		counter := 1
-		legendMap := make(map[string]int)
+		if useNumbers && g.legendMap == nil {
+			g.initObjectLegend()
+		}
 
 		for _, bp := range g.biomes {
 			clr, ok := biomeColors[bp.Name]
