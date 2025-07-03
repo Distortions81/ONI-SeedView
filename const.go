@@ -9,7 +9,7 @@ const (
 	PanSpeed         = 15
 	// CameraMargin controls how far the world can be panned
 	// beyond the visible screen in pixels.
-	CameraMargin        = 64
+	CameraMargin        = -256
 	KeyZoomFactor       = 1.05
 	WheelZoomFactor     = 1.1
 	MinZoom             = 0.5
