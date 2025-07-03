@@ -17,6 +17,7 @@ const (
 	InitialZoom         = 1.0
 	LabelCharWidth      = 6
 	NumberLegendXOffset = 150
+	LegendRowSpacing    = 18
 	ScreenshotFile      = "screenshot.png"
 )
 
