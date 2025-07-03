@@ -1174,6 +1174,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 						formatted, width = formatLabel(d)
 					}
 					labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, clr})
+				} else {
+					fmt.Printf("loading %s: %v\n", iconName, err)
 				}
 			} else {
 				vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, color.RGBA{255, 0, 0, 255}, false)
@@ -1224,6 +1226,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 						formatted, width = formatLabel(d)
 						labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, color.RGBA{}})
 					}
+				} else {
+					fmt.Printf("loading %s: %v\n", iconName, err)
 				}
 			} else {
 				var formatted string
