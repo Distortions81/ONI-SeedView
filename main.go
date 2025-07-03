@@ -612,8 +612,19 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	if g.width != outsideWidth || g.height != outsideHeight {
+		// Keep the world position at the center of the screen fixed so
+		// resizing doesn't shift the view.
+		cxOld, cyOld := float64(g.width)/2, float64(g.height)/2
+		worldX := (cxOld - g.camX) / g.zoom
+		worldY := (cyOld - g.camY) / g.zoom
+
 		g.width = outsideWidth
 		g.height = outsideHeight
+
+		cxNew, cyNew := float64(g.width)/2, float64(g.height)/2
+		g.camX = cxNew - worldX*g.zoom
+		g.camY = cyNew - worldY*g.zoom
+
 		g.needsRedraw = true
 	}
 	return outsideWidth, outsideHeight
