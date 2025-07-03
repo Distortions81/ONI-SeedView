@@ -337,38 +337,48 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{30, 30, 30, 255})
 	for _, gy := range g.geysers {
-		x := (float64(gy.X) * 2 * g.zoom) + g.camX
-		y := (float64(g.astHeight-1-gy.Y) * 2 * g.zoom) + g.camY
-		if iconName := iconForGeyser(gy.ID); iconName != "" {
-			if img, err := loadImage(g.icons, iconName); err == nil {
-				op := &ebiten.DrawImageOptions{}
-				op.GeoM.Scale(g.zoom*0.25, g.zoom*0.25)
-				w := float64(img.Bounds().Dx()) * g.zoom * 0.25
-				h := float64(img.Bounds().Dy()) * g.zoom * 0.25
-				op.GeoM.Translate(x-w/2, y-h/2)
-				screen.DrawImage(img, op)
-				ebitenutil.DebugPrintAt(screen, gy.ID, int(x)+4, int(y)-4)
-			}
-		} else {
-			ebitenutil.DrawRect(screen, x-2, y-2, 4, 4, color.RGBA{255, 0, 0, 255})
-			ebitenutil.DebugPrintAt(screen, gy.ID, int(x)+4, int(y)-4)
-		}
-	}
-	for _, poi := range g.pois {
-		x := (float64(poi.X) * 2 * g.zoom) + g.camX
-		y := (float64(g.astHeight-1-poi.Y) * 2 * g.zoom) + g.camY
-		if iconName := iconForPOI(poi.ID); iconName != "" {
-			if img, err := loadImage(g.icons, iconName); err == nil {
-				op := &ebiten.DrawImageOptions{}
-				op.GeoM.Scale(g.zoom*0.25, g.zoom*0.25)
-				w := float64(img.Bounds().Dx()) * g.zoom * 0.25
-				h := float64(img.Bounds().Dy()) * g.zoom * 0.25
-				op.GeoM.Translate(x-w/2, y-h/2)
-				screen.DrawImage(img, op)
-			}
-		}
-		ebitenutil.DebugPrintAt(screen, poi.ID, int(x)+4, int(y)-4)
-	}
+               x := (float64(gy.X) * 2 * g.zoom) + g.camX
+               y := (float64(gy.Y) * 2 * g.zoom) + g.camY
+               if iconName := iconForGeyser(gy.ID); iconName != "" {
+                       if img, err := loadImage(g.icons, iconName); err == nil {
+                               op := &ebiten.DrawImageOptions{}
+                               op.GeoM.Scale(g.zoom*0.25, g.zoom*0.25)
+                               w := float64(img.Bounds().Dx()) * g.zoom * 0.25
+                               h := float64(img.Bounds().Dy()) * g.zoom * 0.25
+                               op.GeoM.Translate(x-w/2, y-h/2)
+                               screen.DrawImage(img, op)
+                               textX := int(x) - (len(gy.ID)*6)/2
+                               textY := int(y+h/2) + 2
+                               ebitenutil.DebugPrintAt(screen, gy.ID, textX, textY)
+                       }
+               } else {
+                       ebitenutil.DrawRect(screen, x-2, y-2, 4, 4, color.RGBA{255, 0, 0, 255})
+                       textX := int(x) - (len(gy.ID)*6)/2
+                       textY := int(y) + 4
+                       ebitenutil.DebugPrintAt(screen, gy.ID, textX, textY)
+               }
+       }
+       for _, poi := range g.pois {
+               x := (float64(poi.X) * 2 * g.zoom) + g.camX
+               y := (float64(poi.Y) * 2 * g.zoom) + g.camY
+               if iconName := iconForPOI(poi.ID); iconName != "" {
+                       if img, err := loadImage(g.icons, iconName); err == nil {
+                               op := &ebiten.DrawImageOptions{}
+                               op.GeoM.Scale(g.zoom*0.25, g.zoom*0.25)
+                               w := float64(img.Bounds().Dx()) * g.zoom * 0.25
+                               h := float64(img.Bounds().Dy()) * g.zoom * 0.25
+                               op.GeoM.Translate(x-w/2, y-h/2)
+                               screen.DrawImage(img, op)
+                               textX := int(x) - (len(poi.ID)*6)/2
+                               textY := int(y+h/2) + 2
+                               ebitenutil.DebugPrintAt(screen, poi.ID, textX, textY)
+                       }
+               } else {
+                       textX := int(x) - (len(poi.ID)*6)/2
+                       textY := int(y) + 4
+                       ebitenutil.DebugPrintAt(screen, poi.ID, textX, textY)
+               }
+       }
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
