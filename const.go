@@ -4,9 +4,12 @@ package main
 import "math"
 
 const (
-	BaseURL             = "https://ingest.mapsnotincluded.org/coordinate/"
-	AcceptCBORHeader    = "application/cbor"
-	PanSpeed            = 15
+	BaseURL          = "https://ingest.mapsnotincluded.org/coordinate/"
+	AcceptCBORHeader = "application/cbor"
+	PanSpeed         = 15
+	// CameraMargin controls how far the world can be panned
+	// beyond the visible screen in pixels.
+	CameraMargin        = 64
 	KeyZoomFactor       = 1.05
 	WheelZoomFactor     = 1.1
 	MinZoom             = 0.5

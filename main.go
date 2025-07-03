@@ -955,17 +955,18 @@ type label struct {
 func (g *Game) clampCamera() {
 	w := float64(g.astWidth) * 2 * g.zoom
 	h := float64(g.astHeight) * 2 * g.zoom
-	if g.camX < -w+1 {
-		g.camX = -w + 1
+	margin := float64(CameraMargin)
+	if g.camX < -w-margin {
+		g.camX = -w - margin
 	}
-	if g.camX > float64(g.width)-1 {
-		g.camX = float64(g.width) - 1
+	if g.camX > float64(g.width)+margin {
+		g.camX = float64(g.width) + margin
 	}
-	if g.camY < -h+1 {
-		g.camY = -h + 1
+	if g.camY < -h-margin {
+		g.camY = -h - margin
 	}
-	if g.camY > float64(g.height)-1 {
-		g.camY = float64(g.height) - 1
+	if g.camY > float64(g.height)+margin {
+		g.camY = float64(g.height) + margin
 	}
 }
 
