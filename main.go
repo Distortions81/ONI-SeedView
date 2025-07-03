@@ -624,7 +624,7 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 		img.Fill(color.RGBA{0, 0, 0, 77})
 		y := 10
 		for i, e := range g.legendEntries {
-			clr := color.White
+			clr := color.RGBA{}
 			if i < len(g.legendColors) {
 				clr = g.legendColors[i]
 			}
@@ -662,7 +662,7 @@ type Game struct {
 	legend         *ebiten.Image
 	legendMap      map[string]int
 	legendEntries  []string
-	legendColors   []color.Color
+	legendColors   []color.RGBA
 	legendImage    *ebiten.Image
 }
 
