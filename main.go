@@ -257,11 +257,54 @@ func parseBiomeLine(line string) BiomePath {
 }
 
 // loadImage loads an image from the assets directory and caches it.
+func toCamel(s string) string {
+	parts := strings.Split(s, "_")
+	for i, p := range parts {
+		if len(p) == 0 {
+			continue
+		}
+		parts[i] = strings.ToUpper(p[:1]) + p[1:]
+	}
+	return strings.Join(parts, "")
+}
+
+func assetExists(name string) bool {
+	f, err := embeddedFiles.Open(filepath.Join("assets", name))
+	if err != nil {
+		return false
+	}
+	f.Close()
+	return true
+}
+
+func resolveAssetName(name string) string {
+	if assetExists(name) {
+		return name
+	}
+	ext := filepath.Ext(name)
+	base := strings.TrimSuffix(name, ext)
+	camel := toCamel(base) + ext
+	if assetExists(camel) {
+		return camel
+	}
+	for _, prefix := range []string{"geyser_", "building_", "poi_"} {
+		if strings.HasPrefix(base, prefix) {
+			trimmed := base[len(prefix):]
+			camel = toCamel(trimmed) + ext
+			if assetExists(camel) {
+				return camel
+			}
+		}
+	}
+	return name
+}
+
 func loadImage(cache map[string]*ebiten.Image, name string) (*ebiten.Image, error) {
 	if img, ok := cache[name]; ok {
 		return img, nil
 	}
-	f, err := embeddedFiles.Open(filepath.Join("assets", name))
+	resolved := resolveAssetName(name)
+	f, err := embeddedFiles.Open(filepath.Join("assets", resolved))
 	if err != nil {
 		return nil, err
 	}
