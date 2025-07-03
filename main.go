@@ -327,8 +327,8 @@ func drawPolygon(dst *ebiten.Image, pts []Point, clr color.Color, camX, camY, zo
 	for i := range vs {
 		vs[i].DstX = vs[i].DstX*float32(zoom) + float32(camX)
 		vs[i].DstY = vs[i].DstY*float32(zoom) + float32(camY)
-		vs[i].SrcX = 1
-		vs[i].SrcY = 1
+		vs[i].SrcX = 0
+		vs[i].SrcY = 0
 		vs[i].ColorR = float32(r) / 0xffff
 		vs[i].ColorG = float32(g) / 0xffff
 		vs[i].ColorB = float32(b) / 0xffff
