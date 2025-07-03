@@ -9,7 +9,6 @@ import (
 	"image/jpeg"
 	"image/png"
 	"io"
-	"math"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -167,25 +166,6 @@ func decodeSeed(cborData []byte) (*SeedData, error) {
 	return &seed, nil
 }
 
-// sortPolygon orders the points of a polygon by angle around its centroid.
-func sortPolygon(poly []Point) {
-	if len(poly) < 3 {
-		return
-	}
-	var sumX, sumY int
-	for _, p := range poly {
-		sumX += p.X
-		sumY += p.Y
-	}
-	cx := float64(sumX) / float64(len(poly))
-	cy := float64(sumY) / float64(len(poly))
-	sort.Slice(poly, func(i, j int) bool {
-		ai := math.Atan2(float64(poly[i].Y)-cy, float64(poly[i].X)-cx)
-		aj := math.Atan2(float64(poly[j].Y)-cy, float64(poly[j].X)-cx)
-		return ai < aj
-	})
-}
-
 // parseBiomePaths converts the raw biome path string into structured paths.
 func parseBiomePaths(data string) []BiomePath {
 	var paths []BiomePath
@@ -220,7 +200,6 @@ func parseBiomePaths(data string) []BiomePath {
 				poly = append(poly, Point{X: x, Y: y})
 			}
 			if len(poly) > 0 {
-				sortPolygon(poly)
 				bp.Polygons = append(bp.Polygons, poly)
 			}
 		}

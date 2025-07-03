@@ -1,0 +1,397 @@
+{
+  "asteroids": [
+    {
+      "biomePaths": "Sandstone:166,195 173,210 166,218 143,213 136,233 119,232 117,213 109,207 89,213 82,204 90,189 83,174 90,166 113,171 120,151 137,152 139,171 147,177 167,171 174,180\nMagmaCore:256,384 256,355 229,357 223,350 202,353 199,351 176,359 165,352 147,362 134,354 116,366 98,353 86,356 78,352 57,359 51,355 28,363 17,353 0,353 0,384\nOilField:256,355 256,303 233,302 223,323 207,320 195,332 176,326 164,337 143,327 132,339 107,331 104,326 87,320 75,329 58,324 47,333 29,329 24,320 0,320 0,353 17,353 28,363 51,355 57,359 78,352 86,356 98,353 116,366 134,354 147,362 165,352 176,359 199,351 202,353 223,350 229,357\nToxicJungle:32,243 26,229 0,228 0,256 24,258;58,324 54,302 30,306 18,289 0,289 0,320 24,320 29,329 47,333;102,290 101,270 83,262 73,267 76,295 84,299;106,96 102,81 83,76 73,85 57,84 46,96 55,115 75,115 80,111 94,111;119,232 117,213 109,207 89,213 82,204 63,205 56,216 62,234 86,236 112,240;143,327 142,318 118,305 104,326 107,331 132,339;201,226 193,210 173,210 166,218 170,238 177,242 197,235;196,120 202,139 194,150 170,148 167,171 147,177 139,171 137,152 120,151 113,171 90,166 83,174 63,174 55,188 34,188 27,173 32,162 55,158 59,149 79,142 86,146 108,135 109,133 130,119 140,123 155,114 173,122 183,117 180,89 172,85 169,64 181,55 198,60 202,82 202,83 210,109;238,95 226,78 232,64 256,64 256,95;236,272 225,255 234,241 256,240 256,272\nOcean:31,272 24,258 0,256 0,289 18,289;63,205 55,188 34,188 27,201 33,216 26,229 32,243 54,245 62,234 56,216;183,117 180,89 172,85 154,94 155,114 173,122;207,320 199,300 183,299 176,273 162,274 150,288 132,284 117,299 118,305 142,318 143,327 164,337 176,326 195,332;229,183 222,196 201,196 193,179 200,168 223,168 230,155 256,156 256,184;234,241 225,255 236,272 225,289 210,288 201,269 211,256 197,235 201,226 224,222 229,211 256,210 256,240\nBoggyMarsh:33,216 27,201 0,200 0,228 26,229;83,76 80,58 61,52 49,64 33,61 23,82 0,81 0,112 20,112 31,129 22,143 0,144 0,174 27,173 32,162 55,158 59,149 45,128 55,115 46,96 57,84 73,85;82,204 63,205 55,188 63,174 83,174 90,189;118,305 117,299 102,290 84,299 87,320 104,326;170,238 166,218 143,213 136,233 119,232 112,240 86,236 62,234 54,245 32,243 24,258 31,272 46,275 60,264 73,267 83,262 101,270 116,261 126,265 147,251 148,249;172,85 169,64 152,58 138,79 114,66 102,81 106,96 94,111 109,133 130,119 124,100 139,85 154,94;193,210 173,210 166,195 174,180 167,171 170,148 194,150 200,168 193,179 201,196;238,95 226,78 232,64 227,55 209,51 198,60 202,82 202,83 210,109 225,112;233,302 223,323 207,320 199,300 183,299 176,273 181,269 201,269 210,288 225,289 236,272 256,272 256,303\nFrozenWastes:31,129 20,112 0,112 0,144 22,143;34,188 27,173 0,174 0,200 27,201;87,320 84,299 76,295 73,267 60,264 46,275 31,272 18,289 30,306 54,302 58,324 75,329;108,135 86,146 79,142 59,149 45,128 55,115 75,115 80,111 94,111 109,133;152,58 149,53 124,45 113,57 92,47 80,58 83,76 102,81 114,66 138,79;155,114 154,94 139,85 124,100 130,119 140,123;211,256 197,235 177,242 170,238 148,249 147,251 126,265 116,261 101,270 102,290 117,299 132,284 150,288 162,274 176,273 181,269 201,269;256,156 256,95 238,95 225,112 210,109 196,120 202,139 194,150 200,168 223,168 230,155;229,211 224,222 201,226 193,210 201,196 222,196 229,183 256,184 256,210",
+      "geysers": [
+        {
+          "activeCycles": 111.5999984741211,
+          "avgEmitRate": 1667,
+          "dormancyCycles": 81.69999694824219,
+          "emitRate": 13882,
+          "eruptionTime": 135,
+          "id": "steam",
+          "idleTime": 516,
+          "x": 87,
+          "y": 223
+        },
+        {
+          "activeCycles": 39,
+          "avgEmitRate": 107,
+          "dormancyCycles": 27.200000762939453,
+          "emitRate": 415,
+          "eruptionTime": 254,
+          "id": "methane",
+          "idleTime": 323,
+          "x": 154,
+          "y": 168
+        },
+        {
+          "activeCycles": 57.79999923706055,
+          "avgEmitRate": 1384,
+          "dormancyCycles": 47,
+          "emitRate": 4322,
+          "eruptionTime": 433,
+          "id": "steam",
+          "idleTime": 313,
+          "x": 187,
+          "y": 186
+        },
+        {
+          "activeCycles": 100.4000015258789,
+          "avgEmitRate": 117,
+          "dormancyCycles": 62.400001525878906,
+          "emitRate": 496,
+          "eruptionTime": 232,
+          "id": "methane",
+          "idleTime": 374,
+          "x": 202,
+          "y": 76
+        },
+        {
+          "activeCycles": 83,
+          "avgEmitRate": 3020,
+          "dormancyCycles": 64.5999984741211,
+          "emitRate": 9441,
+          "eruptionTime": 245,
+          "id": "salt_water",
+          "idleTime": 185,
+          "x": 161,
+          "y": 326
+        },
+        {
+          "activeCycles": 1,
+          "avgEmitRate": 3333,
+          "dormancyCycles": 0,
+          "emitRate": 3333,
+          "eruptionTime": 1,
+          "id": "OilWell",
+          "idleTime": 0,
+          "x": 36,
+          "y": 340
+        },
+        {
+          "activeCycles": 1,
+          "avgEmitRate": 3333,
+          "dormancyCycles": 0,
+          "emitRate": 3333,
+          "eruptionTime": 1,
+          "id": "OilWell",
+          "idleTime": 0,
+          "x": 236,
+          "y": 319
+        },
+        {
+          "activeCycles": 1,
+          "avgEmitRate": 3333,
+          "dormancyCycles": 0,
+          "emitRate": 3333,
+          "eruptionTime": 1,
+          "id": "OilWell",
+          "idleTime": 0,
+          "x": 138,
+          "y": 342
+        },
+        {
+          "activeCycles": 47.599998474121094,
+          "avgEmitRate": 109,
+          "dormancyCycles": 30.100000381469727,
+          "emitRate": 354,
+          "eruptionTime": 206,
+          "id": "hot_hydrogen",
+          "idleTime": 205,
+          "x": 194,
+          "y": 325
+        },
+        {
+          "activeCycles": 88.69999694824219,
+          "avgEmitRate": 115,
+          "dormancyCycles": 50.099998474121094,
+          "emitRate": 382,
+          "eruptionTime": 363,
+          "id": "hot_po2",
+          "idleTime": 408,
+          "x": 23,
+          "y": 240
+        },
+        {
+          "activeCycles": 100.0999984741211,
+          "avgEmitRate": 120,
+          "dormancyCycles": 53.79999923706055,
+          "emitRate": 741,
+          "eruptionTime": 168,
+          "id": "chlorine_gas",
+          "idleTime": 510,
+          "x": 56,
+          "y": 202
+        },
+        {
+          "activeCycles": 82.5,
+          "avgEmitRate": 2811,
+          "dormancyCycles": 49,
+          "emitRate": 12662,
+          "eruptionTime": 315,
+          "id": "hot_water",
+          "idleTime": 574,
+          "x": 147,
+          "y": 74
+        },
+        {
+          "activeCycles": 74.0999984741211,
+          "avgEmitRate": 107,
+          "dormancyCycles": 49.599998474121094,
+          "emitRate": 277,
+          "eruptionTime": 435,
+          "id": "hot_po2",
+          "idleTime": 237,
+          "x": 61,
+          "y": 190
+        },
+        {
+          "activeCycles": 75,
+          "avgEmitRate": 107,
+          "dormancyCycles": 54.79999923706055,
+          "emitRate": 340,
+          "eruptionTime": 254,
+          "id": "methane",
+          "idleTime": 210,
+          "x": 204,
+          "y": 103
+        },
+        {
+          "activeCycles": 56.599998474121094,
+          "avgEmitRate": 109,
+          "dormancyCycles": 39.099998474121094,
+          "emitRate": 423,
+          "eruptionTime": 275,
+          "id": "chlorine_gas",
+          "idleTime": 358,
+          "x": 215,
+          "y": 116
+        },
+        {
+          "activeCycles": 103.69999694824219,
+          "avgEmitRate": 1681,
+          "dormancyCycles": 37.70000076293945,
+          "emitRate": 5393,
+          "eruptionTime": 281,
+          "id": "slush_water",
+          "idleTime": 380,
+          "x": 135,
+          "y": 305
+        },
+        {
+          "activeCycles": 81.5,
+          "avgEmitRate": 124,
+          "dormancyCycles": 38.5,
+          "emitRate": 342,
+          "eruptionTime": 224,
+          "id": "slimy_po2",
+          "idleTime": 196,
+          "x": 35,
+          "y": 183
+        },
+        {
+          "activeCycles": 67.9000015258789,
+          "avgEmitRate": 279,
+          "dormancyCycles": 67.4000015258789,
+          "emitRate": 9373,
+          "eruptionTime": 44,
+          "id": "molten_iron",
+          "idleTime": 695,
+          "x": 35,
+          "y": 196
+        },
+        {
+          "activeCycles": 54.29999923706055,
+          "avgEmitRate": 1260,
+          "dormancyCycles": 30.600000381469727,
+          "emitRate": 249455,
+          "eruptionTime": 76,
+          "id": "big_volcano",
+          "idleTime": 9542,
+          "x": 97,
+          "y": 345
+        },
+        {
+          "activeCycles": 101.30000305175781,
+          "avgEmitRate": 169,
+          "dormancyCycles": 47.5,
+          "emitRate": 357,
+          "eruptionTime": 187,
+          "id": "liquid_co2",
+          "idleTime": 81,
+          "x": 92,
+          "y": 271
+        }
+      ],
+      "id": "SandstoneDefault",
+      "offsetX": 0,
+      "offsetY": 0,
+      "pointsOfInterest": [
+        {
+          "id": "Headquarters",
+          "x": 127,
+          "y": 196
+        },
+        {
+          "id": "MassiveHeatSink",
+          "x": 68,
+          "y": 274
+        },
+        {
+          "id": "MassiveHeatSink",
+          "x": 174,
+          "y": 260
+        },
+        {
+          "id": "MassiveHeatSink",
+          "x": 129,
+          "y": 57
+        },
+        {
+          "id": "PropFacilityStatue",
+          "x": 39,
+          "y": 56
+        },
+        {
+          "id": "GeneShuffler",
+          "x": 58,
+          "y": 136
+        },
+        {
+          "id": "GeneShuffler",
+          "x": 63,
+          "y": 243
+        },
+        {
+          "id": "GeneShuffler",
+          "x": 155,
+          "y": 115
+        },
+        {
+          "id": "GeneShuffler",
+          "x": 210,
+          "y": 341
+        }
+      ],
+      "sizeX": 256,
+      "sizeY": 384,
+      "worldTraits": []
+    }
+  ],
+  "cluster": "SNDST-A",
+  "coordinate": "SNDST-A-7-0-0-0",
+  "dlcs": [
+    "BaseGame"
+  ],
+  "gameVersion": 663500,
+  "starMapEntriesSpacedOut": null,
+  "starMapEntriesVanilla": [
+    {
+      "distance": 0,
+      "id": "CarbonaceousAsteroid"
+    },
+    {
+      "distance": 0,
+      "id": "CarbonaceousAsteroid"
+    },
+    {
+      "distance": 1,
+      "id": "MetallicAsteroid"
+    },
+    {
+      "distance": 1,
+      "id": "OilyAsteriod"
+    },
+    {
+      "distance": 1,
+      "id": "OilyAsteriod"
+    },
+    {
+      "distance": 1,
+      "id": "OilyAsteriod"
+    },
+    {
+      "distance": 2,
+      "id": "Satellite"
+    },
+    {
+      "distance": 2,
+      "id": "Satellite"
+    },
+    {
+      "distance": 2,
+      "id": "RockyAsteroid"
+    },
+    {
+      "distance": 3,
+      "id": "ForestPlanet"
+    },
+    {
+      "distance": 3,
+      "id": "IcyDwarf"
+    },
+    {
+      "distance": 4,
+      "id": "MetallicAsteroid"
+    },
+    {
+      "distance": 4,
+      "id": "Earth"
+    },
+    {
+      "distance": 4,
+      "id": "OrganicDwarf"
+    },
+    {
+      "distance": 5,
+      "id": "MetallicAsteroid"
+    },
+    {
+      "distance": 6,
+      "id": "RedDwarf"
+    },
+    {
+      "distance": 7,
+      "id": "VolcanoPlanet"
+    },
+    {
+      "distance": 8,
+      "id": "GasGiant"
+    },
+    {
+      "distance": 9,
+      "id": "GasGiant"
+    },
+    {
+      "distance": 11,
+      "id": "ShinyPlanet"
+    },
+    {
+      "distance": 12,
+      "id": "ChlorinePlanet"
+    },
+    {
+      "distance": 13,
+      "id": "DustyMoon"
+    },
+    {
+      "distance": 14,
+      "id": "RockyAsteroid"
+    },
+    {
+      "distance": 15,
+      "id": "ForestPlanet"
+    },
+    {
+      "distance": 15,
+      "id": "OilyAsteriod"
+    },
+    {
+      "distance": 17,
+      "id": "Wormhole"
+    }
+  ],
+  "uploadDate": 1744985127074,
+  "uploaderSteamIdHash": "32f0015c028742220e3419921c3c63b000c4fa93f37bab10508088422a5fb566"
+}
