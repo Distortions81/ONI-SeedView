@@ -6,18 +6,18 @@ import "math"
 const (
 	BaseURL             = "https://ingest.mapsnotincluded.org/coordinate/"
 	AcceptCBORHeader    = "application/cbor"
-	PanSpeed            = 5
+	PanSpeed            = 15
 	KeyZoomFactor       = 1.05
 	WheelZoomFactor     = 1.1
-	MinZoom             = 0.1
-	IconScale           = 0.25
+	MinZoom             = 0.5
+	IconScale           = 0.2
 	LegendZoomExponent  = 10
-	DefaultWidth        = 600
-	DefaultHeight       = 800
+	DefaultWidth        = 1280
+	DefaultHeight       = 720
 	InitialZoom         = 1.0
 	LabelCharWidth      = 6
 	NumberLegendXOffset = 150
-	LegendRowSpacing    = 18
+	LegendRowSpacing    = 25
 	ScreenshotFile      = "screenshot.png"
 )
 
