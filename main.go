@@ -12,14 +12,14 @@ import (
 	"image/jpeg"
 	"image/png"
 	"io"
+	"math"
 	"net/http"
 	"os"
 	"path/filepath"
-       "regexp"
-       "sort"
-       "strconv"
-       "strings"
-       "math"
+	"regexp"
+	"sort"
+	"strconv"
+	"strings"
 
 	"github.com/chai2010/webp"
 	"github.com/fxamacker/cbor/v2"
@@ -398,6 +398,32 @@ func displayPOI(id string) string {
 	return id
 }
 
+// formatLabel splits long names so they wrap every two words. It returns the
+// formatted text and the length of the longest line for centering purposes.
+func formatLabel(name string) (string, int) {
+	words := strings.Fields(name)
+	if len(words) <= 2 {
+		return name, len(name)
+	}
+	var lines []string
+	for i := 0; i < len(words); i += 2 {
+		end := i + 2
+		if end > len(words) {
+			end = len(words)
+		}
+		line := strings.Join(words[i:end], " ")
+		lines = append(lines, line)
+	}
+	formatted := strings.Join(lines, "\n")
+	width := 0
+	for _, l := range lines {
+		if len(l) > width {
+			width = len(l)
+		}
+	}
+	return formatted, width
+}
+
 var whitePixel = func() *ebiten.Image {
 	img := ebiten.NewImage(1, 1)
 	img.Fill(color.White)
@@ -416,16 +442,16 @@ func drawPolygon(dst *ebiten.Image, pts []Point, clr color.Color, camX, camY, zo
 	p.Close()
 	vs, is := p.AppendVerticesAndIndicesForFilling(nil, nil)
 	r, g, b, a := clr.RGBA()
-       for i := range vs {
-               x := float64(vs[i].DstX)*zoom + camX
-               y := float64(vs[i].DstY)*zoom + camY
-               vs[i].DstX = float32(math.Round(x))
-               vs[i].DstY = float32(math.Round(y))
-               vs[i].SrcX = 0
-               vs[i].SrcY = 0
-               vs[i].ColorR = float32(r) / 0xffff
-               vs[i].ColorG = float32(g) / 0xffff
-               vs[i].ColorB = float32(b) / 0xffff
+	for i := range vs {
+		x := float64(vs[i].DstX)*zoom + camX
+		y := float64(vs[i].DstY)*zoom + camY
+		vs[i].DstX = float32(math.Round(x))
+		vs[i].DstY = float32(math.Round(y))
+		vs[i].SrcX = 0
+		vs[i].SrcY = 0
+		vs[i].ColorR = float32(r) / 0xffff
+		vs[i].ColorG = float32(g) / 0xffff
+		vs[i].ColorB = float32(b) / 0xffff
 		vs[i].ColorA = float32(a) / 0xffff
 	}
 	op := &ebiten.DrawTrianglesOptions{
@@ -454,16 +480,16 @@ func drawBiome(dst *ebiten.Image, polys [][]Point, clr color.Color, camX, camY, 
 	}
 	vs, is := p.AppendVerticesAndIndicesForFilling(nil, nil)
 	r, g, b, a := clr.RGBA()
-       for i := range vs {
-               x := float64(vs[i].DstX)*zoom + camX
-               y := float64(vs[i].DstY)*zoom + camY
-               vs[i].DstX = float32(math.Round(x))
-               vs[i].DstY = float32(math.Round(y))
-               vs[i].SrcX = 0
-               vs[i].SrcY = 0
-               vs[i].ColorR = float32(r) / 0xffff
-               vs[i].ColorG = float32(g) / 0xffff
-               vs[i].ColorB = float32(b) / 0xffff
+	for i := range vs {
+		x := float64(vs[i].DstX)*zoom + camX
+		y := float64(vs[i].DstY)*zoom + camY
+		vs[i].DstX = float32(math.Round(x))
+		vs[i].DstY = float32(math.Round(y))
+		vs[i].SrcX = 0
+		vs[i].SrcY = 0
+		vs[i].ColorR = float32(r) / 0xffff
+		vs[i].ColorG = float32(g) / 0xffff
+		vs[i].ColorB = float32(b) / 0xffff
 		vs[i].ColorA = float32(a) / 0xffff
 	}
 	op := &ebiten.DrawTrianglesOptions{
@@ -619,12 +645,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					op.GeoM.Translate(x-w/2, y-h/2)
 					screen.DrawImage(img, op)
 					d := displayGeyser(gy.ID)
-					labels = append(labels, label{d, int(x) - (len(d)*6)/2, int(y+h/2) + 2})
+					formatted, width := formatLabel(d)
+					labels = append(labels, label{formatted, int(x) - (width*6)/2, int(y+h/2) + 2})
 				}
 			} else {
 				vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, color.RGBA{255, 0, 0, 255}, false)
 				d := displayGeyser(gy.ID)
-				labels = append(labels, label{d, int(x) - (len(d)*6)/2, int(y) + 4})
+				formatted, width := formatLabel(d)
+				labels = append(labels, label{formatted, int(x) - (width*6)/2, int(y) + 4})
 			}
 		}
 
@@ -640,11 +668,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					op.GeoM.Translate(x-w/2, y-h/2)
 					screen.DrawImage(img, op)
 					d := displayPOI(poi.ID)
-					labels = append(labels, label{d, int(x) - (len(d)*6)/2, int(y+h/2) + 2})
+					formatted, width := formatLabel(d)
+					labels = append(labels, label{formatted, int(x) - (width*6)/2, int(y+h/2) + 2})
 				}
 			} else {
 				d := displayPOI(poi.ID)
-				labels = append(labels, label{d, int(x) - (len(d)*6)/2, int(y) + 4})
+				formatted, width := formatLabel(d)
+				labels = append(labels, label{formatted, int(x) - (width*6)/2, int(y) + 4})
 			}
 		}
 
