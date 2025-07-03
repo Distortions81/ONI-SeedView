@@ -91,7 +91,7 @@ func loadLocalSample(t *testing.T) struct {
 		BiomePaths string `json:"biomePaths"`
 	}
 } {
-	b, err := os.ReadFile("render-issue/SNDST-A-7-0-0-0.json")
+	b, err := os.ReadFile("test.json")
 	if err != nil {
 		t.Fatalf("read sample: %v", err)
 	}
