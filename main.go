@@ -323,6 +323,11 @@ func loadImage(cache map[string]*ebiten.Image, name string) (*ebiten.Image, erro
 		return nil, err
 	}
 	if nrgba, ok := src.(*image.NRGBA); ok {
+		for i := 3; i < len(nrgba.Pix); i += 4 {
+			if nrgba.Pix[i] < 64 {
+				nrgba.Pix[i] = 0
+			}
+		}
 		img := ebiten.NewImageFromImage(nrgba)
 		cache[name] = img
 		return img, nil
@@ -330,6 +335,11 @@ func loadImage(cache map[string]*ebiten.Image, name string) (*ebiten.Image, erro
 	bounds := src.Bounds()
 	dst := image.NewNRGBA(bounds)
 	draw.Draw(dst, bounds, src, bounds.Min, draw.Src)
+	for i := 3; i < len(dst.Pix); i += 4 {
+		if dst.Pix[i] < 64 {
+			dst.Pix[i] = 0
+		}
+	}
 	img := ebiten.NewImageFromImage(dst)
 	cache[name] = img
 	return img, nil
