@@ -436,6 +436,20 @@ var whitePixel = func() *ebiten.Image {
 	return img
 }()
 
+var tundraPattern = func() *ebiten.Image {
+	const size = 8
+	img := ebiten.NewImage(size, size)
+	img.Fill(color.RGBA{0, 0, 0, 0})
+	line := color.RGBA{255, 255, 255, 50}
+	for i := 0; i < size; i++ {
+		img.Set(i, size-1-i, line)
+		if i+2 < size {
+			img.Set(i, size-1-(i+2), line)
+		}
+	}
+	return img
+}()
+
 func drawTextWithBG(dst *ebiten.Image, text string, x, y int) {
 	lines := strings.Split(text, "\n")
 	width := 0
@@ -575,6 +589,112 @@ func drawBiome(dst *ebiten.Image, polys [][]Point, clr color.Color, camX, camY, 
 		FillRule:       ebiten.FillRuleEvenOdd,
 	}
 	dst.DrawTriangles(vs, is, whitePixel, op)
+}
+
+func drawTundraGradient(dst *ebiten.Image, polys [][]Point, camX, camY, zoom float64) {
+	if len(polys) == 0 {
+		return
+	}
+	minY, maxY := math.MaxFloat64, -math.MaxFloat64
+	for _, pts := range polys {
+		for _, pt := range pts {
+			y := float64(pt.Y*2)*zoom + camY
+			if y < minY {
+				minY = y
+			}
+			if y > maxY {
+				maxY = y
+			}
+		}
+	}
+	var p vector.Path
+	for _, pts := range polys {
+		if len(pts) == 0 {
+			continue
+		}
+		p.MoveTo(float32(pts[0].X*2), float32(pts[0].Y*2))
+		for _, pt := range pts[1:] {
+			p.LineTo(float32(pt.X*2), float32(pt.Y*2))
+		}
+		p.Close()
+	}
+	vs, is := p.AppendVerticesAndIndicesForFilling(nil, nil)
+	for i := range vs {
+		x := float64(vs[i].DstX)*zoom + camX
+		y := float64(vs[i].DstY)*zoom + camY
+		vs[i].DstX = float32(math.Round(x))
+		vs[i].DstY = float32(math.Round(y))
+		vs[i].SrcX = 0
+		vs[i].SrcY = 0
+		alpha := float32(0.0)
+		if maxY > minY {
+			alpha = float32(0.3 * (1 - (y-minY)/(maxY-minY)))
+		}
+		vs[i].ColorR = 1
+		vs[i].ColorG = 1
+		vs[i].ColorB = 1
+		vs[i].ColorA = alpha
+	}
+	op := &ebiten.DrawTrianglesOptions{
+		AntiAlias:      true,
+		ColorScaleMode: ebiten.ColorScaleModeStraightAlpha,
+		FillRule:       ebiten.FillRuleEvenOdd,
+	}
+	dst.DrawTriangles(vs, is, whitePixel, op)
+}
+
+func drawTundraLines(dst *ebiten.Image, polys [][]Point, camX, camY, zoom float64, pattern *ebiten.Image) {
+	if len(polys) == 0 {
+		return
+	}
+	var p vector.Path
+	for _, pts := range polys {
+		if len(pts) == 0 {
+			continue
+		}
+		p.MoveTo(float32(pts[0].X*2), float32(pts[0].Y*2))
+		for _, pt := range pts[1:] {
+			p.LineTo(float32(pt.X*2), float32(pt.Y*2))
+		}
+		p.Close()
+	}
+	vs, is := p.AppendVerticesAndIndicesForFilling(nil, nil)
+	for i := range vs {
+		x := float64(vs[i].DstX)*zoom + camX
+		y := float64(vs[i].DstY)*zoom + camY
+		vs[i].DstX = float32(math.Round(x))
+		vs[i].DstY = float32(math.Round(y))
+		vs[i].SrcX = float32(x)
+		vs[i].SrcY = float32(y)
+		vs[i].ColorR = 1
+		vs[i].ColorG = 1
+		vs[i].ColorB = 1
+		vs[i].ColorA = 1
+	}
+	op := &ebiten.DrawTrianglesOptions{
+		AntiAlias:      true,
+		ColorScaleMode: ebiten.ColorScaleModeStraightAlpha,
+		FillRule:       ebiten.FillRuleEvenOdd,
+		Address:        ebiten.AddressRepeat,
+	}
+	dst.DrawTriangles(vs, is, pattern, op)
+}
+
+func drawBiomeOutline(dst *ebiten.Image, polys [][]Point, camX, camY, zoom float64) {
+	for _, pts := range polys {
+		if len(pts) < 2 {
+			continue
+		}
+		for i := 0; i < len(pts); i++ {
+			a := pts[i]
+			b := pts[(i+1)%len(pts)]
+			x0 := float32(math.Round(float64(a.X*2)*zoom + camX))
+			y0 := float32(math.Round(float64(a.Y*2)*zoom + camY))
+			x1 := float32(math.Round(float64(b.X*2)*zoom + camX))
+			y1 := float32(math.Round(float64(b.Y*2)*zoom + camY))
+			vector.StrokeLine(dst, x0, y0, x1, y1, 1, color.RGBA{255, 255, 255, 128}, true)
+		}
+	}
 }
 
 // buildLegendImage returns an image of biome colors with a single background.
@@ -808,6 +928,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				clr = color.RGBA{60, 60, 60, 255}
 			}
 			drawBiome(screen, bp.Polygons, clr, g.camX, g.camY, g.zoom)
+			if bp.Name == "FrozenWastes" || bp.Name == "IceCaves" {
+				drawTundraGradient(screen, bp.Polygons, g.camX, g.camY, g.zoom)
+				drawTundraLines(screen, bp.Polygons, g.camX, g.camY, g.zoom, tundraPattern)
+			}
+			drawBiomeOutline(screen, bp.Polygons, g.camX, g.camY, g.zoom)
 		}
 
 		for _, gy := range g.geysers {
