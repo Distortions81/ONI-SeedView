@@ -23,7 +23,8 @@ Oni View is a small utility for inspecting **Oxygen Not Included** seed data. It
    ./scripts/download_assets.sh
    ```
 
-   After the script completes the PNG images will be placed in the `assets/` directory.
+   The script converts any `.webp` icons to `.png` using `dwebp`. After it completes the
+   PNG files will be placed in the `assets/` directory. Install the `webp` package if needed.
 
 3. **Build and run** – Execute the program with a seed coordinate. The window defaults to 1280×720 but can be resized.
 
