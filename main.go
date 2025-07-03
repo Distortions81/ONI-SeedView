@@ -467,6 +467,35 @@ func drawTextWithBGBorder(dst *ebiten.Image, text string, x, y int, border color
 	ebitenutil.DebugPrintAt(dst, text, x, y)
 }
 
+// uniqueColor generates a visually distinct color for the given index.
+func uniqueColor(index int) color.RGBA {
+	h := float64((index * 137) % 360)
+	s := 0.6
+	l := 0.5
+	c := (1 - math.Abs(2*l-1)) * s
+	x := c * (1 - math.Abs(math.Mod(h/60.0, 2)-1))
+	m := l - c/2
+	var r1, g1, b1 float64
+	switch {
+	case h < 60:
+		r1, g1, b1 = c, x, 0
+	case h < 120:
+		r1, g1, b1 = x, c, 0
+	case h < 180:
+		r1, g1, b1 = 0, c, x
+	case h < 240:
+		r1, g1, b1 = 0, x, c
+	case h < 300:
+		r1, g1, b1 = x, 0, c
+	default:
+		r1, g1, b1 = c, 0, x
+	}
+	r := uint8(math.Round((r1 + m) * 255))
+	g := uint8(math.Round((g1 + m) * 255))
+	b := uint8(math.Round((b1 + m) * 255))
+	return color.RGBA{r, g, b, 255}
+}
+
 func drawPolygon(dst *ebiten.Image, pts []Point, clr color.Color, camX, camY, zoom float64) {
 	if len(pts) == 0 {
 		return
@@ -557,12 +586,14 @@ func buildLegendImage(biomes []BiomePath) *ebiten.Image {
 	}
 
 	width := 30 + maxLen*6 + 5
-	height := LegendRowSpacing*len(names) + 7
+	height := LegendRowSpacing*(len(names)+1) + 7
 
 	img := ebiten.NewImage(width, height)
 	img.Fill(color.RGBA{0, 0, 0, 77})
 
 	y := 10
+	drawTextWithBG(img, "Biomes", 5, y)
+	y += LegendRowSpacing
 	for _, name := range names {
 		clr, ok := biomeColors[name]
 		if !ok {
@@ -590,7 +621,7 @@ func (g *Game) initObjectLegend() {
 		if _, ok := g.legendMap["g"+name]; !ok {
 			g.legendMap["g"+name] = counter
 			g.legendEntries = append(g.legendEntries, fmt.Sprintf("%d: %s", counter, name))
-			g.legendColors = append(g.legendColors, color.RGBA{255, 165, 0, 255})
+			g.legendColors = append(g.legendColors, uniqueColor(counter))
 			counter++
 		}
 	}
@@ -599,7 +630,7 @@ func (g *Game) initObjectLegend() {
 		if _, ok := g.legendMap["p"+name]; !ok {
 			g.legendMap["p"+name] = counter
 			g.legendEntries = append(g.legendEntries, fmt.Sprintf("%d: %s", counter, name))
-			g.legendColors = append(g.legendColors, color.RGBA{0, 170, 255, 255})
+			g.legendColors = append(g.legendColors, uniqueColor(counter))
 			counter++
 		}
 	}
@@ -619,10 +650,12 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 			}
 		}
 		width := maxLen*6 + 10
-		height := LegendRowSpacing*len(g.legendEntries) + 7
+		height := LegendRowSpacing*(len(g.legendEntries)+1) + 7
 		img := ebiten.NewImage(width, height)
 		img.Fill(color.RGBA{0, 0, 0, 77})
 		y := 10
+		drawTextWithBG(img, "Items", 5, y)
+		y += LegendRowSpacing
 		for i, e := range g.legendEntries {
 			clr := color.RGBA{}
 			if i < len(g.legendColors) {
@@ -670,6 +703,7 @@ type label struct {
 	text string
 	x    int
 	y    int
+	clr  color.RGBA
 }
 
 func (g *Game) Update() error {
@@ -778,31 +812,39 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					screen.DrawImage(img, op)
 					var formatted string
 					var width int
+					clr := color.RGBA{}
 					if useNumbers {
 						name := displayGeyser(gy.ID)
 						num := g.legendMap["g"+name]
 						formatted = strconv.Itoa(num)
 						width = len(formatted)
+						if num-1 < len(g.legendColors) {
+							clr = g.legendColors[num-1]
+						}
 					} else {
 						d := displayGeyser(gy.ID)
 						formatted, width = formatLabel(d)
 					}
-					labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2})
+					labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, clr})
 				}
 			} else {
 				vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, color.RGBA{255, 0, 0, 255}, false)
 				var formatted string
 				var width int
+				clr := color.RGBA{}
 				if useNumbers {
 					name := displayGeyser(gy.ID)
 					num := g.legendMap["g"+name]
 					formatted = strconv.Itoa(num)
 					width = len(formatted)
+					if num-1 < len(g.legendColors) {
+						clr = g.legendColors[num-1]
+					}
 				} else {
 					d := displayGeyser(gy.ID)
 					formatted, width = formatLabel(d)
 				}
-				labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4})
+				labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, clr})
 			}
 		}
 
@@ -824,25 +866,34 @@ func (g *Game) Draw(screen *ebiten.Image) {
 						num := g.legendMap["p"+name]
 						formatted = strconv.Itoa(num)
 						width = len(formatted)
+						clr := color.RGBA{}
+						if num-1 < len(g.legendColors) {
+							clr = g.legendColors[num-1]
+						}
+						labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, clr})
 					} else {
 						d := displayPOI(poi.ID)
 						formatted, width = formatLabel(d)
+						labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, color.RGBA{}})
 					}
-					labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2})
 				}
 			} else {
 				var formatted string
 				var width int
+				clr := color.RGBA{}
 				if useNumbers {
 					name := displayPOI(poi.ID)
 					num := g.legendMap["p"+name]
 					formatted = strconv.Itoa(num)
 					width = len(formatted)
+					if num-1 < len(g.legendColors) {
+						clr = g.legendColors[num-1]
+					}
 				} else {
 					d := displayPOI(poi.ID)
 					formatted, width = formatLabel(d)
 				}
-				labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4})
+				labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, clr})
 			}
 		}
 
@@ -851,7 +902,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 		screen.DrawImage(g.legend, nil)
 		for _, l := range labels {
-			drawTextWithBG(screen, l.text, l.x, l.y)
+			if l.clr.A != 0 {
+				drawTextWithBGBorder(screen, l.text, l.x, l.y, l.clr)
+			} else {
+				drawTextWithBG(screen, l.text, l.x, l.y)
+			}
 		}
 		if useNumbers {
 			g.drawNumberLegend(screen)
