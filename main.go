@@ -1043,23 +1043,24 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				clr = color.RGBA{60, 60, 60, 255}
 			}
 			drawBiome(screen, bp.Polygons, clr, g.camX, g.camY, g.zoom)
-			switch bp.Name {
-			case "FrozenWastes", "IceCaves":
-				drawTundraGradient(screen, bp.Polygons, g.camX, g.camY, g.zoom)
-				drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, tundraPattern)
-			case "MagmaCore":
-				drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, magmaPattern)
-			case "Ocean":
-				drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, oceanPattern)
-			case "Sandstone":
-				drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, sandPattern)
-			case "ToxicJungle":
-				drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, toxicPattern)
-			case "OilField":
-				drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, oilPattern)
-			case "BoggyMarsh":
-				drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, marshPattern)
-			}
+			/*
+				switch bp.Name {
+				case "FrozenWastes", "IceCaves":
+					drawTundraGradient(screen, bp.Polygons, g.camX, g.camY, g.zoom)
+					drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, tundraPattern)
+				case "MagmaCore":
+					drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, magmaPattern)
+				case "Ocean":
+					drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, oceanPattern)
+				case "Sandstone":
+					drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, sandPattern)
+				case "ToxicJungle":
+					drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, toxicPattern)
+				case "OilField":
+					drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, oilPattern)
+				case "BoggyMarsh":
+					drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, marshPattern)
+				} */
 			drawBiomeOutline(screen, bp.Polygons, g.camX, g.camY, g.zoom)
 		}
 
