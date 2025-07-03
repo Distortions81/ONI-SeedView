@@ -1,3 +1,4 @@
 # downloaded assets
 assets/*
 !assets/.gitkeep
+dist/
