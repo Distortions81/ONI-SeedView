@@ -1072,6 +1072,11 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	if g.needsRedraw {
 		screen.Fill(color.RGBA{30, 30, 30, 255})
+		if clr, ok := biomeColors["Space"]; ok {
+			vector.DrawFilledRect(screen, float32(g.camX), float32(g.camY),
+				float32(float64(g.astWidth)*2*g.zoom),
+				float32(float64(g.astHeight)*2*g.zoom), clr, false)
+		}
 		labels := []label{}
 		useNumbers := g.zoom < LegendZoomThreshold
 		if useNumbers && g.legendMap == nil {
