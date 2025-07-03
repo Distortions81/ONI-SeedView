@@ -398,6 +398,32 @@ func displayPOI(id string) string {
 	return id
 }
 
+// formatLabel splits long names so they wrap every two words. It returns the
+// formatted text and the length of the longest line for centering purposes.
+func formatLabel(name string) (string, int) {
+	words := strings.Fields(name)
+	if len(words) <= 2 {
+		return name, len(name)
+	}
+	var lines []string
+	for i := 0; i < len(words); i += 2 {
+		end := i + 2
+		if end > len(words) {
+			end = len(words)
+		}
+		line := strings.Join(words[i:end], " ")
+		lines = append(lines, line)
+	}
+	formatted := strings.Join(lines, "\n")
+	width := 0
+	for _, l := range lines {
+		if len(l) > width {
+			width = len(l)
+		}
+	}
+	return formatted, width
+}
+
 var whitePixel = func() *ebiten.Image {
 	img := ebiten.NewImage(1, 1)
 	img.Fill(color.White)
@@ -619,12 +645,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					op.GeoM.Translate(x-w/2, y-h/2)
 					screen.DrawImage(img, op)
 					d := displayGeyser(gy.ID)
-					labels = append(labels, label{d, int(x) - (len(d)*6)/2, int(y+h/2) + 2})
+					formatted, width := formatLabel(d)
+					labels = append(labels, label{formatted, int(x) - (width*6)/2, int(y+h/2) + 2})
 				}
 			} else {
 				vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, color.RGBA{255, 0, 0, 255}, false)
 				d := displayGeyser(gy.ID)
-				labels = append(labels, label{d, int(x) - (len(d)*6)/2, int(y) + 4})
+				formatted, width := formatLabel(d)
+				labels = append(labels, label{formatted, int(x) - (width*6)/2, int(y) + 4})
 			}
 		}
 
@@ -640,11 +668,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					op.GeoM.Translate(x-w/2, y-h/2)
 					screen.DrawImage(img, op)
 					d := displayPOI(poi.ID)
-					labels = append(labels, label{d, int(x) - (len(d)*6)/2, int(y+h/2) + 2})
+					formatted, width := formatLabel(d)
+					labels = append(labels, label{formatted, int(x) - (width*6)/2, int(y+h/2) + 2})
 				}
 			} else {
 				d := displayPOI(poi.ID)
-				labels = append(labels, label{d, int(x) - (len(d)*6)/2, int(y) + 4})
+				formatted, width := formatLabel(d)
+				labels = append(labels, label{formatted, int(x) - (width*6)/2, int(y) + 4})
 			}
 		}
 
