@@ -445,7 +445,25 @@ func drawTextWithBG(dst *ebiten.Image, text string, x, y int) {
 		}
 	}
 	height := len(lines) * 10
-	vector.DrawFilledRect(dst, float32(x-1), float32(y-1), float32(width*LabelCharWidth+2), float32(height+2), color.RGBA{0, 0, 0, 77}, false)
+	vector.DrawFilledRect(dst, float32(x-2), float32(y-2), float32(width*6+4), float32(height+4), color.RGBA{0, 0, 0, 128}, false)
+	ebitenutil.DebugPrintAt(dst, text, x, y)
+}
+
+func drawTextWithBGBorder(dst *ebiten.Image, text string, x, y int, border color.Color) {
+	lines := strings.Split(text, "\n")
+	width := 0
+	for _, l := range lines {
+		if len(l) > width {
+			width = len(l)
+		}
+	}
+	height := len(lines) * 10
+	bx := x - 2
+	by := y - 2
+	bw := width*6 + 4
+	bh := height + 4
+	vector.DrawFilledRect(dst, float32(bx-1), float32(by-1), float32(bw+2), float32(bh+2), border, false)
+	vector.DrawFilledRect(dst, float32(bx), float32(by), float32(bw), float32(bh), color.RGBA{0, 0, 0, 128}, false)
 	ebitenutil.DebugPrintAt(dst, text, x, y)
 }
 
@@ -550,8 +568,8 @@ func buildLegendImage(biomes []BiomePath) *ebiten.Image {
 		if !ok {
 			clr = color.RGBA{60, 60, 60, 255}
 		}
-		vector.DrawFilledRect(img, 5, float32(y), 20, 10, clr, false)
-		ebitenutil.DebugPrintAt(img, displayBiome(name), 30, y)
+		vector.DrawFilledRect(dst, 5, float32(y), 20, 10, clr, false)
+		drawTextWithBGBorder(dst, displayBiome(name), 30, y, clr)
 		y += 15
 	}
 
