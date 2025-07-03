@@ -952,6 +952,23 @@ type label struct {
 	clr  color.RGBA
 }
 
+func (g *Game) clampCamera() {
+	w := float64(g.astWidth) * 2 * g.zoom
+	h := float64(g.astHeight) * 2 * g.zoom
+	if g.camX < -w+1 {
+		g.camX = -w + 1
+	}
+	if g.camX > float64(g.width)-1 {
+		g.camX = float64(g.width) - 1
+	}
+	if g.camY < -h+1 {
+		g.camY = -h + 1
+	}
+	if g.camY > float64(g.height)-1 {
+		g.camY = float64(g.height) - 1
+	}
+}
+
 func (g *Game) Update() error {
 	const panSpeed = PanSpeed
 
@@ -1016,6 +1033,8 @@ func (g *Game) Update() error {
 		g.camX = cx - worldX*g.zoom
 		g.camY = cy - worldY*g.zoom
 	}
+
+	g.clampCamera()
 
 	if g.camX != oldX || g.camY != oldY || g.zoom != oldZoom {
 		g.needsRedraw = true
@@ -1210,6 +1229,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 		cxNew, cyNew := float64(g.width)/2, float64(g.height)/2
 		g.camX = cxNew - worldX*g.zoom
 		g.camY = cyNew - worldY*g.zoom
+		g.clampCamera()
 
 		g.needsRedraw = true
 	}
@@ -1261,6 +1281,7 @@ func main() {
 	}
 	game.camX = (float64(game.width) - float64(game.astWidth)*2*game.zoom) / 2
 	game.camY = (float64(game.height) - float64(game.astHeight)*2*game.zoom) / 2
+	game.clampCamera()
 	game.needsRedraw = true
 	ebiten.SetWindowSize(game.width, game.height)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
