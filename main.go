@@ -470,10 +470,6 @@ type Game struct {
 	dragging    bool
 	lastX       int
 	lastY       int
-	frame       *ebiten.Image
-	prevCamX    float64
-	prevCamY    float64
-	prevZoom    float64
 	needsRedraw bool
 }
 
@@ -556,13 +552,8 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	if g.frame == nil {
-		g.frame = ebiten.NewImage(g.width, g.height)
-		g.needsRedraw = true
-	}
-
 	if g.needsRedraw {
-		g.frame.Fill(color.RGBA{30, 30, 30, 255})
+		screen.Fill(color.RGBA{30, 30, 30, 255})
 		labels := []label{}
 
 		for _, bp := range g.biomes {
@@ -570,7 +561,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if !ok {
 				clr = color.RGBA{60, 60, 60, 255}
 			}
-			drawBiome(g.frame, bp.Polygons, clr, g.camX, g.camY, g.zoom)
+			drawBiome(screen, bp.Polygons, clr, g.camX, g.camY, g.zoom)
 		}
 
 		for _, gy := range g.geysers {
@@ -583,11 +574,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					w := float64(img.Bounds().Dx()) * g.zoom * 0.25
 					h := float64(img.Bounds().Dy()) * g.zoom * 0.25
 					op.GeoM.Translate(x-w/2, y-h/2)
-					g.frame.DrawImage(img, op)
+					screen.DrawImage(img, op)
 					labels = append(labels, label{gy.ID, int(x) - (len(gy.ID)*6)/2, int(y+h/2) + 2})
 				}
 			} else {
-				vector.DrawFilledRect(g.frame, float32(x-2), float32(y-2), 4, 4, color.RGBA{255, 0, 0, 255}, false)
+				vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, color.RGBA{255, 0, 0, 255}, false)
 				labels = append(labels, label{gy.ID, int(x) - (len(gy.ID)*6)/2, int(y) + 4})
 			}
 		}
@@ -602,7 +593,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					w := float64(img.Bounds().Dx()) * g.zoom * 0.25
 					h := float64(img.Bounds().Dy()) * g.zoom * 0.25
 					op.GeoM.Translate(x-w/2, y-h/2)
-					g.frame.DrawImage(img, op)
+					screen.DrawImage(img, op)
 					labels = append(labels, label{poi.ID, int(x) - (len(poi.ID)*6)/2, int(y+h/2) + 2})
 				}
 			} else {
@@ -610,25 +601,19 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 		}
 
-		drawLegend(g.frame, g.biomes)
+		drawLegend(screen, g.biomes)
 		for _, l := range labels {
-			ebitenutil.DebugPrintAt(g.frame, l.text, l.x, l.y)
+			ebitenutil.DebugPrintAt(screen, l.text, l.x, l.y)
 		}
 
-		g.prevCamX = g.camX
-		g.prevCamY = g.camY
-		g.prevZoom = g.zoom
 		g.needsRedraw = false
 	}
-
-	screen.DrawImage(g.frame, nil)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	if g.width != outsideWidth || g.height != outsideHeight {
 		g.width = outsideWidth
 		g.height = outsideHeight
-		g.frame = ebiten.NewImage(g.width, g.height)
 		g.needsRedraw = true
 	}
 	return outsideWidth, outsideHeight
@@ -673,14 +658,12 @@ func main() {
 	}
 	game.camX = (float64(game.width) - float64(game.astWidth)*2*game.zoom) / 2
 	game.camY = (float64(game.height) - float64(game.astHeight)*2*game.zoom) / 2
-	game.frame = ebiten.NewImage(game.width, game.height)
 	game.needsRedraw = true
-	game.prevCamX = game.camX
-	game.prevCamY = game.camY
-	game.prevZoom = game.zoom
 	ebiten.SetWindowSize(game.width, game.height)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	ebiten.SetWindowTitle("Geysers - " + *coord)
+	ebiten.SetScreenClearedEveryFrame(false)
+	ebiten.SetVsyncEnabled(true)
 	if err := ebiten.RunGame(game); err != nil {
 		fmt.Println("Error running game:", err)
 	}
