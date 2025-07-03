@@ -14,10 +14,11 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"regexp"
-	"sort"
-	"strconv"
-	"strings"
+       "regexp"
+       "sort"
+       "strconv"
+       "strings"
+       "math"
 
 	"github.com/chai2010/webp"
 	"github.com/fxamacker/cbor/v2"
@@ -377,14 +378,16 @@ func drawPolygon(dst *ebiten.Image, pts []Point, clr color.Color, camX, camY, zo
 	p.Close()
 	vs, is := p.AppendVerticesAndIndicesForFilling(nil, nil)
 	r, g, b, a := clr.RGBA()
-	for i := range vs {
-		vs[i].DstX = vs[i].DstX*float32(zoom) + float32(camX)
-		vs[i].DstY = vs[i].DstY*float32(zoom) + float32(camY)
-		vs[i].SrcX = 0
-		vs[i].SrcY = 0
-		vs[i].ColorR = float32(r) / 0xffff
-		vs[i].ColorG = float32(g) / 0xffff
-		vs[i].ColorB = float32(b) / 0xffff
+       for i := range vs {
+               x := float64(vs[i].DstX)*zoom + camX
+               y := float64(vs[i].DstY)*zoom + camY
+               vs[i].DstX = float32(math.Round(x))
+               vs[i].DstY = float32(math.Round(y))
+               vs[i].SrcX = 0
+               vs[i].SrcY = 0
+               vs[i].ColorR = float32(r) / 0xffff
+               vs[i].ColorG = float32(g) / 0xffff
+               vs[i].ColorB = float32(b) / 0xffff
 		vs[i].ColorA = float32(a) / 0xffff
 	}
 	op := &ebiten.DrawTrianglesOptions{
@@ -413,14 +416,16 @@ func drawBiome(dst *ebiten.Image, polys [][]Point, clr color.Color, camX, camY, 
 	}
 	vs, is := p.AppendVerticesAndIndicesForFilling(nil, nil)
 	r, g, b, a := clr.RGBA()
-	for i := range vs {
-		vs[i].DstX = vs[i].DstX*float32(zoom) + float32(camX)
-		vs[i].DstY = vs[i].DstY*float32(zoom) + float32(camY)
-		vs[i].SrcX = 0
-		vs[i].SrcY = 0
-		vs[i].ColorR = float32(r) / 0xffff
-		vs[i].ColorG = float32(g) / 0xffff
-		vs[i].ColorB = float32(b) / 0xffff
+       for i := range vs {
+               x := float64(vs[i].DstX)*zoom + camX
+               y := float64(vs[i].DstY)*zoom + camY
+               vs[i].DstX = float32(math.Round(x))
+               vs[i].DstY = float32(math.Round(y))
+               vs[i].SrcX = 0
+               vs[i].SrcY = 0
+               vs[i].ColorR = float32(r) / 0xffff
+               vs[i].ColorG = float32(g) / 0xffff
+               vs[i].ColorB = float32(b) / 0xffff
 		vs[i].ColorA = float32(a) / 0xffff
 	}
 	op := &ebiten.DrawTrianglesOptions{
