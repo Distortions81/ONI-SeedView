@@ -118,6 +118,40 @@ type SeedData struct {
 	Asteroids []Asteroid `json:"asteroids"`
 }
 
+func colorFromARGB(hex uint32) color.RGBA {
+	return color.RGBA{
+		R: uint8(hex >> 16),
+		G: uint8(hex >> 8),
+		B: uint8(hex),
+		A: uint8(hex >> 24),
+	}
+}
+
+var biomeColors = map[string]color.RGBA{
+	"Sandstone":           colorFromARGB(0xFFF2BB47),
+	"Barren":              colorFromARGB(0xFF97752C),
+	"Space":               colorFromARGB(0xFF242424),
+	"FrozenWastes":        colorFromARGB(0xFF9DC9D6),
+	"BoggyMarsh":          colorFromARGB(0xFF7B974B),
+	"ToxicJungle":         colorFromARGB(0xFFCB95A3),
+	"Ocean":               colorFromARGB(0xFF4C4CFF),
+	"Rust":                colorFromARGB(0xFFFFA007),
+	"Forest":              colorFromARGB(0xFF8EC039),
+	"Radioactive":         colorFromARGB(0xFF4AE458),
+	"Swamp":               colorFromARGB(0xFFEB9B3F),
+	"Wasteland":           colorFromARGB(0xFFCC3636),
+	"Metallic":            colorFromARGB(0xFFFFA007),
+	"Moo":                 colorFromARGB(0xFF8EC039),
+	"IceCaves":            colorFromARGB(0xFFABCFEA),
+	"CarrotQuarry":        colorFromARGB(0xFFCDA2C7),
+	"SugarWoods":          colorFromARGB(0xFFA2CDA4),
+	"PrehistoricGarden":   colorFromARGB(0xFF006127),
+	"PrehistoricRaptor":   colorFromARGB(0xFF352F8C),
+	"PrehistoricWetlands": colorFromARGB(0xFF645906),
+	"OilField":            colorFromARGB(0xFF52321D),
+	"MagmaCore":           colorFromARGB(0xFFDE5A3B),
+}
+
 // decodeSeed parses the CBOR seed data into SeedData.
 func decodeSeed(cborData []byte) (*SeedData, error) {
 	jsonData, err := decodeCBORToJSON(cborData)
@@ -425,8 +459,12 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{30, 30, 30, 255})
 	for _, bp := range g.biomes {
+		clr, ok := biomeColors[bp.Name]
+		if !ok {
+			clr = color.RGBA{60, 60, 60, 255}
+		}
 		for _, poly := range bp.Polygons {
-			drawPolygon(screen, poly, color.RGBA{60, 60, 60, 255}, g.camX, g.camY, g.zoom)
+			drawPolygon(screen, poly, clr, g.camX, g.camY, g.zoom)
 		}
 	}
 	for _, gy := range g.geysers {
