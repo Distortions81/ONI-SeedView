@@ -12,14 +12,14 @@ import (
 	"image/jpeg"
 	"image/png"
 	"io"
+	"math"
 	"net/http"
 	"os"
 	"path/filepath"
-       "regexp"
-       "sort"
-       "strconv"
-       "strings"
-       "math"
+	"regexp"
+	"sort"
+	"strconv"
+	"strings"
 
 	"github.com/chai2010/webp"
 	"github.com/fxamacker/cbor/v2"
@@ -416,16 +416,16 @@ func drawPolygon(dst *ebiten.Image, pts []Point, clr color.Color, camX, camY, zo
 	p.Close()
 	vs, is := p.AppendVerticesAndIndicesForFilling(nil, nil)
 	r, g, b, a := clr.RGBA()
-       for i := range vs {
-               x := float64(vs[i].DstX)*zoom + camX
-               y := float64(vs[i].DstY)*zoom + camY
-               vs[i].DstX = float32(math.Round(x))
-               vs[i].DstY = float32(math.Round(y))
-               vs[i].SrcX = 0
-               vs[i].SrcY = 0
-               vs[i].ColorR = float32(r) / 0xffff
-               vs[i].ColorG = float32(g) / 0xffff
-               vs[i].ColorB = float32(b) / 0xffff
+	for i := range vs {
+		x := float64(vs[i].DstX)*zoom + camX
+		y := float64(vs[i].DstY)*zoom + camY
+		vs[i].DstX = float32(math.Round(x))
+		vs[i].DstY = float32(math.Round(y))
+		vs[i].SrcX = 0
+		vs[i].SrcY = 0
+		vs[i].ColorR = float32(r) / 0xffff
+		vs[i].ColorG = float32(g) / 0xffff
+		vs[i].ColorB = float32(b) / 0xffff
 		vs[i].ColorA = float32(a) / 0xffff
 	}
 	op := &ebiten.DrawTrianglesOptions{
@@ -454,16 +454,16 @@ func drawBiome(dst *ebiten.Image, polys [][]Point, clr color.Color, camX, camY, 
 	}
 	vs, is := p.AppendVerticesAndIndicesForFilling(nil, nil)
 	r, g, b, a := clr.RGBA()
-       for i := range vs {
-               x := float64(vs[i].DstX)*zoom + camX
-               y := float64(vs[i].DstY)*zoom + camY
-               vs[i].DstX = float32(math.Round(x))
-               vs[i].DstY = float32(math.Round(y))
-               vs[i].SrcX = 0
-               vs[i].SrcY = 0
-               vs[i].ColorR = float32(r) / 0xffff
-               vs[i].ColorG = float32(g) / 0xffff
-               vs[i].ColorB = float32(b) / 0xffff
+	for i := range vs {
+		x := float64(vs[i].DstX)*zoom + camX
+		y := float64(vs[i].DstY)*zoom + camY
+		vs[i].DstX = float32(math.Round(x))
+		vs[i].DstY = float32(math.Round(y))
+		vs[i].SrcX = 0
+		vs[i].SrcY = 0
+		vs[i].ColorR = float32(r) / 0xffff
+		vs[i].ColorG = float32(g) / 0xffff
+		vs[i].ColorB = float32(b) / 0xffff
 		vs[i].ColorA = float32(a) / 0xffff
 	}
 	op := &ebiten.DrawTrianglesOptions{
@@ -608,8 +608,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 
 		for _, gy := range g.geysers {
-			x := (float64(gy.X) * 2 * g.zoom) + g.camX
-			y := (float64(gy.Y) * 2 * g.zoom) + g.camY
+			x := math.Round((float64(gy.X) * 2 * g.zoom) + g.camX)
+			y := math.Round((float64(gy.Y) * 2 * g.zoom) + g.camY)
 			if iconName := iconForGeyser(gy.ID); iconName != "" {
 				if img, err := loadImage(g.icons, iconName); err == nil {
 					op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
@@ -629,8 +629,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 
 		for _, poi := range g.pois {
-			x := (float64(poi.X) * 2 * g.zoom) + g.camX
-			y := (float64(poi.Y) * 2 * g.zoom) + g.camY
+			x := math.Round((float64(poi.X) * 2 * g.zoom) + g.camX)
+			y := math.Round((float64(poi.Y) * 2 * g.zoom) + g.camY)
 			if iconName := iconForPOI(poi.ID); iconName != "" {
 				if img, err := loadImage(g.icons, iconName); err == nil {
 					op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
