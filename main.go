@@ -4,11 +4,17 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"image"
 	"image/color"
+	"image/jpeg"
+	"image/png"
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 
+	"github.com/chai2010/webp"
 	"github.com/fxamacker/cbor/v2"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -82,10 +88,17 @@ type Geyser struct {
 	Y  int    `json:"y"`
 }
 
+type PointOfInterest struct {
+	ID string `json:"id"`
+	X  int    `json:"x"`
+	Y  int    `json:"y"`
+}
+
 type Asteroid struct {
-	SizeX   int      `json:"sizeX"`
-	SizeY   int      `json:"sizeY"`
-	Geysers []Geyser `json:"geysers"`
+	SizeX   int               `json:"sizeX"`
+	SizeY   int               `json:"sizeY"`
+	Geysers []Geyser          `json:"geysers"`
+	POIs    []PointOfInterest `json:"pointsOfInterest"`
 }
 
 type SeedData struct {
@@ -105,9 +118,144 @@ func decodeSeed(cborData []byte) (*SeedData, error) {
 	return &seed, nil
 }
 
+// loadImage loads an image from the assets directory and caches it.
+func loadImage(cache map[string]*ebiten.Image, name string) (*ebiten.Image, error) {
+	if img, ok := cache[name]; ok {
+		return img, nil
+	}
+	path := filepath.Join("assets", name)
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	var src image.Image
+	ext := strings.ToLower(filepath.Ext(name))
+	switch ext {
+	case ".png":
+		src, err = png.Decode(f)
+	case ".jpg", ".jpeg":
+		src, err = jpeg.Decode(f)
+	case ".webp":
+		src, err = webp.Decode(f)
+	default:
+		return nil, fmt.Errorf("unsupported image format: %s", ext)
+	}
+	if err != nil {
+		return nil, err
+	}
+	img := ebiten.NewImageFromImage(src)
+	cache[name] = img
+	return img, nil
+}
+
+func iconForGeyser(id string) string {
+	switch id {
+	case "steam":
+		return "geyser_cool_steam_vent.webp"
+	case "hot_steam":
+		return "geyser_steam_vent.webp"
+	case "hot_water":
+		return "geyser_water.webp"
+	case "slush_water":
+		return "geyser_cool_slush_geyser.webp"
+	case "filthy_water":
+		return "geyser_polluted_water_vent.webp"
+	case "slush_salt_water":
+		return "geyser_cool_salt_slush_geyser.webp"
+	case "salt_water":
+		return "geyser_salt_water.webp"
+	case "small_volcano":
+		return "geyser_minor_volcano.webp"
+	case "big_volcano":
+		return "geyser_volcano.webp"
+	case "liquid_co2":
+		return "geyser_carbon_dioxide.webp"
+	case "hot_co2":
+		return "geyser_carbon_dioxide_vent.webp"
+	case "hot_hydrogen":
+		return "geyser_hydrogen_vent.webp"
+	case "hot_po2":
+		return "geyser_hot_polluted_oxygen_vent.webp"
+	case "slimy_po2":
+		return "geyser_infectious_polluted_oxygen_vent.webp"
+	case "chlorine_gas", "chlorine_gas_cool":
+		return "geyser_chlorine_gas_vent.webp"
+	case "methane":
+		return "geyser_natural_gas_geyser.webp"
+	case "molten_copper":
+		return "geyser_copper_volcano.webp"
+	case "molten_iron":
+		return "geyser_iron_volcano.webp"
+	case "molten_gold":
+		return "geyser_gold_volcano.webp"
+	case "oil_drip":
+		return "geyser_leaky_oil_fissure.webp"
+	case "molten_aluminum":
+		return "geyser_aluminum_volcano.webp"
+	case "molten_cobalt":
+		return "geyser_cobalt_volcano.webp"
+	case "liquid_sulfur":
+		return "geyser_liquid_sulfur_geyser.webp"
+	case "molten_tungsten":
+		return "geyser_tungsten_volcano.webp"
+	case "molten_niobium":
+		return "geyser_niobium_volcano.webp"
+	case "OilWell":
+		return "geyser_oil_reservoir.webp"
+	default:
+		return ""
+	}
+}
+
+func iconForPOI(id string) string {
+	switch id {
+	case "Headquarters":
+		return "building_printing_pod.webp"
+	case "WarpConduitSender":
+		return "building_supply_teleporter_input.webp"
+	case "WarpConduitReceiver":
+		return "building_supply_teleporter_output.webp"
+	case "WarpPortal":
+		return "building_teleporter_transmitter.webp"
+	case "WarpReceiver":
+		return "building_teleporter_receiver.webp"
+	case "GeneShuffler":
+		return "building_neural_vacillator.webp"
+	case "MassiveHeatSink":
+		return "building_anti_entropy_thermo_nullifier.webp"
+	case "SapTree":
+		return "building_sap_tree.webp"
+	case "GravitasPedestal":
+		return "poi_artifact_outline.webp"
+	case "PropSurfaceSatellite1":
+		return "poi_crashed_satellite.webp"
+	case "PropSurfaceSatellite2":
+		return "poi_wrecked_satellite.webp"
+	case "PropSurfaceSatellite3":
+		return "poi_crushed_satellite.webp"
+	case "TemporalTearOpener":
+		return "building_temporal_tear_opener.webp"
+	case "CryoTank":
+		return "building_cryotank.webp"
+	case "PropFacilityStatue":
+		return "poi_prop_facility_statue.webp"
+	case "GeothermalVentEntity":
+		return "poi_geothermal_vent_entity.webp"
+	case "GeothermalControllerEntity":
+		return "poi_geothermal_controller_entity.webp"
+	case "POICeresTechUnlock":
+		return "poi_ceres_tech_unlock.webp"
+	default:
+		return ""
+	}
+}
+
 // Game implements ebiten.Game and displays geysers with their names.
 type Game struct {
 	geysers []Geyser
+	pois    []PointOfInterest
+	icons   map[string]*ebiten.Image
 	width   int
 	height  int
 }
@@ -117,10 +265,26 @@ func (g *Game) Update() error { return nil }
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{30, 30, 30, 255})
 	for _, gy := range g.geysers {
-		// Invert Y to place origin at bottom-left like the game world.
 		y := g.height - gy.Y
-		ebitenutil.DrawRect(screen, float64(gy.X-2), float64(y-2), 4, 4, color.RGBA{255, 0, 0, 255})
-		ebitenutil.DebugPrintAt(screen, gy.ID, gy.X+4, y-4)
+		if iconName := iconForGeyser(gy.ID); iconName != "" {
+			if img, err := loadImage(g.icons, iconName); err == nil {
+				op := &ebiten.DrawImageOptions{}
+				op.GeoM.Translate(float64(gy.X)-float64(img.Bounds().Dx())/2, float64(y)-float64(img.Bounds().Dy())/2)
+				screen.DrawImage(img, op)
+			}
+		} else {
+			ebitenutil.DrawRect(screen, float64(gy.X-2), float64(y-2), 4, 4, color.RGBA{255, 0, 0, 255})
+		}
+	}
+	for _, poi := range g.pois {
+		y := g.height - poi.Y
+		if iconName := iconForPOI(poi.ID); iconName != "" {
+			if img, err := loadImage(g.icons, iconName); err == nil {
+				op := &ebiten.DrawImageOptions{}
+				op.GeoM.Translate(float64(poi.X)-float64(img.Bounds().Dx())/2, float64(y)-float64(img.Bounds().Dy())/2)
+				screen.DrawImage(img, op)
+			}
+		}
 	}
 }
 
@@ -154,7 +318,13 @@ func main() {
 	}
 
 	ast := seed.Asteroids[0]
-	game := &Game{geysers: ast.Geysers, width: ast.SizeX, height: ast.SizeY}
+	game := &Game{
+		geysers: ast.Geysers,
+		pois:    ast.POIs,
+		icons:   make(map[string]*ebiten.Image),
+		width:   ast.SizeX,
+		height:  ast.SizeY,
+	}
 	ebiten.SetWindowSize(game.width*2, game.height*2)
 	ebiten.SetWindowTitle("Geysers - " + *coord)
 	if err := ebiten.RunGame(game); err != nil {
