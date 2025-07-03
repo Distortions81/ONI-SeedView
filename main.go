@@ -385,7 +385,11 @@ func drawPolygon(dst *ebiten.Image, pts []Point, clr color.Color, camX, camY, zo
 		vs[i].ColorB = float32(b) / 0xffff
 		vs[i].ColorA = float32(a) / 0xffff
 	}
-	op := &ebiten.DrawTrianglesOptions{AntiAlias: true, ColorScaleMode: ebiten.ColorScaleModePremultipliedAlpha}
+	op := &ebiten.DrawTrianglesOptions{
+		AntiAlias:      true,
+		ColorScaleMode: ebiten.ColorScaleModePremultipliedAlpha,
+		FillRule:       ebiten.FillRuleEvenOdd,
+	}
 	dst.DrawTriangles(vs, is, whitePixel, op)
 }
 
@@ -417,7 +421,11 @@ func drawBiome(dst *ebiten.Image, polys [][]Point, clr color.Color, camX, camY, 
 		vs[i].ColorB = float32(b) / 0xffff
 		vs[i].ColorA = float32(a) / 0xffff
 	}
-	op := &ebiten.DrawTrianglesOptions{AntiAlias: true, ColorScaleMode: ebiten.ColorScaleModePremultipliedAlpha}
+	op := &ebiten.DrawTrianglesOptions{
+		AntiAlias:      true,
+		ColorScaleMode: ebiten.ColorScaleModePremultipliedAlpha,
+		FillRule:       ebiten.FillRuleEvenOdd,
+	}
 	dst.DrawTriangles(vs, is, whitePixel, op)
 }
 
