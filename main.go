@@ -539,8 +539,8 @@ func drawPolygon(dst *ebiten.Image, pts []Point, clr color.Color, camX, camY, zo
 	for i := range vs {
 		x := float64(vs[i].DstX)*zoom + camX
 		y := float64(vs[i].DstY)*zoom + camY
-		vs[i].DstX = float32(math.Round(x))
-		vs[i].DstY = float32(math.Round(y))
+		vs[i].DstX = float32(x)
+		vs[i].DstY = float32(y)
 		vs[i].SrcX = 0
 		vs[i].SrcY = 0
 		vs[i].ColorR = float32(r) / 0xffff
@@ -550,7 +550,7 @@ func drawPolygon(dst *ebiten.Image, pts []Point, clr color.Color, camX, camY, zo
 	}
 	op := &ebiten.DrawTrianglesOptions{
 		AntiAlias:      true,
-		ColorScaleMode: ebiten.ColorScaleModeStraightAlpha,
+		ColorScaleMode: ebiten.ColorScaleModePremultipliedAlpha,
 		FillRule:       ebiten.FillRuleEvenOdd,
 	}
 	dst.DrawTriangles(vs, is, whitePixel, op)
@@ -577,8 +577,8 @@ func drawBiome(dst *ebiten.Image, polys [][]Point, clr color.Color, camX, camY, 
 	for i := range vs {
 		x := float64(vs[i].DstX)*zoom + camX
 		y := float64(vs[i].DstY)*zoom + camY
-		vs[i].DstX = float32(math.Round(x))
-		vs[i].DstY = float32(math.Round(y))
+		vs[i].DstX = float32(x)
+		vs[i].DstY = float32(y)
 		vs[i].SrcX = 0
 		vs[i].SrcY = 0
 		vs[i].ColorR = float32(r) / 0xffff
@@ -588,7 +588,7 @@ func drawBiome(dst *ebiten.Image, polys [][]Point, clr color.Color, camX, camY, 
 	}
 	op := &ebiten.DrawTrianglesOptions{
 		AntiAlias:      true,
-		ColorScaleMode: ebiten.ColorScaleModeStraightAlpha,
+		ColorScaleMode: ebiten.ColorScaleModePremultipliedAlpha,
 		FillRule:       ebiten.FillRuleEvenOdd,
 	}
 	dst.DrawTriangles(vs, is, whitePixel, op)
