@@ -578,7 +578,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			y := (float64(gy.Y) * 2 * g.zoom) + g.camY
 			if iconName := iconForGeyser(gy.ID); iconName != "" {
 				if img, err := loadImage(g.icons, iconName); err == nil {
-					op := &ebiten.DrawImageOptions{}
+					op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
 					op.GeoM.Scale(g.zoom*0.25, g.zoom*0.25)
 					w := float64(img.Bounds().Dx()) * g.zoom * 0.25
 					h := float64(img.Bounds().Dy()) * g.zoom * 0.25
@@ -597,7 +597,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			y := (float64(poi.Y) * 2 * g.zoom) + g.camY
 			if iconName := iconForPOI(poi.ID); iconName != "" {
 				if img, err := loadImage(g.icons, iconName); err == nil {
-					op := &ebiten.DrawImageOptions{}
+					op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
 					op.GeoM.Scale(g.zoom*0.25, g.zoom*0.25)
 					w := float64(img.Bounds().Dx()) * g.zoom * 0.25
 					h := float64(img.Bounds().Dy()) * g.zoom * 0.25
