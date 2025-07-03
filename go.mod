@@ -3,7 +3,6 @@ module oni-view
 go 1.24.3
 
 require (
-	github.com/chai2010/webp v1.4.0
 	github.com/fxamacker/cbor/v2 v2.8.0
 	github.com/hajimehoshi/ebiten/v2 v2.8.8
 )
