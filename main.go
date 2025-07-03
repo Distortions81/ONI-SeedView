@@ -444,7 +444,7 @@ func drawTextWithBG(dst *ebiten.Image, text string, x, y int) {
 			width = len(l)
 		}
 	}
-	height := len(lines) * 10
+	height := len(lines) * 16
 	vector.DrawFilledRect(dst, float32(x-2), float32(y-2), float32(width*6+4), float32(height+4), color.RGBA{0, 0, 0, 128}, false)
 	ebitenutil.DebugPrintAt(dst, text, x, y)
 }
@@ -457,7 +457,7 @@ func drawTextWithBGBorder(dst *ebiten.Image, text string, x, y int, border color
 			width = len(l)
 		}
 	}
-	height := len(lines) * 10
+	height := len(lines) * 16
 	bx := x - 2
 	by := y - 2
 	bw := width*6 + 4
@@ -470,8 +470,19 @@ func drawTextWithBGBorder(dst *ebiten.Image, text string, x, y int, border color
 // uniqueColor generates a visually distinct color for the given index.
 func uniqueColor(index int) color.RGBA {
 	h := float64((index * 137) % 360)
-	s := 0.6
-	l := 0.5
+	// Vary saturation and lightness based on the index to expand the palette
+	s := 0.5 + 0.4*math.Sin(float64(index)*0.6)
+	l := 0.45 + 0.3*math.Cos(float64(index)*0.4)
+	if s < 0.3 {
+		s = 0.3
+	} else if s > 0.9 {
+		s = 0.9
+	}
+	if l < 0.3 {
+		l = 0.3
+	} else if l > 0.8 {
+		l = 0.8
+	}
 	c := (1 - math.Abs(2*l-1)) * s
 	x := c * (1 - math.Abs(math.Mod(h/60.0, 2)-1))
 	m := l - c/2
