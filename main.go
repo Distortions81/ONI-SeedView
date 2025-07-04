@@ -1082,6 +1082,11 @@ func main() {
 	out := flag.String("out", "", "optional path to save JSON")
 	screenshot := flag.String("screenshot", "", "path to save a PNG screenshot and exit")
 	flag.Parse()
+	if runtime.GOARCH == "wasm" {
+		if c := coordFromURL(); c != "" {
+			*coord = c
+		}
+	}
 
 	game := &Game{
 		icons:   make(map[string]*ebiten.Image),
