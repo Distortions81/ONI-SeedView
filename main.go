@@ -25,6 +25,7 @@ import (
 	"time"
 
 	_ "embed"
+
 	"github.com/fxamacker/cbor/v2"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -1289,8 +1290,9 @@ iconsLoop:
 		g.camY = cy - worldY*g.zoom
 	}
 
+	mx, my := 0, 0
 	if !g.mobile {
-		mx, my := ebiten.CursorPosition()
+		mx, my = ebiten.CursorPosition()
 		if g.showHelp {
 			if !g.helpRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 				g.showHelp = false
@@ -1493,6 +1495,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				ty := hr.Min.Y - 70
 				drawTextWithBG(screen, helpMessage, tx, ty)
 			}
+		}
 		if g.showInfo {
 			tx := g.infoX + 10
 			ty := g.infoY - 20
