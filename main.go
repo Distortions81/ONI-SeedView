@@ -3,7 +3,6 @@
 package main
 
 import (
-	"embed"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -16,6 +15,7 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -126,9 +126,6 @@ type SeedData struct {
 	Asteroids []Asteroid `json:"asteroids"`
 }
 
-//go:embed assets/* names.json
-var embeddedFiles embed.FS
-
 type nameTables struct {
 	Biomes  map[string]string `json:"biomes"`
 	Geysers map[string]string `json:"geysers"`
@@ -137,8 +134,36 @@ type nameTables struct {
 
 var names nameTables
 
+func openFile(name string) (io.ReadCloser, error) {
+	if runtime.GOOS == "js" {
+		resp, err := http.Get(name)
+		if err != nil {
+			return nil, err
+		}
+		if resp.StatusCode != http.StatusOK {
+			b, _ := io.ReadAll(resp.Body)
+			resp.Body.Close()
+			return nil, fmt.Errorf("failed to fetch %s: %s", name, b)
+		}
+		return resp.Body, nil
+	}
+	return os.Open(name)
+}
+
+func openAsset(name string) (io.ReadCloser, error) {
+	if runtime.GOOS == "js" {
+		return openFile(path.Join(WebAssetBase, name))
+	}
+	return openFile(filepath.Join("assets", name))
+}
+
 func init() {
-	if b, err := embeddedFiles.ReadFile("names.json"); err == nil {
+	f, err := openFile("names.json")
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	if b, err := io.ReadAll(f); err == nil {
 		_ = json.Unmarshal(b, &names)
 	}
 }
@@ -271,7 +296,7 @@ func toCamel(s string) string {
 }
 
 func assetExists(name string) bool {
-	f, err := embeddedFiles.Open(filepath.Join("assets", name))
+	f, err := openAsset(name)
 	if err != nil {
 		return false
 	}
@@ -306,7 +331,7 @@ func loadImage(cache map[string]*ebiten.Image, name string) (*ebiten.Image, erro
 		return img, nil
 	}
 	resolved := resolveAssetName(name)
-	f, err := embeddedFiles.Open(filepath.Join("assets", resolved))
+	f, err := openAsset(resolved)
 	if err != nil {
 		return nil, err
 	}
