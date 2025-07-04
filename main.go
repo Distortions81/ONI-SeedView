@@ -435,10 +435,7 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 		}
 		g.legendImage = img
 	}
-	scale := 1.0
-	if (g.height > 850 && !g.mobile) || g.screenshotMode {
-		scale = 2.0
-	}
+	scale := g.uiScale()
 	w := float64(g.legendImage.Bounds().Dx()) * scale
 	x := float64(dst.Bounds().Dx()) - w - 12
 	y := 10.0
@@ -518,11 +515,24 @@ type loadedIcon struct {
 	img  *ebiten.Image
 }
 
-func (g *Game) iconSize() int {
-	if (g.height > 850 && !g.mobile) || g.screenshotMode {
-		return HelpIconSize * 2
+// uiScale returns a multiplier for UI elements based on the current window
+// height. Larger windows and high quality screenshots use bigger values so
+// that text and icons remain readable.
+func (g *Game) uiScale() float64 {
+	if g.mobile {
+		return 1.0
 	}
-	return HelpIconSize
+	if g.height > 1700 {
+		return 4.0
+	}
+	if g.height > 850 {
+		return 2.0
+	}
+	return 1.0
+}
+
+func (g *Game) iconSize() int {
+	return int(float64(HelpIconSize) * g.uiScale())
 }
 
 func (g *Game) helpRect() image.Rectangle {
@@ -1029,10 +1039,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, width, labelClr})
 		}
 
-		labelScale := 1.0
-		if (g.height > 850 && !g.mobile) || g.screenshotMode {
-			labelScale = 2.0
-		}
+		labelScale := g.uiScale()
 		for _, l := range labels {
 			x := l.x
 			if labelScale != 1.0 {
@@ -1054,8 +1061,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 
 		if g.coord != "" && !g.screenshotMode {
-			x := g.width/2 - len(g.coord)*LabelCharWidth/2
-			drawTextWithBG(screen, g.coord, x, 10)
+			scale := g.uiScale()
+			x := g.width/2 - int(float64(len(g.coord)*LabelCharWidth)*scale/2)
+			drawTextWithBGScale(screen, g.coord, x, 10, scale)
 		}
 
 		if !g.mobile && !g.screenshotMode {
@@ -1097,6 +1105,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			g.legend = buildLegendImage(g.biomes)
 		}
 		opLegend := &ebiten.DrawImageOptions{}
+		scale := g.uiScale()
+		opLegend.GeoM.Scale(scale, scale)
 		screen.DrawImage(g.legend, opLegend)
 		if useNumbers && !g.screenshotMode {
 			g.drawNumberLegend(screen)
@@ -1111,17 +1121,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			worldX := int(math.Round(((float64(cx) - g.camX) / g.zoom) / 2))
 			worldY := int(math.Round(((float64(cy) - g.camY) / g.zoom) / 2))
 			coords := fmt.Sprintf("X: %d Y: %d", worldX, worldY)
-			scale := 1.0
-			if (g.height > 850 && !g.mobile) || g.screenshotMode {
-				scale = 2.0
-			}
+			scale := g.uiScale()
 			drawTextWithBGScale(screen, coords, 5, g.height-int(20*scale), scale)
 		}
 		if g.showInfo {
-			scale := 1.0
-			if (g.height > 850 && !g.mobile) || g.screenshotMode {
-				scale = 2.0
-			}
+			scale := g.uiScale()
 			w, h := textDimensions(g.infoText)
 			iconW, iconH := 0, 0
 			if g.infoIcon != nil {
