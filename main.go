@@ -84,6 +84,31 @@ func drawTextWithBGBorder(dst *ebiten.Image, text string, x, y int, border color
 	ebitenutil.DebugPrintAt(dst, text, x, y)
 }
 
+func drawTextWithBGBorderScale(dst *ebiten.Image, text string, x, y int, border color.Color, scale float64) {
+	if scale == 1.0 {
+		drawTextWithBGBorder(dst, text, x, y, border)
+		return
+	}
+	lines := strings.Split(text, "\n")
+	width := 0
+	for _, l := range lines {
+		if len(l) > width {
+			width = len(l)
+		}
+	}
+	height := len(lines) * 16
+	w := width*6 + 4
+	h := height + 4
+	img := ebiten.NewImage(w+2, h+2)
+	vector.DrawFilledRect(img, 0, 0, float32(w+2), float32(h+2), border, false)
+	vector.DrawFilledRect(img, 1, 1, float32(w), float32(h), color.RGBA{0, 0, 0, 128}, false)
+	ebitenutil.DebugPrintAt(img, text, 3, 3)
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(scale, scale)
+	op.GeoM.Translate(float64(x-2), float64(y-2))
+	dst.DrawImage(img, op)
+}
+
 func drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int, scale float64) {
 	lines := strings.Split(text, "\n")
 	width := 0
@@ -436,6 +461,7 @@ type Game struct {
 	camX           float64
 	camY           float64
 	zoom           float64
+	minZoom        float64
 	dragging       bool
 	lastX          int
 	lastY          int
@@ -475,10 +501,11 @@ type Game struct {
 }
 
 type label struct {
-	text string
-	x    int
-	y    int
-	clr  color.RGBA
+	text  string
+	x     int
+	y     int
+	width int
+	clr   color.RGBA
 }
 
 type touchPoint struct {
@@ -491,8 +518,15 @@ type loadedIcon struct {
 	img  *ebiten.Image
 }
 
+func (g *Game) iconSize() int {
+	if (g.height > 850 && !g.mobile) || g.screenshotMode {
+		return HelpIconSize * 2
+	}
+	return HelpIconSize
+}
+
 func (g *Game) helpRect() image.Rectangle {
-	size := HelpIconSize
+	size := g.iconSize()
 	x := g.width - size - HelpMargin
 	y := g.height - size - HelpMargin
 	return image.Rect(x, y, x+size, y+size)
@@ -687,8 +721,11 @@ iconsLoop:
 			factor := dist / g.pinchDist
 			oldZoom := g.zoom
 			g.zoom *= factor
-			if g.zoom < MinZoom {
-				g.zoom = MinZoom
+			if g.zoom < g.minZoom {
+				g.zoom = g.minZoom
+			}
+			if g.zoom > MaxZoom {
+				g.zoom = MaxZoom
 			}
 			worldX := (midX - g.camX) / oldZoom
 			worldY := (midY - g.camY) / oldZoom
@@ -752,8 +789,11 @@ iconsLoop:
 	if zoomFactor != 1.0 {
 		oldZoom := g.zoom
 		g.zoom *= zoomFactor
-		if g.zoom < MinZoom {
-			g.zoom = MinZoom
+		if g.zoom < g.minZoom {
+			g.zoom = g.minZoom
+		}
+		if g.zoom > MaxZoom {
+			g.zoom = MaxZoom
 		}
 		cx, cy := float64(g.width)/2, float64(g.height)/2
 		worldX := (cx - g.camX) / oldZoom
@@ -934,7 +974,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 						formatted = strconv.Itoa(g.legendMap["g"+name])
 						width = len(formatted)
 					}
-					labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, labelClr})
+					labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, width, labelClr})
 					continue
 				}
 			}
@@ -944,7 +984,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				formatted = strconv.Itoa(g.legendMap["g"+name])
 				width = len(formatted)
 			}
-			labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, labelClr})
+			labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, width, labelClr})
 		}
 		for _, poi := range g.pois {
 			x := math.Round((float64(poi.X) * 2 * g.zoom) + g.camX)
@@ -976,7 +1016,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 						formatted = strconv.Itoa(g.legendMap["p"+name])
 						width = len(formatted)
 					}
-					labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, labelClr})
+					labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, width, labelClr})
 					continue
 				}
 			}
@@ -986,14 +1026,30 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				formatted = strconv.Itoa(g.legendMap["p"+name])
 				width = len(formatted)
 			}
-			labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, labelClr})
+			labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, width, labelClr})
 		}
 
+		labelScale := 1.0
+		if (g.height > 850 && !g.mobile) || g.screenshotMode {
+			labelScale = 2.0
+		}
 		for _, l := range labels {
+			x := l.x
+			if labelScale != 1.0 {
+				x -= int(float64(l.width*LabelCharWidth) * (labelScale - 1) / 2)
+			}
 			if l.clr.A != 0 {
-				drawTextWithBGBorder(screen, l.text, l.x, l.y, l.clr)
+				if labelScale == 1.0 {
+					drawTextWithBGBorder(screen, l.text, x, l.y, l.clr)
+				} else {
+					drawTextWithBGBorderScale(screen, l.text, x, l.y, l.clr, labelScale)
+				}
 			} else {
-				drawTextWithBG(screen, l.text, l.x, l.y)
+				if labelScale == 1.0 {
+					drawTextWithBG(screen, l.text, x, l.y)
+				} else {
+					drawTextWithBGScale(screen, l.text, x, l.y, labelScale)
+				}
 			}
 		}
 
@@ -1004,17 +1060,18 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		if !g.mobile && !g.screenshotMode {
 			// Draw screenshot icon
+			size := g.iconSize()
 			sr := g.screenshotRect()
-			scx := float32(sr.Min.X + HelpIconSize/2)
-			scy := float32(sr.Min.Y + HelpIconSize/2)
-			vector.DrawFilledCircle(screen, scx, scy, HelpIconSize/2, color.RGBA{0, 0, 0, 180}, true)
+			scx := float32(sr.Min.X + size/2)
+			scy := float32(sr.Min.Y + size/2)
+			vector.DrawFilledCircle(screen, scx, scy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
 			if cam, ok := g.icons["camera.png"]; ok && cam != nil {
 				op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
-				scale := float64(HelpIconSize) / math.Max(float64(cam.Bounds().Dx()), float64(cam.Bounds().Dy()))
+				scale := float64(size) / math.Max(float64(cam.Bounds().Dx()), float64(cam.Bounds().Dy()))
 				op.GeoM.Scale(scale, scale)
 				w := float64(cam.Bounds().Dx()) * scale
 				h := float64(cam.Bounds().Dy()) * scale
-				op.GeoM.Translate(float64(sr.Min.X)+(float64(HelpIconSize)-w)/2, float64(sr.Min.Y)+(float64(HelpIconSize)-h)/2)
+				op.GeoM.Translate(float64(sr.Min.X)+(float64(size)-w)/2, float64(sr.Min.Y)+(float64(size)-h)/2)
 				screen.DrawImage(cam, op)
 			} else {
 				ebitenutil.DebugPrintAt(screen, "SS", sr.Min.X+3, sr.Min.Y+5)
@@ -1025,9 +1082,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 			// Draw help icon
 			hr := g.helpRect()
-			cx := float32(hr.Min.X + HelpIconSize/2)
-			cy := float32(hr.Min.Y + HelpIconSize/2)
-			vector.DrawFilledCircle(screen, cx, cy, HelpIconSize/2, color.RGBA{0, 0, 0, 180}, true)
+			cx := float32(hr.Min.X + size/2)
+			cy := float32(hr.Min.Y + size/2)
+			vector.DrawFilledCircle(screen, cx, cy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
 			ebitenutil.DebugPrintAt(screen, "?", hr.Min.X+7, hr.Min.Y+5)
 			if g.showHelp {
 				tx := hr.Min.X - 170
@@ -1111,6 +1168,11 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 		g.camX = cxNew - worldX*g.zoom
 		g.camY = cyNew - worldY*g.zoom
 		g.clampCamera()
+		if g.astWidth > 0 && g.astHeight > 0 {
+			zx := float64(g.width) / (float64(g.astWidth) * 2)
+			zy := float64(g.height) / (float64(g.astHeight) * 2)
+			g.minZoom = math.Min(zx, zy) * 0.25
+		}
 
 		g.needsRedraw = true
 	}
@@ -1133,6 +1195,7 @@ func main() {
 		width:     DefaultWidth,
 		height:    DefaultHeight,
 		zoom:      1.0,
+		minZoom:   MinZoom,
 		loading:   true,
 		status:    "Fetching...",
 		coord:     *coord,
@@ -1170,6 +1233,7 @@ func main() {
 		zoomX := float64(game.width) / (float64(game.astWidth) * 2)
 		zoomY := float64(game.height) / (float64(game.astHeight) * 2)
 		game.zoom = math.Min(zoomX, zoomY)
+		game.minZoom = game.zoom * 0.25
 		game.camX = (float64(game.width) - float64(game.astWidth)*2*game.zoom) / 2
 		game.camY = (float64(game.height) - float64(game.astHeight)*2*game.zoom) / 2
 		game.clampCamera()

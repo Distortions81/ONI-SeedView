@@ -15,7 +15,7 @@ import (
 )
 
 func (g *Game) screenshotRect() image.Rectangle {
-	size := HelpIconSize
+	size := g.iconSize()
 	x := g.width - size*2 - HelpMargin*2
 	y := g.height - size - HelpMargin
 	return image.Rect(x, y, x+size, y+size)

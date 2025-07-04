@@ -15,7 +15,8 @@ const (
 	CameraMargin          = -64
 	KeyZoomFactor         = 1.05
 	WheelZoomFactor       = 1.1
-	MinZoom               = 0.5
+	MinZoom               = 0.25
+	MaxZoom               = 8.0
 	IconScale             = 0.2
 	LegendZoomExponent    = 10
 	DefaultWidth          = 800
