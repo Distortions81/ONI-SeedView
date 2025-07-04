@@ -24,6 +24,7 @@ import (
 	"strings"
 	"time"
 
+	_ "embed"
 	"github.com/fxamacker/cbor/v2"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -139,6 +140,9 @@ type nameTables struct {
 
 var names nameTables
 
+//go:embed names.json
+var namesData []byte
+
 func openFile(name string) (io.ReadCloser, error) {
 	if runtime.GOOS == "js" {
 		resp, err := http.Get(name)
@@ -163,14 +167,7 @@ func openAsset(name string) (io.ReadCloser, error) {
 }
 
 func init() {
-	f, err := openFile("names.json")
-	if err != nil {
-		return
-	}
-	defer f.Close()
-	if b, err := io.ReadAll(f); err == nil {
-		_ = json.Unmarshal(b, &names)
-	}
+	_ = json.Unmarshal(namesData, &names)
 }
 
 func colorFromARGB(hex uint32) color.RGBA {
