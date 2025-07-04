@@ -18,9 +18,11 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/fxamacker/cbor/v2"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -1023,6 +1025,7 @@ type Game struct {
 	legendEntries  []string
 	legendColors   []color.RGBA
 	legendImage    *ebiten.Image
+	lastWheel      time.Time
 }
 
 type label struct {
@@ -1142,6 +1145,14 @@ func (g *Game) Update() error {
 
 	// Zoom with mouse wheel
 	_, wheelY := ebiten.Wheel()
+	if runtime.GOARCH == "wasm" && wheelY != 0 {
+		now := time.Now()
+		if now.Sub(g.lastWheel) < WheelThrottle {
+			wheelY = 0
+		} else {
+			g.lastWheel = now
+		}
+	}
 	if wheelY != 0 {
 		if wheelY > 0 {
 			zoomFactor *= WheelZoomFactor
