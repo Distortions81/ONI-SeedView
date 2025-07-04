@@ -18,8 +18,8 @@ const (
 	MinZoom               = 0.5
 	IconScale             = 0.2
 	LegendZoomExponent    = 10
-	DefaultWidth          = 1280
-	DefaultHeight         = 720
+	DefaultWidth          = 800
+	DefaultHeight         = 800
 	InitialZoom           = 1.0
 	LabelCharWidth        = 6
 	NumberLegendXOffset   = 150
