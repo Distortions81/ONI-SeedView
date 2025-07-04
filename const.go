@@ -28,6 +28,8 @@ const (
 	HelpIconSize        = 24
 	HelpMargin          = 10
 	CrosshairSize       = 10
+	InfoIconScale       = 0.3
+	InfoPanelAlpha      = 200
 	// WheelThrottle controls how often mouse wheel zoom is applied
 	// in WASM to account for faster scroll events.
 	WheelThrottle = 75 * time.Millisecond

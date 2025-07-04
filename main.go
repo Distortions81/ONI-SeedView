@@ -84,6 +84,43 @@ func drawTextWithBGBorder(dst *ebiten.Image, text string, x, y int, border color
 	ebitenutil.DebugPrintAt(dst, text, x, y)
 }
 
+func drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int, scale float64) {
+	lines := strings.Split(text, "\n")
+	width := 0
+	for _, l := range lines {
+		if len(l) > width {
+			width = len(l)
+		}
+	}
+	txtW := width * LabelCharWidth
+	txtH := len(lines) * 16
+	iconW, iconH := 0, 0
+	if icon != nil {
+		iconW = int(float64(icon.Bounds().Dx()) * InfoIconScale)
+		iconH = int(float64(icon.Bounds().Dy()) * InfoIconScale)
+	}
+	gap := 4
+	w := txtW + iconW + gap + 4
+	h := txtH
+	if iconH > txtH {
+		h = iconH
+	}
+	h += 4
+	img := ebiten.NewImage(w, h)
+	vector.DrawFilledRect(img, 0, 0, float32(w), float32(h), color.RGBA{0, 0, 0, InfoPanelAlpha}, false)
+	if icon != nil {
+		opIcon := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
+		opIcon.GeoM.Scale(InfoIconScale, InfoIconScale)
+		opIcon.GeoM.Translate(2, float64(h-iconH)/2)
+		img.DrawImage(icon, opIcon)
+	}
+	ebitenutil.DebugPrintAt(img, text, iconW+gap+2, 2)
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(scale, scale)
+	op.GeoM.Translate(float64(x-2), float64(y-2))
+	dst.DrawImage(img, op)
+}
+
 func textDimensions(text string) (int, int) {
 	lines := strings.Split(text, "\n")
 	width := 0
@@ -424,6 +461,7 @@ type Game struct {
 	infoText       string
 	infoX          int
 	infoY          int
+	infoIcon       *ebiten.Image
 	lastMouseX     int
 	lastMouseY     int
 	touchUsed      bool
@@ -471,7 +509,7 @@ func (g *Game) clampCamera() {
 	}
 }
 
-func (g *Game) itemAt(mx, my int) (string, int, int, bool) {
+func (g *Game) itemAt(mx, my int) (string, int, int, *ebiten.Image, bool) {
 	const hitRadius = 10
 	for _, gy := range g.geysers {
 		x := float64(gy.X)*2*g.zoom + g.camX
@@ -489,7 +527,11 @@ func (g *Game) itemAt(mx, my int) (string, int, int, bool) {
 		}
 		if float64(mx) >= left && float64(mx) <= right && float64(my) >= top && float64(my) <= bottom {
 			info := fullGeyserName(gy.ID) + "\n" + formatGeyserInfo(gy)
-			return info, int(math.Round(x)), int(math.Round(y)), true
+			var icon *ebiten.Image
+			if n := iconForGeyser(gy.ID); n != "" {
+				icon = g.icons[n]
+			}
+			return info, int(math.Round(x)), int(math.Round(y)), icon, true
 		}
 	}
 	for _, poi := range g.pois {
@@ -508,10 +550,14 @@ func (g *Game) itemAt(mx, my int) (string, int, int, bool) {
 		}
 		if float64(mx) >= left && float64(mx) <= right && float64(my) >= top && float64(my) <= bottom {
 			info := fullPOIName(poi.ID) + "\n" + formatPOIInfo(poi)
-			return info, int(math.Round(x)), int(math.Round(y)), true
+			var icon *ebiten.Image
+			if n := iconForPOI(poi.ID); n != "" {
+				icon = g.icons[n]
+			}
+			return info, int(math.Round(x)), int(math.Round(y)), icon, true
 		}
 	}
-	return "", 0, 0, false
+	return "", 0, 0, nil, false
 }
 
 func abs(a int) int {
@@ -715,19 +761,21 @@ iconsLoop:
 	prevShow := g.showInfo
 	prevPinned := g.infoPinned
 	prevText := g.infoText
+	prevIcon := g.infoIcon
 
-	info, ix, iy, found := "", 0, 0, false
+	info, ix, iy, icon, found := "", 0, 0, (*ebiten.Image)(nil), false
 	if g.mobile {
 		cx := g.width / 2
 		cy := g.height / 2
-		info, ix, iy, found = g.itemAt(cx, cy)
+		info, ix, iy, icon, found = g.itemAt(cx, cy)
 	} else if !g.touchUsed {
-		info, ix, iy, found = g.itemAt(mx, my)
+		info, ix, iy, icon, found = g.itemAt(mx, my)
 	}
 	if found {
 		g.infoText = info
 		g.infoX = ix
 		g.infoY = iy
+		g.infoIcon = icon
 		g.showInfo = true
 		if mousePressed {
 			g.infoPinned = true
@@ -735,9 +783,10 @@ iconsLoop:
 	} else if !g.infoPinned || mousePressed {
 		g.showInfo = false
 		g.infoPinned = false
+		g.infoIcon = nil
 	}
 
-	if g.showInfo != prevShow || g.infoPinned != prevPinned || g.infoText != prevText {
+	if g.showInfo != prevShow || g.infoPinned != prevPinned || g.infoText != prevText || g.infoIcon != prevIcon {
 		g.needsRedraw = true
 	}
 
@@ -943,9 +992,19 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				scale = 2.0
 			}
 			w, h := textDimensions(g.infoText)
-			tx := g.width/2 - int(float64(w)*scale)/2
-			ty := g.height - int(float64(h)*scale) - 30
-			drawTextWithBGScale(screen, g.infoText, tx, ty, scale)
+			iconW, iconH := 0, 0
+			if g.infoIcon != nil {
+				iconW = int(float64(g.infoIcon.Bounds().Dx()) * InfoIconScale)
+				iconH = int(float64(g.infoIcon.Bounds().Dy()) * InfoIconScale)
+			}
+			panelW := w + iconW + 4
+			panelH := h
+			if iconH > h {
+				panelH = iconH
+			}
+			tx := g.width/2 - int(float64(panelW)*scale)/2
+			ty := g.height - int(float64(panelH)*scale) - 30
+			drawInfoPanel(screen, g.infoText, g.infoIcon, tx, ty, scale)
 		}
 
 		g.needsRedraw = false
