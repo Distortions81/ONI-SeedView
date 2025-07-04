@@ -50,6 +50,7 @@
         return WebAssembly.instantiate(decompressed, go.importObject);
       })
       .then((result) => {
+        document.getElementById("loading").remove();
         go.run(result.instance);
       })
       .catch((err) => {
