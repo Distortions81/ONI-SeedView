@@ -1070,6 +1070,11 @@ type Game struct {
 	iconResults    chan loadedIcon
 	coord          string
 	mobile         bool
+	showInfo       bool
+	infoPinned     bool
+	infoText       string
+	infoX          int
+	infoY          int
 }
 
 type label struct {
@@ -1112,6 +1117,32 @@ func (g *Game) clampCamera() {
 	if g.camY > float64(g.height)+margin {
 		g.camY = float64(g.height) + margin
 	}
+}
+
+func (g *Game) itemAt(mx, my int) (string, int, int, bool) {
+	const hitRadius = 10
+	for _, gy := range g.geysers {
+		x := int(math.Round(float64(gy.X)*2*g.zoom + g.camX))
+		y := int(math.Round(float64(gy.Y)*2*g.zoom + g.camY))
+		if abs(x-mx) <= hitRadius && abs(y-my) <= hitRadius {
+			return displayGeyser(gy.ID), x, y, true
+		}
+	}
+	for _, poi := range g.pois {
+		x := int(math.Round(float64(poi.X)*2*g.zoom + g.camX))
+		y := int(math.Round(float64(poi.Y)*2*g.zoom + g.camY))
+		if abs(x-mx) <= hitRadius && abs(y-my) <= hitRadius {
+			return displayPOI(poi.ID), x, y, true
+		}
+	}
+	return "", 0, 0, false
+}
+
+func abs(a int) int {
+	if a < 0 {
+		return -a
+	}
+	return a
 }
 
 func (g *Game) startIconLoader(names []string) {
@@ -1267,6 +1298,25 @@ iconsLoop:
 	} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && g.helpRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.showHelp = true
 		g.needsRedraw = true
+	}
+
+	if g.dragging {
+		g.showInfo = false
+		g.infoPinned = false
+	}
+
+	name, ix, iy, found := g.itemAt(mx, my)
+	if found {
+		g.infoText = name
+		g.infoX = ix
+		g.infoY = iy
+		g.showInfo = true
+		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+			g.infoPinned = true
+		}
+	} else if !g.infoPinned || ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+		g.showInfo = false
+		g.infoPinned = false
 	}
 
 	g.clampCamera()
@@ -1427,6 +1477,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		if g.coord != "" {
 			x := g.width/2 - len(g.coord)*LabelCharWidth/2
 			drawTextWithBG(screen, g.coord, x, 10)
+		}
+
+		if g.showInfo {
+			tx := g.infoX + 10
+			ty := g.infoY - 20
+			drawTextWithBG(screen, g.infoText, tx, ty)
 		}
 
 		// Draw help icon
