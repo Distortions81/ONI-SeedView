@@ -28,6 +28,7 @@ import (
 	"github.com/fxamacker/cbor/v2"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
@@ -39,6 +40,25 @@ const helpMessage = "Controls:\n" +
 // fetchSeedCBOR retrieves the seed data in CBOR format for a given coordinate.
 func fetchSeedCBOR(coordinate string) ([]byte, error) {
 	url := BaseURL + coordinate
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("Accept", AcceptCBORHeader)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, body)
+	}
+	return io.ReadAll(resp.Body)
+}
+
+// fetchSeedNumber retrieves seed data for a numeric seed ID.
+func fetchSeedNumber(seed string) ([]byte, error) {
+	url := SeedURL + seed
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("Accept", AcceptCBORHeader)
 
@@ -1060,6 +1080,9 @@ type Game struct {
 	legendImage    *ebiten.Image
 	showHelp       bool
 	lastWheel      time.Time
+	seedInput      string
+	editingInput   bool
+	errorMsg       string
 }
 
 type label struct {
@@ -1081,6 +1104,15 @@ func (g *Game) helpRect() image.Rectangle {
 	return image.Rect(x, y, x+size, y+size)
 }
 
+func (g *Game) inputRect() image.Rectangle {
+	return image.Rect(InputBoxX, InputBoxY, InputBoxX+InputBoxW, InputBoxY+InputBoxH)
+}
+
+func (g *Game) buttonRect() image.Rectangle {
+	x := InputBoxX + InputBoxW + 5
+	return image.Rect(x, InputBoxY, x+ButtonW, InputBoxY+ButtonH)
+}
+
 func (g *Game) clampCamera() {
 	w := float64(g.astWidth) * 2 * g.zoom
 	h := float64(g.astHeight) * 2 * g.zoom
@@ -1099,8 +1131,82 @@ func (g *Game) clampCamera() {
 	}
 }
 
+// loadSeed fetches and decodes the seed, replacing current data.
+func (g *Game) loadSeed(seed string) error {
+	cborData, err := fetchSeedNumber(seed)
+	if err != nil {
+		return err
+	}
+	sd, err := decodeSeed(cborData)
+	if err != nil {
+		return err
+	}
+	if len(sd.Asteroids) == 0 {
+		return fmt.Errorf("no asteroid in seed")
+	}
+	ast := sd.Asteroids[0]
+	g.geysers = ast.Geysers
+	g.pois = ast.POIs
+	g.biomes = parseBiomePaths(ast.BiomePaths)
+	g.astWidth = ast.SizeX
+	g.astHeight = ast.SizeY
+	g.legend = buildLegendImage(g.biomes)
+	g.legendMap = nil
+	g.legendEntries = nil
+	g.legendColors = nil
+	g.legendImage = nil
+	g.camX = (float64(g.width) - float64(g.astWidth)*2*g.zoom) / 2
+	g.camY = (float64(g.height) - float64(g.astHeight)*2*g.zoom) / 2
+	g.clampCamera()
+	g.needsRedraw = true
+	ebiten.SetWindowTitle("Geysers - " + seed)
+	return nil
+}
+
 func (g *Game) Update() error {
 	const panSpeed = PanSpeed
+
+	// Handle UI interactions
+	if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		x, y := ebiten.CursorPosition()
+		pt := image.Rect(x, y, x+1, y+1)
+		if g.buttonRect().Overlaps(pt) {
+			g.editingInput = false
+			if err := g.loadSeed(strings.TrimSpace(g.seedInput)); err != nil {
+				g.errorMsg = err.Error()
+			} else {
+				g.errorMsg = ""
+			}
+			return nil
+		}
+		if g.inputRect().Overlaps(pt) {
+			g.editingInput = true
+			return nil
+		}
+		g.editingInput = false
+	}
+
+	if g.editingInput {
+		for _, r := range ebiten.AppendInputChars(nil) {
+			if r >= '0' && r <= '9' {
+				g.seedInput += string(r)
+				g.needsRedraw = true
+			}
+		}
+		if inpututil.IsKeyJustPressed(ebiten.KeyBackspace) && len(g.seedInput) > 0 {
+			g.seedInput = g.seedInput[:len(g.seedInput)-1]
+			g.needsRedraw = true
+		}
+		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) && g.seedInput != "" {
+			g.editingInput = false
+			if err := g.loadSeed(strings.TrimSpace(g.seedInput)); err != nil {
+				g.errorMsg = err.Error()
+			} else {
+				g.errorMsg = ""
+			}
+		}
+		return nil
+	}
 
 	oldX, oldY, oldZoom := g.camX, g.camY, g.zoom
 
@@ -1380,6 +1486,17 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			tx := hr.Min.X - 170
 			ty := hr.Min.Y - 70
 			drawTextWithBG(screen, helpMessage, tx, ty)
+		}
+
+		// Draw seed input box and button
+		ir := g.inputRect()
+		vector.DrawFilledRect(screen, float32(ir.Min.X), float32(ir.Min.Y), float32(ir.Dx()), float32(ir.Dy()), color.RGBA{0, 0, 0, 180}, false)
+		ebitenutil.DebugPrintAt(screen, g.seedInput, ir.Min.X+4, ir.Min.Y+4)
+		br := g.buttonRect()
+		vector.DrawFilledRect(screen, float32(br.Min.X), float32(br.Min.Y), float32(br.Dx()), float32(br.Dy()), color.RGBA{60, 60, 60, 180}, false)
+		ebitenutil.DebugPrintAt(screen, "Go", br.Min.X+6, br.Min.Y+4)
+		if g.errorMsg != "" {
+			drawTextWithBG(screen, g.errorMsg, ir.Min.X, ir.Max.Y+5)
 		}
 
 		g.needsRedraw = false

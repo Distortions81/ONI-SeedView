@@ -8,6 +8,7 @@ import (
 
 const (
 	BaseURL          = "https://ingest.mapsnotincluded.org/coordinate/"
+	SeedURL          = "https://ingest.mapsnotincluded.org/seed/"
 	AcceptCBORHeader = "application/cbor"
 	PanSpeed         = 15
 	// CameraMargin controls how far the world can be panned
@@ -35,6 +36,13 @@ const (
 	// when running in WebAssembly. The assets should be served
 	// relative to the page URL.
 	WebAssetBase = "assets/"
+
+	InputBoxX = 10
+	InputBoxY = 10
+	InputBoxW = 120
+	InputBoxH = 20
+	ButtonW   = 30
+	ButtonH   = 20
 )
 
 var LegendZoomThreshold = math.Pow(WheelZoomFactor, LegendZoomExponent)
