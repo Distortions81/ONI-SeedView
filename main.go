@@ -461,8 +461,7 @@ func (g *Game) itemAt(mx, my int) (string, int, int, bool) {
 			}
 		}
 		if float64(mx) >= left && float64(mx) <= right && float64(my) >= top && float64(my) <= bottom {
-			infoBytes, _ := json.MarshalIndent(gy, "", "  ")
-			info := displayGeyser(gy.ID) + "\n" + string(infoBytes)
+			info := fullGeyserName(gy.ID) + "\n" + formatGeyserInfo(gy)
 			return info, int(math.Round(x)), int(math.Round(y)), true
 		}
 	}
@@ -481,8 +480,7 @@ func (g *Game) itemAt(mx, my int) (string, int, int, bool) {
 			}
 		}
 		if float64(mx) >= left && float64(mx) <= right && float64(my) >= top && float64(my) <= bottom {
-			infoBytes, _ := json.MarshalIndent(poi, "", "  ")
-			info := displayPOI(poi.ID) + "\n" + string(infoBytes)
+			info := fullPOIName(poi.ID) + "\n" + formatPOIInfo(poi)
 			return info, int(math.Round(x)), int(math.Round(y)), true
 		}
 	}
@@ -817,14 +815,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, clr})
 		}
 
-		if g.legend == nil {
-			g.legend = buildLegendImage(g.biomes)
-		}
-		opLegend := &ebiten.DrawImageOptions{}
-		if g.height > 850 {
-			opLegend.GeoM.Scale(2, 2)
-		}
-		screen.DrawImage(g.legend, opLegend)
 		for _, l := range labels {
 			if l.clr.A != 0 {
 				drawTextWithBGBorder(screen, l.text, l.x, l.y, l.clr)
@@ -832,33 +822,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				drawTextWithBG(screen, l.text, l.x, l.y)
 			}
 		}
-		if useNumbers {
-			g.drawNumberLegend(screen)
-		}
 
 		if g.coord != "" {
 			x := g.width/2 - len(g.coord)*LabelCharWidth/2
 			drawTextWithBG(screen, g.coord, x, 10)
-		}
-
-		// Draw help icon when not running on mobile
-		if !g.mobile {
-			hr := g.helpRect()
-			cx := float32(hr.Min.X + HelpIconSize/2)
-			cy := float32(hr.Min.Y + HelpIconSize/2)
-			vector.DrawFilledCircle(screen, cx, cy, HelpIconSize/2, color.RGBA{0, 0, 0, 180}, true)
-			ebitenutil.DebugPrintAt(screen, "?", hr.Min.X+7, hr.Min.Y+5)
-			if g.showHelp {
-				tx := hr.Min.X - 170
-				ty := hr.Min.Y - 70
-				drawTextWithBG(screen, helpMessage, tx, ty)
-			}
-		}
-		if g.showInfo {
-			w, h := textDimensions(g.infoText)
-			tx := g.width/2 - w/2
-			ty := g.height - h - 30
-			drawTextWithBG(screen, g.infoText, tx, ty)
 		}
 
 		// Draw help icon
@@ -871,6 +838,24 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			tx := hr.Min.X - 170
 			ty := hr.Min.Y - 70
 			drawTextWithBG(screen, helpMessage, tx, ty)
+		}
+
+		if g.legend == nil {
+			g.legend = buildLegendImage(g.biomes)
+		}
+		opLegend := &ebiten.DrawImageOptions{}
+		if g.height > 850 {
+			opLegend.GeoM.Scale(2, 2)
+		}
+		screen.DrawImage(g.legend, opLegend)
+		if useNumbers {
+			g.drawNumberLegend(screen)
+		}
+		if g.showInfo {
+			w, h := textDimensions(g.infoText)
+			tx := g.width/2 - w/2
+			ty := g.height - h - 30
+			drawTextWithBG(screen, g.infoText, tx, ty)
 		}
 
 		g.needsRedraw = false

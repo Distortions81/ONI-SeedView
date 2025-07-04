@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -128,6 +129,9 @@ func displayBiome(id string) string {
 
 func displayGeyser(id string) string {
 	id = simplifyID(id)
+	if v, ok := shortNames.Geysers[id]; ok {
+		return v
+	}
 	if v, ok := names.Geysers[id]; ok {
 		return v
 	}
@@ -135,6 +139,25 @@ func displayGeyser(id string) string {
 }
 
 func displayPOI(id string) string {
+	id = simplifyID(id)
+	if v, ok := shortNames.POIs[id]; ok {
+		return v
+	}
+	if v, ok := names.POIs[id]; ok {
+		return v
+	}
+	return id
+}
+
+func fullGeyserName(id string) string {
+	id = simplifyID(id)
+	if v, ok := names.Geysers[id]; ok {
+		return v
+	}
+	return id
+}
+
+func fullPOIName(id string) string {
 	id = simplifyID(id)
 	if v, ok := names.POIs[id]; ok {
 		return v
@@ -172,4 +195,17 @@ func formatLabel(name string) (string, int) {
 	}
 	formatted := strings.Join(lines, "\n")
 	return formatted, width
+}
+
+func formatGeyserInfo(g Geyser) string {
+	return "Active Cycles: " + fmt.Sprintf("%.2f", g.ActiveCycles) +
+		"\nAvg Emit Rate: " + fmt.Sprintf("%.2f", g.AvgEmitRate) +
+		"\nDormancy Cycles: " + fmt.Sprintf("%.2f", g.DormancyCycles) +
+		"\nEmit Rate: " + fmt.Sprintf("%.2f", g.EmitRate) +
+		"\nEruption Time: " + fmt.Sprintf("%.2f", g.EruptionTime) +
+		"\nIdle Time: " + fmt.Sprintf("%.2f", g.IdleTime)
+}
+
+func formatPOIInfo(p PointOfInterest) string {
+	return fmt.Sprintf("X: %d\nY: %d", p.X, p.Y)
 }
