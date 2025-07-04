@@ -411,9 +411,6 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 		g.legendImage = img
 	}
 	scale := 1.0
-	if g.height > 850 && !g.mobile {
-		scale = 2.0
-	}
 	w := float64(g.legendImage.Bounds().Dx()) * scale
 	x := float64(dst.Bounds().Dx()) - w - 12
 	y := 10.0
@@ -1002,7 +999,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			drawTextWithBG(screen, g.coord, x, 10)
 		}
 
-		if !g.mobile {
+		if !g.mobile && !g.screenshotMode {
 			// Draw screenshot icon
 			sr := g.screenshotRect()
 			scx := float32(sr.Min.X + HelpIconSize/2)
@@ -1030,9 +1027,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			g.legend = buildLegendImage(g.biomes)
 		}
 		opLegend := &ebiten.DrawImageOptions{}
-		if g.height > 850 && !g.mobile {
-			opLegend.GeoM.Scale(2, 2)
-		}
 		screen.DrawImage(g.legend, opLegend)
 		if useNumbers && !g.screenshotMode {
 			g.drawNumberLegend(screen)
@@ -1048,16 +1042,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			worldY := int(math.Round(((float64(cy) - g.camY) / g.zoom) / 2))
 			coords := fmt.Sprintf("X: %d Y: %d", worldX, worldY)
 			scale := 1.0
-			if g.height > 850 && !g.mobile {
-				scale = 2.0
-			}
 			drawTextWithBGScale(screen, coords, 5, g.height-int(20*scale), scale)
 		}
 		if g.showInfo {
 			scale := 1.0
-			if g.height > 850 && !g.mobile {
-				scale = 2.0
-			}
 			w, h := textDimensions(g.infoText)
 			iconW, iconH := 0, 0
 			if g.infoIcon != nil {
@@ -1189,6 +1177,10 @@ func main() {
 	}()
 	if *screenshot != "" {
 		game.screenshotPath = *screenshot
+		game.screenshotMode = true
+		game.showHelp = false
+		game.showInfo = false
+		game.showShotMenu = false
 	}
 	ebiten.SetWindowSize(game.width, game.height)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
