@@ -60,6 +60,17 @@ func drawTextWithBGBorder(dst *ebiten.Image, text string, x, y int, border color
 	ebitenutil.DebugPrintAt(dst, text, x, y)
 }
 
+func textDimensions(text string) (int, int) {
+	lines := strings.Split(text, "\n")
+	width := 0
+	for _, l := range lines {
+		if len(l) > width {
+			width = len(l)
+		}
+	}
+	return width * LabelCharWidth, len(lines) * 16
+}
+
 func drawPolygon(dst *ebiten.Image, pts []Point, clr color.Color, camX, camY, zoom float64) {
 	if len(pts) == 0 {
 		return
@@ -439,14 +450,18 @@ func (g *Game) itemAt(mx, my int) (string, int, int, bool) {
 		x := int(math.Round(float64(gy.X)*2*g.zoom + g.camX))
 		y := int(math.Round(float64(gy.Y)*2*g.zoom + g.camY))
 		if abs(x-mx) <= hitRadius && abs(y-my) <= hitRadius {
-			return displayGeyser(gy.ID), x, y, true
+			infoBytes, _ := json.MarshalIndent(gy, "", "  ")
+			info := displayGeyser(gy.ID) + "\n" + string(infoBytes)
+			return info, x, y, true
 		}
 	}
 	for _, poi := range g.pois {
 		x := int(math.Round(float64(poi.X)*2*g.zoom + g.camX))
 		y := int(math.Round(float64(poi.Y)*2*g.zoom + g.camY))
 		if abs(x-mx) <= hitRadius && abs(y-my) <= hitRadius {
-			return displayPOI(poi.ID), x, y, true
+			infoBytes, _ := json.MarshalIndent(poi, "", "  ")
+			info := displayPOI(poi.ID) + "\n" + string(infoBytes)
+			return info, x, y, true
 		}
 	}
 	return "", 0, 0, false
@@ -622,9 +637,13 @@ iconsLoop:
 		g.infoPinned = false
 	}
 
-	name, ix, iy, found := g.itemAt(mx, my)
+	prevShow := g.showInfo
+	prevPinned := g.infoPinned
+	prevText := g.infoText
+
+	info, ix, iy, found := g.itemAt(mx, my)
 	if found {
-		g.infoText = name
+		g.infoText = info
 		g.infoX = ix
 		g.infoY = iy
 		g.showInfo = true
@@ -634,6 +653,10 @@ iconsLoop:
 	} else if !g.infoPinned || ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		g.showInfo = false
 		g.infoPinned = false
+	}
+
+	if g.showInfo != prevShow || g.infoPinned != prevPinned || g.infoText != prevText {
+		g.needsRedraw = true
 	}
 
 	g.clampCamera()
@@ -810,8 +833,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 		}
 		if g.showInfo {
-			tx := g.infoX + 10
-			ty := g.infoY - 20
+			w, h := textDimensions(g.infoText)
+			tx := g.width/2 - w/2
+			ty := g.height - h - 30
 			drawTextWithBG(screen, g.infoText, tx, ty)
 		}
 
