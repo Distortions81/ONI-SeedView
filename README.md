@@ -80,7 +80,7 @@ fragment like `#coord=<seed>` and the viewer will load it automatically.
 
 ## Desktop vs Web and Mobile
 
-Oni View runs on the desktop as well as in the browser. Key differences between
+Oni-SeedView runs on the desktop as well as in the browser. Key differences between
 the environments are:
 
 * **Desktop** – Launch the program with the `-coord` flag to select a seed.
