@@ -1110,14 +1110,15 @@ func main() {
 	}
 
 	game := &Game{
-		icons:   make(map[string]*ebiten.Image),
-		width:   DefaultWidth,
-		height:  DefaultHeight,
-		zoom:    1.0,
-		loading: true,
-		status:  "Fetching...",
-		coord:   *coord,
-		mobile:  isMobile(),
+		icons:     make(map[string]*ebiten.Image),
+		width:     DefaultWidth,
+		height:    DefaultHeight,
+		zoom:      1.0,
+		loading:   true,
+		status:    "Fetching...",
+		coord:     *coord,
+		mobile:    isMobile(),
+		ssQuality: 2,
 	}
 	go func() {
 		fmt.Println("Fetching:", *coord)

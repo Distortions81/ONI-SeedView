@@ -87,13 +87,13 @@ func (g *Game) saveScreenshot() {
 	scale := 1.0
 	switch g.ssQuality {
 	case 0:
-		scale = 0.5
-	case 1:
 		scale = 1.0
-	case 2:
-		scale = 2.0
-	default:
+	case 1:
 		scale = 4.0
+	case 2:
+		scale = 8.0
+	default:
+		scale = 2.0
 	}
 	width := int(float64(g.astWidth) * 2 * scale)
 	height := int(float64(g.astHeight) * 2 * scale)
