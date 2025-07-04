@@ -447,21 +447,43 @@ func (g *Game) clampCamera() {
 func (g *Game) itemAt(mx, my int) (string, int, int, bool) {
 	const hitRadius = 10
 	for _, gy := range g.geysers {
-		x := int(math.Round(float64(gy.X)*2*g.zoom + g.camX))
-		y := int(math.Round(float64(gy.Y)*2*g.zoom + g.camY))
-		if abs(x-mx) <= hitRadius && abs(y-my) <= hitRadius {
+		x := float64(gy.X)*2*g.zoom + g.camX
+		y := float64(gy.Y)*2*g.zoom + g.camY
+		left, top, right, bottom := x-hitRadius, y-hitRadius, x+hitRadius, y+hitRadius
+		if iconName := iconForGeyser(gy.ID); iconName != "" {
+			if img, ok := g.icons[iconName]; ok && img != nil {
+				w := float64(img.Bounds().Dx()) * g.zoom * IconScale
+				h := float64(img.Bounds().Dy()) * g.zoom * IconScale
+				left = x - w/2
+				top = y - h/2
+				right = x + w/2
+				bottom = y + h/2
+			}
+		}
+		if float64(mx) >= left && float64(mx) <= right && float64(my) >= top && float64(my) <= bottom {
 			infoBytes, _ := json.MarshalIndent(gy, "", "  ")
 			info := displayGeyser(gy.ID) + "\n" + string(infoBytes)
-			return info, x, y, true
+			return info, int(math.Round(x)), int(math.Round(y)), true
 		}
 	}
 	for _, poi := range g.pois {
-		x := int(math.Round(float64(poi.X)*2*g.zoom + g.camX))
-		y := int(math.Round(float64(poi.Y)*2*g.zoom + g.camY))
-		if abs(x-mx) <= hitRadius && abs(y-my) <= hitRadius {
+		x := float64(poi.X)*2*g.zoom + g.camX
+		y := float64(poi.Y)*2*g.zoom + g.camY
+		left, top, right, bottom := x-hitRadius, y-hitRadius, x+hitRadius, y+hitRadius
+		if iconName := iconForPOI(poi.ID); iconName != "" {
+			if img, ok := g.icons[iconName]; ok && img != nil {
+				w := float64(img.Bounds().Dx()) * g.zoom * IconScale
+				h := float64(img.Bounds().Dy()) * g.zoom * IconScale
+				left = x - w/2
+				top = y - h/2
+				right = x + w/2
+				bottom = y + h/2
+			}
+		}
+		if float64(mx) >= left && float64(mx) <= right && float64(my) >= top && float64(my) <= bottom {
 			infoBytes, _ := json.MarshalIndent(poi, "", "  ")
 			info := displayPOI(poi.ID) + "\n" + string(infoBytes)
-			return info, x, y, true
+			return info, int(math.Round(x)), int(math.Round(y)), true
 		}
 	}
 	return "", 0, 0, false
