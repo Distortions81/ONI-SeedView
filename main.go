@@ -568,8 +568,10 @@ func (g *Game) itemAt(mx, my int) (string, int, int, *ebiten.Image, bool) {
 		left, top, right, bottom := x-hitRadius, y-hitRadius, x+hitRadius, y+hitRadius
 		if iconName := iconForGeyser(gy.ID); iconName != "" {
 			if img, ok := g.icons[iconName]; ok && img != nil {
-				w := float64(img.Bounds().Dx()) * g.zoom * IconScale
-				h := float64(img.Bounds().Dy()) * g.zoom * IconScale
+				maxDim := math.Max(float64(img.Bounds().Dx()), float64(img.Bounds().Dy()))
+				scale := g.zoom * IconScale * float64(BaseIconPixels) / maxDim
+				w := float64(img.Bounds().Dx()) * scale
+				h := float64(img.Bounds().Dy()) * scale
 				left = x - w/2
 				top = y - h/2
 				right = x + w/2
@@ -591,8 +593,10 @@ func (g *Game) itemAt(mx, my int) (string, int, int, *ebiten.Image, bool) {
 		left, top, right, bottom := x-hitRadius, y-hitRadius, x+hitRadius, y+hitRadius
 		if iconName := iconForPOI(poi.ID); iconName != "" {
 			if img, ok := g.icons[iconName]; ok && img != nil {
-				w := float64(img.Bounds().Dx()) * g.zoom * IconScale
-				h := float64(img.Bounds().Dy()) * g.zoom * IconScale
+				maxDim := math.Max(float64(img.Bounds().Dx()), float64(img.Bounds().Dy()))
+				scale := g.zoom * IconScale * float64(BaseIconPixels) / maxDim
+				w := float64(img.Bounds().Dx()) * scale
+				h := float64(img.Bounds().Dy()) * scale
 				left = x - w/2
 				top = y - h/2
 				right = x + w/2
@@ -975,9 +979,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if iconName := iconForGeyser(gy.ID); iconName != "" {
 				if img, ok := g.icons[iconName]; ok && img != nil {
 					op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
-					op.GeoM.Scale(g.zoom*IconScale, g.zoom*IconScale)
-					w := float64(img.Bounds().Dx()) * g.zoom * IconScale
-					h := float64(img.Bounds().Dy()) * g.zoom * IconScale
+					maxDim := math.Max(float64(img.Bounds().Dx()), float64(img.Bounds().Dy()))
+					scale := g.zoom * IconScale * float64(BaseIconPixels) / maxDim
+					op.GeoM.Scale(scale, scale)
+					w := float64(img.Bounds().Dx()) * scale
+					h := float64(img.Bounds().Dy()) * scale
 					op.GeoM.Translate(x-w/2, y-h/2)
 					screen.DrawImage(img, op)
 					if useNumbers {
@@ -1017,9 +1023,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if iconName := iconForPOI(poi.ID); iconName != "" {
 				if img, ok := g.icons[iconName]; ok && img != nil {
 					op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
-					op.GeoM.Scale(g.zoom*IconScale, g.zoom*IconScale)
-					w := float64(img.Bounds().Dx()) * g.zoom * IconScale
-					h := float64(img.Bounds().Dy()) * g.zoom * IconScale
+					maxDim := math.Max(float64(img.Bounds().Dx()), float64(img.Bounds().Dy()))
+					scale := g.zoom * IconScale * float64(BaseIconPixels) / maxDim
+					op.GeoM.Scale(scale, scale)
+					w := float64(img.Bounds().Dx()) * scale
+					h := float64(img.Bounds().Dy()) * scale
 					op.GeoM.Translate(x-w/2, y-h/2)
 					screen.DrawImage(img, op)
 					if useNumbers {

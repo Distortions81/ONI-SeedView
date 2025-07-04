@@ -12,12 +12,16 @@ const (
 	PanSpeed         = 15
 	// CameraMargin controls how far the world can be panned
 	// beyond the visible screen in pixels.
-	CameraMargin          = -64
-	KeyZoomFactor         = 1.05
-	WheelZoomFactor       = 1.1
-	MinZoom               = 0.25
-	MaxZoom               = 8.0
-	IconScale             = 0.2
+	CameraMargin    = -64
+	KeyZoomFactor   = 1.05
+	WheelZoomFactor = 1.1
+	MinZoom         = 0.25
+	MaxZoom         = 8.0
+	IconScale       = 0.2
+	// BaseIconPixels is the target pixel size used when scaling
+	// geyser and POI icons. Larger icons are scaled down so the
+	// on-screen size is consistent across all items.
+	BaseIconPixels        = 96
 	LegendZoomExponent    = 10
 	DefaultWidth          = 800
 	DefaultHeight         = 800
