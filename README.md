@@ -48,13 +48,13 @@ sudo apt-get install xvfb   # one-time setup
 
 ## WebAssembly Build
 
-Run the build script to compile the program and copy the necessary runtime files. The generated WASM binary, runtime JavaScript and `index.html` will be placed in `dist/`.
+Run the build script to compile the program and copy the necessary runtime files. The WebAssembly module is optimized and compressed, with the runtime JavaScript and `index.html` placed in `dist/`.
 
 ```bash
 ./scripts/build_all.sh
 ```
 
-Open `dist/index.html` in a browser to test the WebAssembly build.
+Open `dist/index.html` in a browser to test the WebAssembly build. The page loads `oni-view.wasm.gz` and decompresses it with [Pako](https://github.com/nodeca/pako).
 
 ## Repository Layout
 
