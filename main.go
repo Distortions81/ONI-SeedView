@@ -568,15 +568,20 @@ iconsLoop:
 		g.camY -= panSpeed
 	}
 
+	mxTmp, myTmp := ebiten.CursorPosition()
+	mousePressed := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
+	if mxTmp < 0 || mxTmp >= g.width || myTmp < 0 || myTmp >= g.height {
+		mousePressed = false
+	}
+
 	// Mouse dragging
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-		x, y := ebiten.CursorPosition()
+	if mousePressed {
 		if g.dragging {
-			g.camX += float64(x - g.lastX)
-			g.camY += float64(y - g.lastY)
+			g.camX += float64(mxTmp - g.lastX)
+			g.camY += float64(myTmp - g.lastY)
 		}
-		g.lastX = x
-		g.lastY = y
+		g.lastX = mxTmp
+		g.lastY = myTmp
 		g.dragging = true
 	} else {
 		g.dragging = false
@@ -584,6 +589,15 @@ iconsLoop:
 
 	// Touch gestures
 	touchIDs := ebiten.TouchIDs()
+	// Filter out touches outside the window
+	valid := make([]ebiten.TouchID, 0, len(touchIDs))
+	for _, id := range touchIDs {
+		x, y := ebiten.TouchPosition(id)
+		if x >= 0 && x < g.width && y >= 0 && y < g.height {
+			valid = append(valid, id)
+		}
+	}
+	touchIDs = valid
 	if len(touchIDs) > 0 {
 		g.touchUsed = true
 	}
@@ -628,6 +642,11 @@ iconsLoop:
 		g.pinchDist = 0
 	}
 
+	if len(touchIDs) > 0 {
+		g.showInfo = false
+		g.infoPinned = false
+	}
+
 	// Zoom with keyboard
 	zoomFactor := 1.0
 	if ebiten.IsKeyPressed(ebiten.KeyEqual) || ebiten.IsKeyPressed(ebiten.KeyKPAdd) {
@@ -668,10 +687,12 @@ iconsLoop:
 		g.camY = cy - worldY*g.zoom
 	}
 
-	mx, my := 0, 0
+	mx, my := -1, -1
 	if !g.mobile {
-		mx, my = ebiten.CursorPosition()
-		if mx != g.lastMouseX || my != g.lastMouseY {
+		mx, my = mxTmp, myTmp
+		if mx < 0 || mx >= g.width || my < 0 || my >= g.height {
+			mx, my = -1, -1
+		} else if mx != g.lastMouseX || my != g.lastMouseY {
 			g.touchUsed = false
 		}
 		g.lastMouseX, g.lastMouseY = mx, my
@@ -680,7 +701,7 @@ iconsLoop:
 				g.showHelp = false
 				g.needsRedraw = true
 			}
-		} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && g.helpRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		} else if mousePressed && g.helpRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.showHelp = true
 			g.needsRedraw = true
 		}
@@ -704,10 +725,10 @@ iconsLoop:
 		g.infoX = ix
 		g.infoY = iy
 		g.showInfo = true
-		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+		if mousePressed {
 			g.infoPinned = true
 		}
-	} else if !g.infoPinned || ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+	} else if !g.infoPinned || mousePressed {
 		g.showInfo = false
 		g.infoPinned = false
 	}
@@ -736,9 +757,17 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		if msg == "" {
 			msg = "Fetching..."
 		}
-		x := g.width/2 - len(msg)*LabelCharWidth/2
+		scale := 1.0
+		if msg == "Fetching..." {
+			scale = 2.0
+		}
+		x := g.width/2 - int(float64(len(msg)*LabelCharWidth)*scale/2)
 		y := g.height / 2
-		drawTextWithBG(screen, msg, x, y)
+		if scale == 1.0 {
+			drawTextWithBG(screen, msg, x, y)
+		} else {
+			drawTextWithBGScale(screen, msg, x, y, scale)
+		}
 		return
 	}
 	if g.needsRedraw {
