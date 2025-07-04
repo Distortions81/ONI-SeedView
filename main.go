@@ -476,18 +476,60 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 }
 
 func (g *Game) drawGeyserList(dst *ebiten.Image) {
-	vector.DrawFilledRect(dst, 0, 0, float32(g.width), float32(g.height), color.RGBA{0, 0, 0, 230}, false)
+	vector.DrawFilledRect(dst, 0, 0, float32(g.width), float32(g.height), color.RGBA{0, 0, 0, 255}, false)
 	scale := g.uiScale()
-	y := int(10 - g.geyserScroll)
-	for _, gy := range g.geysers {
-		icon := (*ebiten.Image)(nil)
+	cr := g.geyserCloseRect()
+	drawTextWithBGScale(dst, "Close (X)", cr.Min.X+2, cr.Min.Y+2, scale)
+
+	spacing := int(10 * scale)
+	type item struct {
+		text string
+		icon *ebiten.Image
+		w    int
+		h    int
+	}
+	items := make([]item, len(g.geysers))
+	maxW := 0
+	for i, gy := range g.geysers {
+		ic := (*ebiten.Image)(nil)
 		if n := iconForGeyser(gy.ID); n != "" {
-			icon = g.icons[n]
+			ic = g.icons[n]
 		}
-		text := fmt.Sprintf("%s\nX: %d Y: %d", displayGeyser(gy.ID), gy.X, gy.Y)
-		drawInfoPanel(dst, text, icon, 10, y, scale)
-		_, h := infoPanelSize(text, icon)
-		y += int(float64(h)*scale) + int(float64(GeyserRowSpacing)*scale/3)
+		txt := displayGeyser(gy.ID) + "\n" + formatGeyserInfo(gy)
+		w, h := infoPanelSize(txt, ic)
+		sw := int(float64(w) * scale)
+		sh := int(float64(h) * scale)
+		if sw > maxW {
+			maxW = sw
+		}
+		items[i] = item{text: txt, icon: ic, w: sw, h: sh}
+	}
+	cols := 1
+	if maxW+spacing > 0 {
+		cols = g.width / (maxW + spacing)
+		if cols < 1 {
+			cols = 1
+		}
+	}
+	rows := (len(items) + cols - 1) / cols
+	rowHeights := make([]int, rows)
+	for i, it := range items {
+		r := i / cols
+		if it.h > rowHeights[r] {
+			rowHeights[r] = it.h
+		}
+	}
+	y := spacing - int(g.geyserScroll)
+	idx := 0
+	for r := 0; r < rows; r++ {
+		x := spacing
+		for c := 0; c < cols && idx < len(items); c++ {
+			it := items[idx]
+			drawInfoPanel(dst, it.text, it.icon, x, y, scale)
+			x += maxW + spacing
+			idx++
+		}
+		y += rowHeights[r] + spacing
 	}
 }
 
@@ -595,9 +637,19 @@ func (g *Game) helpRect() image.Rectangle {
 
 func (g *Game) geyserRect() image.Rectangle {
 	size := g.iconSize()
-	x := HelpMargin
+	x := g.width - size*3 - HelpMargin*3
 	y := g.height - size - HelpMargin
 	return image.Rect(x, y, x+size, y+size)
+}
+
+func (g *Game) geyserCloseRect() image.Rectangle {
+	text := "Close (X)"
+	scale := g.uiScale()
+	w := int(float64((len(text)*LabelCharWidth + 4)) * scale)
+	h := int(float64(16+4) * scale)
+	x := g.width - w - HelpMargin
+	y := HelpMargin
+	return image.Rect(x, y, x+w, y+h)
 }
 
 func (g *Game) clampCamera() {
@@ -709,6 +761,27 @@ iconsLoop:
 		default:
 			break iconsLoop
 		}
+	}
+
+	if g.showGeyserList {
+		_, wheelY := ebiten.Wheel()
+		if wheelY != 0 {
+			g.geyserScroll -= float64(wheelY) * 10
+			if g.geyserScroll < 0 {
+				g.geyserScroll = 0
+			}
+			g.needsRedraw = true
+		}
+		mx, my := ebiten.CursorPosition()
+		if mx >= 0 && mx < g.width && my >= 0 && my < g.height {
+			if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+				if g.geyserCloseRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+					g.showGeyserList = false
+					g.needsRedraw = true
+				}
+			}
+		}
+		return nil
 	}
 
 	oldX, oldY, oldZoom := g.camX, g.camY, g.zoom
@@ -910,11 +983,6 @@ iconsLoop:
 		} else if mousePressed && g.screenshotRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.showShotMenu = true
 			g.needsRedraw = true
-		} else if g.showGeyserList {
-			if mousePressed {
-				g.showGeyserList = false
-				g.needsRedraw = true
-			}
 		} else if mousePressed && g.geyserRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.showGeyserList = true
 			g.needsRedraw = true
@@ -1013,6 +1081,14 @@ iconsLoop:
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
+	if g.showGeyserList {
+		if g.needsRedraw {
+			screen.Fill(color.Black)
+			g.drawGeyserList(screen)
+			g.needsRedraw = false
+		}
+		return
+	}
 	if g.loading || (len(g.biomes) == 0 && g.status != "") {
 		screen.Fill(color.RGBA{30, 30, 30, 255})
 		msg := g.status
@@ -1261,9 +1337,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			coords := fmt.Sprintf("X: %d Y: %d", worldX, worldY)
 			scale := g.uiScale()
 			drawTextWithBGScale(screen, coords, 5, g.height-int(20*scale), scale)
-		}
-		if g.showGeyserList {
-			g.drawGeyserList(screen)
 		}
 
 		if g.showInfo {
