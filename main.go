@@ -1081,7 +1081,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			scx := float32(sr.Min.X + size/2)
 			scy := float32(sr.Min.Y + size/2)
 			vector.DrawFilledCircle(screen, scx, scy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
-			if cam, ok := g.icons["camera.png"]; ok && cam != nil {
+			if cam, ok := g.icons["../icons/camera.png"]; ok && cam != nil {
 				op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
 				scale := float64(size) / math.Max(float64(cam.Bounds().Dx()), float64(cam.Bounds().Dy()))
 				op.GeoM.Scale(scale, scale)
@@ -1249,7 +1249,7 @@ func main() {
 		game.camX = (float64(game.width) - float64(game.astWidth)*2*game.zoom) / 2
 		game.camY = (float64(game.height) - float64(game.astHeight)*2*game.zoom) / 2
 		game.clampCamera()
-		names := []string{"camera.png"}
+		names := []string{"../icons/camera.png"}
 		set := make(map[string]struct{})
 		for _, gy := range ast.Geysers {
 			if n := iconForGeyser(gy.ID); n != "" {
