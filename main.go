@@ -1082,11 +1082,9 @@ iconsLoop:
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	if g.showGeyserList {
-		if g.needsRedraw {
-			screen.Fill(color.Black)
-			g.drawGeyserList(screen)
-			g.needsRedraw = false
-		}
+		screen.Fill(color.Black)
+		g.drawGeyserList(screen)
+		g.needsRedraw = false
 		return
 	}
 	if g.loading || (len(g.biomes) == 0 && g.status != "") {
