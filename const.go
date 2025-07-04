@@ -34,6 +34,7 @@ const (
 	HelpMargin            = 10
 	CrosshairSize         = 10
 	InfoIconScale         = 0.3
+	InfoIconSize          = 32
 	InfoPanelAlpha        = 200
 	TouchDragThreshold    = 10
 	ScreenshotMenuSpacing = 26

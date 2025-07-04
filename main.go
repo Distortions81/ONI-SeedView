@@ -121,8 +121,8 @@ func drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int,
 	txtH := len(lines) * 16
 	iconW, iconH := 0, 0
 	if icon != nil {
-		iconW = int(float64(icon.Bounds().Dx()) * InfoIconScale)
-		iconH = int(float64(icon.Bounds().Dy()) * InfoIconScale)
+		iconW = InfoIconSize
+		iconH = InfoIconSize
 	}
 	gap := 4
 	w := txtW + iconW + gap + 4
@@ -135,7 +135,8 @@ func drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int,
 	vector.DrawFilledRect(img, 0, 0, float32(w), float32(h), color.RGBA{0, 0, 0, InfoPanelAlpha}, false)
 	if icon != nil {
 		opIcon := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
-		opIcon.GeoM.Scale(InfoIconScale, InfoIconScale)
+		scaleIcon := float64(InfoIconSize) / math.Max(float64(icon.Bounds().Dx()), float64(icon.Bounds().Dy()))
+		opIcon.GeoM.Scale(scaleIcon, scaleIcon)
 		opIcon.GeoM.Translate(2, float64(h-iconH)/2)
 		img.DrawImage(icon, opIcon)
 	}
@@ -169,8 +170,8 @@ func infoPanelSize(text string, icon *ebiten.Image) (int, int) {
 	txtH := len(lines) * 16
 	iconW, iconH := 0, 0
 	if icon != nil {
-		iconW = int(float64(icon.Bounds().Dx()) * InfoIconScale)
-		iconH = int(float64(icon.Bounds().Dy()) * InfoIconScale)
+		iconW = InfoIconSize
+		iconH = InfoIconSize
 	}
 	gap := 4
 	w := txtW + iconW + gap + 4
@@ -343,7 +344,7 @@ func drawPattern(dst *ebiten.Image, polys [][]Point, camX, camY, zoom float64, p
 	dst.DrawTriangles(vs, is, pattern, op)
 }
 
-func drawBiomeOutline(dst *ebiten.Image, polys [][]Point, camX, camY, zoom float64) {
+func drawBiomeOutline(dst *ebiten.Image, polys [][]Point, camX, camY, zoom float64, clr color.Color) {
 	for _, pts := range polys {
 		if len(pts) < 2 {
 			continue
@@ -355,7 +356,7 @@ func drawBiomeOutline(dst *ebiten.Image, polys [][]Point, camX, camY, zoom float
 			y0 := float32(math.Round(float64(a.Y*2)*zoom + camY))
 			x1 := float32(math.Round(float64(b.X*2)*zoom + camX))
 			y1 := float32(math.Round(float64(b.Y*2)*zoom + camY))
-			vector.StrokeLine(dst, x0, y0, x1, y1, 1, color.RGBA{255, 255, 255, 128}, true)
+			vector.StrokeLine(dst, x0, y0, x1, y1, 1, clr, true)
 		}
 	}
 }
@@ -471,7 +472,7 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 	if g.hoverItem >= 0 {
 		hy := y + float64(LegendRowSpacing*(g.hoverItem+1))*scale
 		hh := float32(float64(LegendRowSpacing) * scale)
-		vector.DrawFilledRect(dst, float32(x), float32(hy), float32(w), hh, color.RGBA{255, 255, 255, 50}, false)
+		vector.StrokeRect(dst, float32(x)+0.5, float32(hy)+0.5, float32(w)-1, hh-1, 2, color.RGBA{255, 0, 0, 255}, false)
 	}
 }
 
@@ -479,7 +480,10 @@ func (g *Game) drawGeyserList(dst *ebiten.Image) {
 	vector.DrawFilledRect(dst, 0, 0, float32(g.width), float32(g.height), color.RGBA{0, 0, 0, 255}, false)
 	scale := g.uiScale()
 	cr := g.geyserCloseRect()
-	drawTextWithBGScale(dst, "Close (X)", cr.Min.X+2, cr.Min.Y+2, scale)
+	vector.DrawFilledRect(dst, float32(cr.Min.X), float32(cr.Min.Y), float32(cr.Dx()), float32(cr.Dy()), color.RGBA{0, 0, 0, 200}, false)
+	vector.StrokeRect(dst, float32(cr.Min.X)+0.5, float32(cr.Min.Y)+0.5, float32(cr.Dx())-1, float32(cr.Dy())-1, 2, color.RGBA{255, 255, 255, 255}, false)
+	vector.StrokeLine(dst, float32(cr.Min.X+4), float32(cr.Min.Y+4), float32(cr.Max.X-4), float32(cr.Max.Y-4), 2, color.RGBA{255, 255, 255, 255}, false)
+	vector.StrokeLine(dst, float32(cr.Min.X+4), float32(cr.Max.Y-4), float32(cr.Max.X-4), float32(cr.Min.Y+4), 2, color.RGBA{255, 255, 255, 255}, false)
 
 	spacing := int(10 * scale)
 	type item struct {
@@ -696,13 +700,10 @@ func (g *Game) geyserRect() image.Rectangle {
 }
 
 func (g *Game) geyserCloseRect() image.Rectangle {
-	text := "Close (X)"
-	scale := g.uiScale()
-	w := int(float64((len(text)*LabelCharWidth + 4)) * scale)
-	h := int(float64(16+4) * scale)
-	x := g.width - w - HelpMargin
+	size := g.iconSize()
+	x := g.width - size - HelpMargin
 	y := HelpMargin
-	return image.Rect(x, y, x+w, y+h)
+	return image.Rect(x, y, x+size, y+size)
 }
 
 func (g *Game) clampCamera() {
@@ -1189,25 +1190,30 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				clr = color.RGBA{60, 60, 60, 255}
 			}
 			drawBiome(screen, bp.Polygons, clr, g.camX, g.camY, g.zoom)
+			highlight := g.hoverBiome >= 0 && g.hoverBiome < len(g.legendBiomes) && g.legendBiomes[g.hoverBiome] == bp.Name
 			/*
-				switch bp.Name {
-				case "FrozenWastes", "IceCaves":
-					drawTundraGradient(screen, bp.Polygons, g.camX, g.camY, g.zoom)
-					drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, tundraPattern)
-				case "MagmaCore":
-					drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, magmaPattern)
-				case "Ocean":
-					drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, oceanPattern)
-				case "Sandstone":
-					drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, sandPattern)
-				case "ToxicJungle":
-					drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, toxicPattern)
-				case "OilField":
-					drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, oilPattern)
-				case "BoggyMarsh":
-					drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, marshPattern)
-				} */
-			drawBiomeOutline(screen, bp.Polygons, g.camX, g.camY, g.zoom)
+							switch bp.Name {
+							case "FrozenWastes", "IceCaves":
+								drawTundraGradient(screen, bp.Polygons, g.camX, g.camY, g.zoom)
+								drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, tundraPattern)
+							case "MagmaCore":
+								drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, magmaPattern)
+							case "Ocean":
+								drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, oceanPattern)
+							case "Sandstone":
+								drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, sandPattern)
+							case "ToxicJungle":
+								drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, toxicPattern)
+							case "OilField":
+								drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, oilPattern)
+			                                case "BoggyMarsh":
+			                                        drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, marshPattern)
+			                                } */
+			outlineClr := color.RGBA{255, 255, 255, 128}
+			if highlight {
+				outlineClr = color.RGBA{255, 0, 0, 255}
+			}
+			drawBiomeOutline(screen, bp.Polygons, g.camX, g.camY, g.zoom, outlineClr)
 		}
 
 		for _, gy := range g.geysers {
@@ -1224,6 +1230,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if !useNumbers {
 				labelClr = color.RGBA{}
 			}
+			hover := false
+			if idx, ok := g.legendMap["g"+name]; ok && g.hoverItem == idx-1 {
+				hover = true
+				dotClr = color.RGBA{255, 0, 0, 255}
+				labelClr = dotClr
+			}
 
 			if iconName := iconForGeyser(gy.ID); iconName != "" {
 				if img, ok := g.icons[iconName]; ok && img != nil {
@@ -1235,6 +1247,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					h := float64(img.Bounds().Dy()) * scale
 					op.GeoM.Translate(x-w/2, y-h/2)
 					screen.DrawImage(img, op)
+					if hover {
+						vector.StrokeRect(screen, float32(x-w/2), float32(y-h/2), float32(w), float32(h), 2, dotClr, false)
+					}
 					if useNumbers {
 						formatted = strconv.Itoa(g.legendMap["g"+name])
 						width = len(formatted)
@@ -1245,6 +1260,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 
 			vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, dotClr, true)
+			if hover {
+				vector.StrokeRect(screen, float32(x-3), float32(y-3), 6, 6, 2, dotClr, false)
+			}
 			if useNumbers {
 				formatted = strconv.Itoa(g.legendMap["g"+name])
 				width = len(formatted)
@@ -1265,6 +1283,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if !useNumbers {
 				labelClr = color.RGBA{}
 			}
+			hover := false
+			if idx, ok := g.legendMap["p"+name]; ok && g.hoverItem == idx-1 {
+				hover = true
+				dotClr = color.RGBA{255, 0, 0, 255}
+				labelClr = dotClr
+			}
 
 			if iconName := iconForPOI(poi.ID); iconName != "" {
 				if img, ok := g.icons[iconName]; ok && img != nil {
@@ -1276,6 +1300,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					h := float64(img.Bounds().Dy()) * scale
 					op.GeoM.Translate(x-w/2, y-h/2)
 					screen.DrawImage(img, op)
+					if hover {
+						vector.StrokeRect(screen, float32(x-w/2), float32(y-h/2), float32(w), float32(h), 2, dotClr, false)
+					}
 					if useNumbers {
 						formatted = strconv.Itoa(g.legendMap["p"+name])
 						width = len(formatted)
@@ -1286,6 +1313,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 
 			vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, dotClr, true)
+			if hover {
+				vector.StrokeRect(screen, float32(x-3), float32(y-3), 6, 6, 2, dotClr, false)
+			}
 			if useNumbers {
 				formatted = strconv.Itoa(g.legendMap["p"+name])
 				width = len(formatted)
@@ -1320,8 +1350,24 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			drawTextWithBGScale(screen, g.coord, x, 10, scale)
 		}
 
+		if g.legend == nil {
+			g.legend, g.legendBiomes = buildLegendImage(g.biomes)
+		}
+		opLegend := &ebiten.DrawImageOptions{}
+		scale := g.uiScale()
+		opLegend.GeoM.Scale(scale, scale)
+		screen.DrawImage(g.legend, opLegend)
+		if g.hoverBiome >= 0 {
+			y0 := float32(float64(10+LegendRowSpacing+g.hoverBiome*LegendRowSpacing) * scale)
+			h := float32(float64(LegendRowSpacing) * scale)
+			w := float32(float64(g.legend.Bounds().Dx()) * scale)
+			vector.StrokeRect(screen, 0.5, y0+0.5, w-1, h-1, 2, color.RGBA{255, 0, 0, 255}, false)
+		}
+		if useNumbers && !g.screenshotMode {
+			g.drawNumberLegend(screen)
+		}
+
 		if !g.mobile && !g.screenshotMode {
-			// Draw screenshot icon
 			size := g.iconSize()
 			sr := g.screenshotRect()
 			scx := float32(sr.Min.X + size/2)
@@ -1335,19 +1381,24 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				h := float64(cam.Bounds().Dy()) * scale
 				op.GeoM.Translate(float64(sr.Min.X)+(float64(size)-w)/2, float64(sr.Min.Y)+(float64(size)-h)/2)
 				screen.DrawImage(cam, op)
-			} else {
-				ebitenutil.DebugPrintAt(screen, "SS", sr.Min.X+3, sr.Min.Y+5)
 			}
 			if g.showShotMenu {
 				g.drawScreenshotMenu(screen)
 			}
 
-			// Draw help icon
 			hr := g.helpRect()
 			cx := float32(hr.Min.X + size/2)
 			cy := float32(hr.Min.Y + size/2)
 			vector.DrawFilledCircle(screen, cx, cy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
-			ebitenutil.DebugPrintAt(screen, "?", hr.Min.X+7, hr.Min.Y+5)
+			if helpImg, ok := g.icons["../icons/help.png"]; ok && helpImg != nil {
+				op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
+				sc := float64(size) / math.Max(float64(helpImg.Bounds().Dx()), float64(helpImg.Bounds().Dy()))
+				op.GeoM.Scale(sc, sc)
+				w := float64(helpImg.Bounds().Dx()) * sc
+				h := float64(helpImg.Bounds().Dy()) * sc
+				op.GeoM.Translate(float64(hr.Min.X)+(float64(size)-w)/2, float64(hr.Min.Y)+(float64(size)-h)/2)
+				screen.DrawImage(helpImg, op)
+			}
 
 			gr := g.geyserRect()
 			gcx := float32(gr.Min.X + size/2)
@@ -1361,27 +1412,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				h := float64(icon.Bounds().Dy()) * sc
 				op.GeoM.Translate(float64(gr.Min.X)+(float64(size)-w)/2, float64(gr.Min.Y)+(float64(size)-h)/2)
 				screen.DrawImage(icon, op)
-			} else {
-				ebitenutil.DebugPrintAt(screen, "GY", gr.Min.X+3, gr.Min.Y+5)
 			}
 		}
 
-		if g.legend == nil {
-			g.legend, g.legendBiomes = buildLegendImage(g.biomes)
-		}
-		opLegend := &ebiten.DrawImageOptions{}
-		scale := g.uiScale()
-		opLegend.GeoM.Scale(scale, scale)
-		screen.DrawImage(g.legend, opLegend)
-		if g.hoverBiome >= 0 {
-			y0 := float32(float64(10+LegendRowSpacing+g.hoverBiome*LegendRowSpacing) * scale)
-			h := float32(float64(LegendRowSpacing) * scale)
-			w := float32(float64(g.legend.Bounds().Dx()) * scale)
-			vector.DrawFilledRect(screen, 0, y0, w, h, color.RGBA{255, 255, 255, 50}, false)
-		}
-		if useNumbers && !g.screenshotMode {
-			g.drawNumberLegend(screen)
-		}
 		if g.showHelp && !g.screenshotMode {
 			scale := g.uiScale()
 			hr := g.helpRect()
@@ -1408,8 +1441,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			w, h := textDimensions(g.infoText)
 			iconW, iconH := 0, 0
 			if g.infoIcon != nil {
-				iconW = int(float64(g.infoIcon.Bounds().Dx()) * InfoIconScale)
-				iconH = int(float64(g.infoIcon.Bounds().Dy()) * InfoIconScale)
+				iconW = InfoIconSize
+				iconH = InfoIconSize
 			}
 			panelW := w + iconW + 4
 			panelH := h
@@ -1522,7 +1555,7 @@ func main() {
 		game.camX = (float64(game.width) - float64(game.astWidth)*2*game.zoom) / 2
 		game.camY = (float64(game.height) - float64(game.astHeight)*2*game.zoom) / 2
 		game.clampCamera()
-		names := []string{"../icons/camera.png", "geyser_water.png"}
+		names := []string{"../icons/camera.png", "../icons/help.png", "geyser_water.png"}
 		set := make(map[string]struct{})
 		for _, gy := range ast.Geysers {
 			if n := iconForGeyser(gy.ID); n != "" {
