@@ -14,11 +14,11 @@ jobs:
         with:
           go-version: 'stable'
       - name: Install deps
-        run: sudo apt-get update && sudo apt-get install -y xvfb webp
+        run: sudo apt-get update && sudo apt-get install -y webp
       - name: Download assets
         run: ./scripts/download_assets.sh
       - name: Run tests
-        run: xvfb-run --auto-servernum --server-args='-screen 0 1280x720x24' go test ./...
+        run: go test -tags test ./...
       - name: Build binaries
         run: ./scripts/build_all.sh
       - name: Copy assets
