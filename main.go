@@ -164,7 +164,7 @@ var biomeColors = map[string]color.RGBA{
 	"Barren":    darkenColor(colorFromARGB(0xFF97752C), 0.6),
 	// Use a lighter gray so the space region stands out from the
 	// background color of the window.
-	"Space":               colorFromARGB(0xFFD0D0D0),
+	"Space":               darkenColor(colorFromARGB(0xFFD0D0D0), 0.6),
 	"FrozenWastes":        darkenColor(colorFromARGB(0xFF4F80B5), 0.6),
 	"BoggyMarsh":          darkenColor(colorFromARGB(0xFF7B974B), 0.6),
 	"ToxicJungle":         darkenColor(colorFromARGB(0xFFCB95A3), 0.6),
