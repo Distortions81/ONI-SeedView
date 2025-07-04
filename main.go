@@ -411,6 +411,9 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 		g.legendImage = img
 	}
 	scale := 1.0
+	if (g.height > 850 && !g.mobile) || g.screenshotMode {
+		scale = 2.0
+	}
 	w := float64(g.legendImage.Bounds().Dx()) * scale
 	x := float64(dst.Bounds().Dx()) - w - 12
 	y := 10.0
@@ -1005,7 +1008,17 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			scx := float32(sr.Min.X + HelpIconSize/2)
 			scy := float32(sr.Min.Y + HelpIconSize/2)
 			vector.DrawFilledCircle(screen, scx, scy, HelpIconSize/2, color.RGBA{0, 0, 0, 180}, true)
-			ebitenutil.DebugPrintAt(screen, "SS", sr.Min.X+3, sr.Min.Y+5)
+			if cam, ok := g.icons["camera.png"]; ok && cam != nil {
+				op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
+				scale := float64(HelpIconSize) / math.Max(float64(cam.Bounds().Dx()), float64(cam.Bounds().Dy()))
+				op.GeoM.Scale(scale, scale)
+				w := float64(cam.Bounds().Dx()) * scale
+				h := float64(cam.Bounds().Dy()) * scale
+				op.GeoM.Translate(float64(sr.Min.X)+(float64(HelpIconSize)-w)/2, float64(sr.Min.Y)+(float64(HelpIconSize)-h)/2)
+				screen.DrawImage(cam, op)
+			} else {
+				ebitenutil.DebugPrintAt(screen, "SS", sr.Min.X+3, sr.Min.Y+5)
+			}
 			if g.showShotMenu {
 				g.drawScreenshotMenu(screen)
 			}
@@ -1042,10 +1055,16 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			worldY := int(math.Round(((float64(cy) - g.camY) / g.zoom) / 2))
 			coords := fmt.Sprintf("X: %d Y: %d", worldX, worldY)
 			scale := 1.0
+			if (g.height > 850 && !g.mobile) || g.screenshotMode {
+				scale = 2.0
+			}
 			drawTextWithBGScale(screen, coords, 5, g.height-int(20*scale), scale)
 		}
 		if g.showInfo {
 			scale := 1.0
+			if (g.height > 850 && !g.mobile) || g.screenshotMode {
+				scale = 2.0
+			}
 			w, h := textDimensions(g.infoText)
 			iconW, iconH := 0, 0
 			if g.infoIcon != nil {
@@ -1154,7 +1173,7 @@ func main() {
 		game.camX = (float64(game.width) - float64(game.astWidth)*2*game.zoom) / 2
 		game.camY = (float64(game.height) - float64(game.astHeight)*2*game.zoom) / 2
 		game.clampCamera()
-		names := []string{}
+		names := []string{"camera.png"}
 		set := make(map[string]struct{})
 		for _, gy := range ast.Geysers {
 			if n := iconForGeyser(gy.ID); n != "" {

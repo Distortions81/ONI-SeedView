@@ -26,6 +26,9 @@ find "$ASSET_SRC" -name '*.webp' -print0 | while IFS= read -r -d '' img; do
     dwebp "$img" -o "$out" >/dev/null
 done
 
+# copy local icons if present
+cp "$(dirname "$0")/../icons"/*.png "$ASSET_DIR" 2>/dev/null || true
+
 echo "Cleaning up..."
 rm -rf "$TEMP_DIR"
 

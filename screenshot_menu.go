@@ -22,7 +22,7 @@ func (g *Game) screenshotRect() image.Rectangle {
 }
 
 func (g *Game) screenshotMenuRect() image.Rectangle {
-	labels := []string{"Low", "Medium", "High", "Extreme", "Save Screenshot"}
+	labels := []string{"Image quality:", "Low (1x)", "Medium (2x)", "High (4x)", "Extreme (8x)", "Save Screenshot"}
 	maxW := 0
 	for _, s := range labels {
 		if len(s) > maxW {
@@ -45,8 +45,9 @@ func (g *Game) screenshotMenuRect() image.Rectangle {
 func (g *Game) drawScreenshotMenu(dst *ebiten.Image) {
 	rect := g.screenshotMenuRect()
 	vector.DrawFilledRect(dst, float32(rect.Min.X), float32(rect.Min.Y), float32(rect.Dx()), float32(rect.Dy()), colorRGBA(0, 0, 0, 200), false)
-	items := []string{"Low", "Medium", "High", "Extreme", "Save Screenshot"}
-	y := rect.Min.Y + 2
+	drawTextWithBG(dst, "Image quality:", rect.Min.X+2, rect.Min.Y+2)
+	items := []string{"Low (1x)", "Medium (2x)", "High (4x)", "Extreme (8x)", "Save Screenshot"}
+	y := rect.Min.Y + 2 + ScreenshotMenuSpacing
 	for i, it := range items {
 		selected := i == g.ssQuality
 		if selected {
@@ -63,8 +64,8 @@ func (g *Game) clickScreenshotMenu(mx, my int) bool {
 	if !rect.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		return false
 	}
-	items := []string{"Low", "Medium", "High", "Extreme", "Save Screenshot"}
-	y := rect.Min.Y + 2
+	items := []string{"Low (1x)", "Medium (2x)", "High (4x)", "Extreme (8x)", "Save Screenshot"}
+	y := rect.Min.Y + 2 + ScreenshotMenuSpacing
 	for i := range items {
 		r := image.Rect(rect.Min.X, y-2, rect.Min.X+rect.Dx(), y-2+16+4)
 		if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
@@ -89,11 +90,11 @@ func (g *Game) saveScreenshot() {
 	case 0:
 		scale = 1.0
 	case 1:
-		scale = 4.0
-	case 2:
-		scale = 8.0
-	default:
 		scale = 2.0
+	case 2:
+		scale = 4.0
+	default:
+		scale = 8.0
 	}
 	width := int(float64(g.astWidth) * 2 * scale)
 	height := int(float64(g.astHeight) * 2 * scale)
