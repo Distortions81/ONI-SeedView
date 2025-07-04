@@ -465,6 +465,10 @@ type Game struct {
 	lastMouseX     int
 	lastMouseY     int
 	touchUsed      bool
+	touchActive    bool
+	touchStartX    int
+	touchStartY    int
+	touchMoved     bool
 }
 
 type label struct {
@@ -652,8 +656,18 @@ iconsLoop:
 		id := touchIDs[0]
 		x, y := ebiten.TouchPosition(id)
 		if last, ok := g.touches[id]; ok {
-			g.camX += float64(x - last.x)
-			g.camY += float64(y - last.y)
+			dx := x - last.x
+			dy := y - last.y
+			g.camX += float64(dx)
+			g.camY += float64(dy)
+			if abs(dx) > TouchDragThreshold || abs(dy) > TouchDragThreshold {
+				g.touchMoved = true
+			}
+		} else {
+			g.touchStartX = x
+			g.touchStartY = y
+			g.touchMoved = false
+			g.touchActive = true
 		}
 		g.touches = map[ebiten.TouchID]touchPoint{id: {x: x, y: y}}
 		g.pinchDist = 0
@@ -683,9 +697,21 @@ iconsLoop:
 			id1: {x: x1, y: y1},
 			id2: {x: x2, y: y2},
 		}
+		g.touchActive = false
+		g.touchMoved = false
 	default:
+		if g.mobile && g.touchActive && !g.touchMoved {
+			if _, ix, iy, _, found := g.itemAt(g.touchStartX, g.touchStartY); found {
+				g.camX += float64(g.width/2 - ix)
+				g.camY += float64(g.height/2 - iy)
+				g.clampCamera()
+				g.needsRedraw = true
+			}
+		}
 		g.touches = nil
 		g.pinchDist = 0
+		g.touchActive = false
+		g.touchMoved = false
 	}
 
 	if len(touchIDs) > 0 {
@@ -869,9 +895,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 			name := displayGeyser(gy.ID)
 			formatted, width := formatLabel(name)
-			clr := color.RGBA{}
+			dotClr := color.RGBA{}
 			if idx, ok := g.legendMap["g"+name]; ok && idx-1 < len(g.legendColors) {
-				clr = g.legendColors[idx-1]
+				dotClr = g.legendColors[idx-1]
+			}
+			labelClr := dotClr
+			if !useNumbers {
+				labelClr = color.RGBA{}
 			}
 
 			if iconName := iconForGeyser(gy.ID); iconName != "" {
@@ -886,17 +916,17 @@ func (g *Game) Draw(screen *ebiten.Image) {
 						formatted = strconv.Itoa(g.legendMap["g"+name])
 						width = len(formatted)
 					}
-					labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, clr})
+					labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, labelClr})
 					continue
 				}
 			}
 
-			vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, clr, true)
+			vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, dotClr, true)
 			if useNumbers {
 				formatted = strconv.Itoa(g.legendMap["g"+name])
 				width = len(formatted)
 			}
-			labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, clr})
+			labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, labelClr})
 		}
 		for _, poi := range g.pois {
 			x := math.Round((float64(poi.X) * 2 * g.zoom) + g.camX)
@@ -904,9 +934,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 			name := displayPOI(poi.ID)
 			formatted, width := formatLabel(name)
-			clr := color.RGBA{}
+			dotClr := color.RGBA{}
 			if idx, ok := g.legendMap["p"+name]; ok && idx-1 < len(g.legendColors) {
-				clr = g.legendColors[idx-1]
+				dotClr = g.legendColors[idx-1]
+			}
+			labelClr := dotClr
+			if !useNumbers {
+				labelClr = color.RGBA{}
 			}
 
 			if iconName := iconForPOI(poi.ID); iconName != "" {
@@ -921,17 +955,17 @@ func (g *Game) Draw(screen *ebiten.Image) {
 						formatted = strconv.Itoa(g.legendMap["p"+name])
 						width = len(formatted)
 					}
-					labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, clr})
+					labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, labelClr})
 					continue
 				}
 			}
 
-			vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, clr, true)
+			vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, dotClr, true)
 			if useNumbers {
 				formatted = strconv.Itoa(g.legendMap["p"+name])
 				width = len(formatted)
 			}
-			labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, clr})
+			labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, labelClr})
 		}
 
 		for _, l := range labels {
