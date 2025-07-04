@@ -90,7 +90,7 @@ the environments are:
   seed from the page URL using `?coord=` or `#coord=` parameters.
 * **Mobile** – When running on a mobile OS or in a mobile browser the toolbar
   icons are hidden. Item details appear when the crosshair is centered over a
-  geyser or POI, and you pan or zoom using touch gestures.
+  geyser or POI, or a POI is clicked, and you pan or zoom using touch gestures.
 
 ## Saving Screenshots
 
