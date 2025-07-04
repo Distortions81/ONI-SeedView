@@ -1068,6 +1068,7 @@ type Game struct {
 	loading        bool
 	status         string
 	iconResults    chan loadedIcon
+	coord          string
 	mobile         bool
 }
 
@@ -1423,6 +1424,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			g.drawNumberLegend(screen)
 		}
 
+		if g.coord != "" {
+			x := g.width/2 - len(g.coord)*LabelCharWidth/2
+			drawTextWithBG(screen, g.coord, x, 10)
+		}
+
 		// Draw help icon
 		hr := g.helpRect()
 		cx := float32(hr.Min.X + HelpIconSize/2)
@@ -1484,6 +1490,7 @@ func main() {
 		zoom:    1.0,
 		loading: true,
 		status:  "Fetching...",
+		coord:   *coord,
 		mobile:  isMobile(),
 	}
 	go func() {
