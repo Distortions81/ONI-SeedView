@@ -470,7 +470,7 @@ type Game struct {
 	touchStartY    int
 	touchMoved     bool
 	showShotMenu   bool
-	ssAspect       int
+	screenshotMode bool
 	ssQuality      int
 }
 
@@ -763,7 +763,7 @@ iconsLoop:
 	}
 
 	mx, my := -1, -1
-	if !g.mobile {
+	if !g.mobile && !g.screenshotMode {
 		mx, my = mxTmp, myTmp
 		if mx < 0 || mx >= g.width || my < 0 || my >= g.height {
 			mx, my = -1, -1
@@ -872,7 +872,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				float32(float64(g.astHeight)*2*g.zoom), clr, false)
 		}
 		labels := []label{}
-		useNumbers := !g.mobile && g.zoom < LegendZoomThreshold
+		useNumbers := !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
 		if g.legendMap == nil {
 			g.initObjectLegend()
 		}
@@ -909,6 +909,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			y := math.Round((float64(gy.Y) * 2 * g.zoom) + g.camY)
 
 			name := displayGeyser(gy.ID)
+			if g.screenshotMode {
+				name = fullGeyserName(gy.ID)
+			}
 			formatted, width := formatLabel(name)
 			dotClr := color.RGBA{}
 			if idx, ok := g.legendMap["g"+name]; ok && idx-1 < len(g.legendColors) {
@@ -948,6 +951,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			y := math.Round((float64(poi.Y) * 2 * g.zoom) + g.camY)
 
 			name := displayPOI(poi.ID)
+			if g.screenshotMode {
+				name = fullPOIName(poi.ID)
+			}
 			formatted, width := formatLabel(name)
 			dotClr := color.RGBA{}
 			if idx, ok := g.legendMap["p"+name]; ok && idx-1 < len(g.legendColors) {
@@ -991,7 +997,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 		}
 
-		if g.coord != "" {
+		if g.coord != "" && !g.screenshotMode {
 			x := g.width/2 - len(g.coord)*LabelCharWidth/2
 			drawTextWithBG(screen, g.coord, x, 10)
 		}
@@ -1028,23 +1034,25 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			opLegend.GeoM.Scale(2, 2)
 		}
 		screen.DrawImage(g.legend, opLegend)
-		if useNumbers {
+		if useNumbers && !g.screenshotMode {
 			g.drawNumberLegend(screen)
 		}
 
-		cx := g.width / 2
-		cy := g.height / 2
-		crossClr := color.RGBA{255, 255, 255, 30}
-		vector.StrokeLine(screen, float32(cx-CrosshairSize), float32(cy), float32(cx+CrosshairSize), float32(cy), 1, crossClr, true)
-		vector.StrokeLine(screen, float32(cx), float32(cy-CrosshairSize), float32(cx), float32(cy+CrosshairSize), 1, crossClr, true)
-		worldX := int(math.Round(((float64(cx) - g.camX) / g.zoom) / 2))
-		worldY := int(math.Round(((float64(cy) - g.camY) / g.zoom) / 2))
-		coords := fmt.Sprintf("X: %d Y: %d", worldX, worldY)
-		scale := 1.0
-		if g.height > 850 && !g.mobile {
-			scale = 2.0
+		if !g.screenshotMode {
+			cx := g.width / 2
+			cy := g.height / 2
+			crossClr := color.RGBA{255, 255, 255, 30}
+			vector.StrokeLine(screen, float32(cx-CrosshairSize), float32(cy), float32(cx+CrosshairSize), float32(cy), 1, crossClr, true)
+			vector.StrokeLine(screen, float32(cx), float32(cy-CrosshairSize), float32(cx), float32(cy+CrosshairSize), 1, crossClr, true)
+			worldX := int(math.Round(((float64(cx) - g.camX) / g.zoom) / 2))
+			worldY := int(math.Round(((float64(cy) - g.camY) / g.zoom) / 2))
+			coords := fmt.Sprintf("X: %d Y: %d", worldX, worldY)
+			scale := 1.0
+			if g.height > 850 && !g.mobile {
+				scale = 2.0
+			}
+			drawTextWithBGScale(screen, coords, 5, g.height-int(20*scale), scale)
 		}
-		drawTextWithBGScale(screen, coords, 5, g.height-int(20*scale), scale)
 		if g.showInfo {
 			scale := 1.0
 			if g.height > 850 && !g.mobile {

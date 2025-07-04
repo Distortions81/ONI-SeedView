@@ -22,7 +22,7 @@ func (g *Game) screenshotRect() image.Rectangle {
 }
 
 func (g *Game) screenshotMenuRect() image.Rectangle {
-	labels := []string{"Square (1:1)", "Portrait (3:4)", "Low", "Medium", "High", "Extreme", "Save Screenshot"}
+	labels := []string{"Low", "Medium", "High", "Extreme", "Save Screenshot"}
 	maxW := 0
 	for _, s := range labels {
 		if len(s) > maxW {
@@ -45,10 +45,10 @@ func (g *Game) screenshotMenuRect() image.Rectangle {
 func (g *Game) drawScreenshotMenu(dst *ebiten.Image) {
 	rect := g.screenshotMenuRect()
 	vector.DrawFilledRect(dst, float32(rect.Min.X), float32(rect.Min.Y), float32(rect.Dx()), float32(rect.Dy()), colorRGBA(0, 0, 0, 200), false)
-	items := []string{"Square (1:1)", "Portrait (3:4)", "Low", "Medium", "High", "Extreme", "Save Screenshot"}
+	items := []string{"Low", "Medium", "High", "Extreme", "Save Screenshot"}
 	y := rect.Min.Y + 2
 	for i, it := range items {
-		selected := (i == g.ssAspect) || (i-2 == g.ssQuality && i >= 2 && i <= 5)
+		selected := i == g.ssQuality
 		if selected {
 			drawTextWithBGBorder(dst, it, rect.Min.X+2, y, colorRGBA(255, 255, 255, 255))
 		} else {
@@ -63,19 +63,15 @@ func (g *Game) clickScreenshotMenu(mx, my int) bool {
 	if !rect.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		return false
 	}
-	items := []string{"Square (1:1)", "Portrait (3:4)", "Low", "Medium", "High", "Extreme", "Save Screenshot"}
+	items := []string{"Low", "Medium", "High", "Extreme", "Save Screenshot"}
 	y := rect.Min.Y + 2
 	for i := range items {
 		r := image.Rect(rect.Min.X, y-2, rect.Min.X+rect.Dx(), y-2+16+4)
 		if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			switch i {
-			case 0:
-				g.ssAspect = 0
-			case 1:
-				g.ssAspect = 1
-			case 2, 3, 4, 5:
-				g.ssQuality = i - 2
-			case 6:
+			case 0, 1, 2, 3:
+				g.ssQuality = i
+			case 4:
 				g.saveScreenshot()
 				g.showShotMenu = false
 			}
@@ -88,30 +84,29 @@ func (g *Game) clickScreenshotMenu(mx, my int) bool {
 }
 
 func (g *Game) saveScreenshot() {
-	var height int
+	scale := 1.0
 	switch g.ssQuality {
 	case 0:
-		height = g.height
+		scale = 0.5
 	case 1:
-		height = 2048
+		scale = 1.0
 	case 2:
-		height = 4096
+		scale = 2.0
 	default:
-		height = 8192
+		scale = 4.0
 	}
-	width := height
-	if g.ssAspect == 1 {
-		width = height * 3 / 4
-	}
-	img := g.captureScreenshot(width, height)
+	width := int(float64(g.astWidth) * 2 * scale)
+	height := int(float64(g.astHeight) * 2 * scale)
+	img := g.captureScreenshot(width, height, scale)
 	var buf bytes.Buffer
 	_ = png.Encode(&buf, img)
 	name := fmt.Sprintf("%s-%s.png", g.coord, time.Now().Format("20060102-150405"))
 	_ = saveImageData(name, buf.Bytes())
 }
 
-func (g *Game) captureScreenshot(w, h int) *image.RGBA {
+func (g *Game) captureScreenshot(w, h int, zoom float64) *image.RGBA {
 	ow, oh := g.width, g.height
+	ox, oy, oz := g.camX, g.camY, g.zoom
 	showHelp := g.showHelp
 	showInfo := g.showInfo
 	menu := g.showShotMenu
@@ -120,7 +115,12 @@ func (g *Game) captureScreenshot(w, h int) *image.RGBA {
 	g.showInfo = false
 	g.infoPinned = false
 	g.showShotMenu = false
-	g.Layout(w, h)
+	g.width = w
+	g.height = h
+	g.zoom = zoom
+	g.camX = 0
+	g.camY = 0
+	g.screenshotMode = true
 	img := ebiten.NewImage(w, h)
 	g.needsRedraw = true
 	g.Draw(img)
@@ -128,7 +128,12 @@ func (g *Game) captureScreenshot(w, h int) *image.RGBA {
 	pix := make([]byte, 4*b.Dx()*b.Dy())
 	img.ReadPixels(pix)
 	rgba := &image.RGBA{Pix: pix, Stride: 4 * b.Dx(), Rect: b}
-	g.Layout(ow, oh)
+	g.screenshotMode = false
+	g.width = ow
+	g.height = oh
+	g.zoom = oz
+	g.camX = ox
+	g.camY = oy
 	g.showHelp = showHelp
 	g.showInfo = showInfo
 	g.infoPinned = pinned
