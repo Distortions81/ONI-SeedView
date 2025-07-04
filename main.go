@@ -467,12 +467,12 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 	y := 10.0
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(scale, scale)
-	op.GeoM.Translate(x, y)
+	op.GeoM.Translate(math.Round(x), math.Round(y))
 	dst.DrawImage(g.legendImage, op)
 	if g.hoverItem >= 0 {
 		hy := y + float64(10+LegendRowSpacing*(g.hoverItem+1))*scale
-		hh := float32(float64(LegendRowSpacing) * scale)
-		vector.StrokeRect(dst, float32(x)+0.5, float32(hy)+0.5, float32(w)-1, hh-1, 2, color.RGBA{255, 0, 0, 255}, false)
+		hh := float64(LegendRowSpacing) * scale
+		vector.StrokeRect(dst, float32(math.Round(x))+0.5, float32(math.Round(hy))+0.5, float32(math.Round(w))-1, float32(math.Round(hh))-1, 2, color.RGBA{255, 0, 0, 255}, false)
 	}
 }
 
@@ -1370,12 +1370,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		opLegend := &ebiten.DrawImageOptions{}
 		scale := g.uiScale()
 		opLegend.GeoM.Scale(scale, scale)
+		opLegend.GeoM.Translate(0, 0)
 		screen.DrawImage(g.legend, opLegend)
 		if g.hoverBiome >= 0 {
-			y0 := float32(float64(10+LegendRowSpacing+g.hoverBiome*LegendRowSpacing) * scale)
-			h := float32(float64(LegendRowSpacing) * scale)
-			w := float32(float64(g.legend.Bounds().Dx()) * scale)
-			vector.StrokeRect(screen, 0.5, y0+0.5, w-1, h-1, 2, color.RGBA{255, 0, 0, 255}, false)
+			y0 := math.Round(float64(10+LegendRowSpacing+g.hoverBiome*LegendRowSpacing) * scale)
+			h := math.Round(float64(LegendRowSpacing) * scale)
+			w := math.Round(float64(g.legend.Bounds().Dx()) * scale)
+			vector.StrokeRect(screen, 0.5, float32(y0)+0.5, float32(w)-1, float32(h)-1, 2, color.RGBA{255, 0, 0, 255}, false)
 		}
 		if useNumbers && !g.screenshotMode {
 			g.drawNumberLegend(screen)
