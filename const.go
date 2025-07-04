@@ -30,6 +30,11 @@ const (
 	// WheelThrottle controls how often mouse wheel zoom is applied
 	// in WASM to account for faster scroll events.
 	WheelThrottle = 75 * time.Millisecond
+
+	// WebAssetBase specifies the path used to fetch image assets
+	// when running in WebAssembly. The assets should be served
+	// relative to the page URL.
+	WebAssetBase = "assets/"
 )
 
 var LegendZoomThreshold = math.Pow(WheelZoomFactor, LegendZoomExponent)
