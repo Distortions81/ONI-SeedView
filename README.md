@@ -55,6 +55,8 @@ Run the build script to compile the program and copy the necessary runtime files
 ```
 
 Open `dist/index.html` in a browser to test the WebAssembly build. The page loads `oni-view.wasm.gz` and decompresses it with [Pako](https://github.com/nodeca/pako).
+You can specify the seed coordinate in the URL using `?coord=<seed>` or in the
+fragment like `#coord=<seed>` and the viewer will load it automatically.
 
 ## Repository Layout
 
