@@ -78,6 +78,20 @@ Open `dist/index.html` in a browser to test the WebAssembly build. The page load
 You can specify the seed coordinate in the URL using `?coord=<seed>` or in the
 fragment like `#coord=<seed>` and the viewer will load it automatically.
 
+## Desktop vs Web and Mobile
+
+Oni View runs on the desktop as well as in the browser. Key differences between
+the environments are:
+
+* **Desktop** – Launch the program with the `-coord` flag to select a seed.
+  Screenshot, help and geyser icons are always visible and you interact using
+  the mouse and keyboard.
+* **WebAssembly** – No command line flags are available. The viewer reads the
+  seed from the page URL using `?coord=` or `#coord=` parameters.
+* **Mobile** – When running on a mobile OS or in a mobile browser the toolbar
+  icons are hidden. Item details appear when the crosshair is centered over a
+  geyser or POI, and you pan or zoom using touch gestures.
+
 ## Saving Screenshots
 
 Click the camera icon to open the screenshot menu. Choose a quality level
