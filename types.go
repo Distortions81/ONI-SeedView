@@ -8,9 +8,15 @@ import (
 
 // Data structures used to decode the geyser information.
 type Geyser struct {
-	ID string `json:"id"`
-	X  int    `json:"x"`
-	Y  int    `json:"y"`
+	ID             string  `json:"id"`
+	X              int     `json:"x"`
+	Y              int     `json:"y"`
+	ActiveCycles   float64 `json:"activeCycles"`
+	AvgEmitRate    float64 `json:"avgEmitRate"`
+	DormancyCycles float64 `json:"dormancyCycles"`
+	EmitRate       float64 `json:"emitRate"`
+	EruptionTime   float64 `json:"eruptionTime"`
+	IdleTime       float64 `json:"idleTime"`
 }
 
 type PointOfInterest struct {
