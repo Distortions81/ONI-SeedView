@@ -707,20 +707,26 @@ func (g *Game) geyserCloseRect() image.Rectangle {
 }
 
 func (g *Game) clampCamera() {
-	w := float64(g.astWidth) * 2 * g.zoom
-	h := float64(g.astHeight) * 2 * g.zoom
-	margin := float64(CameraMargin)
-	if g.camX < -w-margin {
-		g.camX = -w - margin
+	if g.astWidth == 0 || g.astHeight == 0 {
+		return
 	}
-	if g.camX > float64(g.width)+margin {
-		g.camX = float64(g.width) + margin
+	cx := float64(g.width) / 2
+	cy := float64(g.height) / 2
+	maxX := cx
+	minX := cx - float64(g.astWidth)*2*g.zoom
+	if g.camX < minX {
+		g.camX = minX
 	}
-	if g.camY < -h-margin {
-		g.camY = -h - margin
+	if g.camX > maxX {
+		g.camX = maxX
 	}
-	if g.camY > float64(g.height)+margin {
-		g.camY = float64(g.height) + margin
+	maxY := cy
+	minY := cy - float64(g.astHeight)*2*g.zoom
+	if g.camY < minY {
+		g.camY = minY
+	}
+	if g.camY > maxY {
+		g.camY = maxY
 	}
 }
 
@@ -1249,10 +1255,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					op.GeoM.Scale(scale, scale)
 					w := float64(img.Bounds().Dx()) * scale
 					h := float64(img.Bounds().Dy()) * scale
-					op.GeoM.Translate(x-w/2, y-h/2)
+					left := math.Round(x - w/2)
+					top := math.Round(y - h/2)
+					op.GeoM.Translate(left, top)
 					screen.DrawImage(img, op)
 					if hover {
-						vector.StrokeRect(screen, float32(x-w/2), float32(y-h/2), float32(w), float32(h), 2, dotClr, false)
+						vector.StrokeRect(screen, float32(left)+0.5, float32(top)+0.5, float32(math.Round(w))-1, float32(math.Round(h))-1, 2, dotClr, false)
 					}
 					if useNumbers {
 						formatted = strconv.Itoa(g.legendMap["g"+name])
@@ -1463,9 +1471,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					op.GeoM.Scale(scale, scale)
 					w := float64(img.Bounds().Dx()) * scale
 					h := float64(img.Bounds().Dy()) * scale
-					op.GeoM.Translate(x-w/2, y-h/2)
+					left := math.Round(x - w/2)
+					top := math.Round(y - h/2)
+					op.GeoM.Translate(left, top)
 					screen.DrawImage(img, op)
-					vector.StrokeRect(screen, float32(x-w/2), float32(y-h/2), float32(w), float32(h), 2, dotClr, false)
+					vector.StrokeRect(screen, float32(left)+0.5, float32(top)+0.5, float32(math.Round(w))-1, float32(math.Round(h))-1, 2, dotClr, false)
 					if useNumbers {
 						formatted = strconv.Itoa(g.legendMap["g"+name])
 						width = len(formatted)
@@ -1504,9 +1514,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					op.GeoM.Scale(scale, scale)
 					w := float64(img.Bounds().Dx()) * scale
 					h := float64(img.Bounds().Dy()) * scale
-					op.GeoM.Translate(x-w/2, y-h/2)
+					left := math.Round(x - w/2)
+					top := math.Round(y - h/2)
+					op.GeoM.Translate(left, top)
 					screen.DrawImage(img, op)
-					vector.StrokeRect(screen, float32(x-w/2), float32(y-h/2), float32(w), float32(h), 2, dotClr, false)
+					vector.StrokeRect(screen, float32(left)+0.5, float32(top)+0.5, float32(math.Round(w))-1, float32(math.Round(h))-1, 2, dotClr, false)
 					if useNumbers {
 						formatted = strconv.Itoa(g.legendMap["p"+name])
 						width = len(formatted)
