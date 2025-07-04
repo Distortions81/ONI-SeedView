@@ -7,3 +7,7 @@ env CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o dist/oni-view-linux-amd64 
 env CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build -o dist/oni-view-windows-amd64.exe .
 env CGO_ENABLED=0 GOOS=js GOARCH=wasm go build -o dist/oni-view.wasm .
 
+# Copy the JS runtime and HTML loader for WASM builds.
+cp $(go env GOROOT)/lib/wasm/wasm_exec.js dist/
+cp index.html dist/
+

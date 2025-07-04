@@ -46,6 +46,16 @@ sudo apt-get install xvfb   # one-time setup
 ./scripts/run_headless.sh -coord SNDST-A-7-0-0-0
 ```
 
+## WebAssembly Build
+
+Run the build script to compile the program and copy the necessary runtime files. The generated WASM binary, runtime JavaScript and `index.html` will be placed in `dist/`.
+
+```bash
+./scripts/build_all.sh
+```
+
+Open `dist/index.html` in a browser to test the WebAssembly build.
+
 ## Repository Layout
 
 ```
