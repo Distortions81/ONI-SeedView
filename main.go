@@ -717,7 +717,11 @@ iconsLoop:
 	prevText := g.infoText
 
 	info, ix, iy, found := "", 0, 0, false
-	if !g.touchUsed {
+	if g.mobile {
+		cx := g.width / 2
+		cy := g.height / 2
+		info, ix, iy, found = g.itemAt(cx, cy)
+	} else if !g.touchUsed {
 		info, ix, iy, found = g.itemAt(mx, my)
 	}
 	if found {
@@ -894,16 +898,18 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			drawTextWithBG(screen, g.coord, x, 10)
 		}
 
-		// Draw help icon
-		hr := g.helpRect()
-		cx := float32(hr.Min.X + HelpIconSize/2)
-		cy := float32(hr.Min.Y + HelpIconSize/2)
-		vector.DrawFilledCircle(screen, cx, cy, HelpIconSize/2, color.RGBA{0, 0, 0, 180}, true)
-		ebitenutil.DebugPrintAt(screen, "?", hr.Min.X+7, hr.Min.Y+5)
-		if g.showHelp {
-			tx := hr.Min.X - 170
-			ty := hr.Min.Y - 70
-			drawTextWithBG(screen, helpMessage, tx, ty)
+		if !g.mobile {
+			// Draw help icon
+			hr := g.helpRect()
+			cx := float32(hr.Min.X + HelpIconSize/2)
+			cy := float32(hr.Min.Y + HelpIconSize/2)
+			vector.DrawFilledCircle(screen, cx, cy, HelpIconSize/2, color.RGBA{0, 0, 0, 180}, true)
+			ebitenutil.DebugPrintAt(screen, "?", hr.Min.X+7, hr.Min.Y+5)
+			if g.showHelp {
+				tx := hr.Min.X - 170
+				ty := hr.Min.Y - 70
+				drawTextWithBG(screen, helpMessage, tx, ty)
+			}
 		}
 
 		if g.legend == nil {
@@ -926,7 +932,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		worldX := int(math.Round(((float64(cx) - g.camX) / g.zoom) / 2))
 		worldY := int(math.Round(((float64(cy) - g.camY) / g.zoom) / 2))
 		coords := fmt.Sprintf("X: %d Y: %d", worldX, worldY)
-		drawTextWithBG(screen, coords, 5, g.height-20)
+		scale := 1.0
+		if g.height > 850 && !g.mobile {
+			scale = 2.0
+		}
+		drawTextWithBGScale(screen, coords, 5, g.height-int(20*scale), scale)
 		if g.showInfo {
 			scale := 1.0
 			if g.height > 850 && !g.mobile {
