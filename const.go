@@ -1,7 +1,10 @@
 // Package constants for configuration.
 package main
 
-import "math"
+import (
+	"math"
+	"time"
+)
 
 const (
 	BaseURL          = "https://ingest.mapsnotincluded.org/coordinate/"
@@ -24,6 +27,9 @@ const (
 	ScreenshotFile      = "screenshot.png"
 	HelpIconSize        = 24
 	HelpMargin          = 10
+	// WheelThrottle controls how often mouse wheel zoom is applied
+	// in WASM to account for faster scroll events.
+	WheelThrottle = 75 * time.Millisecond
 )
 
 var LegendZoomThreshold = math.Pow(WheelZoomFactor, LegendZoomExponent)
