@@ -533,6 +533,58 @@ func (g *Game) drawGeyserList(dst *ebiten.Image) {
 	}
 }
 
+func (g *Game) maxGeyserScroll() float64 {
+	scale := g.uiScale()
+	spacing := int(10 * scale)
+	type item struct {
+		w int
+		h int
+	}
+	items := make([]item, len(g.geysers))
+	maxW := 0
+	for i, gy := range g.geysers {
+		ic := (*ebiten.Image)(nil)
+		if n := iconForGeyser(gy.ID); n != "" {
+			ic = g.icons[n]
+		}
+		txt := displayGeyser(gy.ID) + "\n" + formatGeyserInfo(gy)
+		w, h := infoPanelSize(txt, ic)
+		sw := int(float64(w) * scale)
+		sh := int(float64(h) * scale)
+		if sw > maxW {
+			maxW = sw
+		}
+		items[i] = item{w: sw, h: sh}
+	}
+	cols := 1
+	if maxW+spacing > 0 {
+		cols = g.width / (maxW + spacing)
+		if cols < 1 {
+			cols = 1
+		}
+	}
+	rows := (len(items) + cols - 1) / cols
+	if rows == 0 {
+		return 0
+	}
+	rowHeights := make([]int, rows)
+	for i, it := range items {
+		r := i / cols
+		if it.h > rowHeights[r] {
+			rowHeights[r] = it.h
+		}
+	}
+	total := spacing
+	for _, h := range rowHeights {
+		total += h + spacing
+	}
+	max := total - rowHeights[rows-1] - spacing
+	if max < 0 {
+		max = 0
+	}
+	return float64(max)
+}
+
 // Game implements ebiten.Game and displays geysers with their names.
 type Game struct {
 	geysers        []Geyser
@@ -588,6 +640,7 @@ type Game struct {
 	showShotMenu   bool
 	screenshotMode bool
 	ssQuality      int
+	ssSaved        time.Time
 }
 
 type label struct {
@@ -770,6 +823,10 @@ iconsLoop:
 			if g.geyserScroll < 0 {
 				g.geyserScroll = 0
 			}
+			max := g.maxGeyserScroll()
+			if g.geyserScroll > max {
+				g.geyserScroll = max
+			}
 			g.needsRedraw = true
 		}
 		mx, my := ebiten.CursorPosition()
@@ -929,6 +986,10 @@ iconsLoop:
 			if g.geyserScroll < 0 {
 				g.geyserScroll = 0
 			}
+			max := g.maxGeyserScroll()
+			if g.geyserScroll > max {
+				g.geyserScroll = max
+			}
 		} else {
 			if wheelY > 0 {
 				zoomFactor *= WheelZoomFactor
@@ -984,6 +1045,9 @@ iconsLoop:
 			g.showShotMenu = true
 			g.needsRedraw = true
 		} else if mousePressed && g.geyserRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+			g.camX = oldX
+			g.camY = oldY
+			g.dragging = false
 			g.showGeyserList = true
 			g.needsRedraw = true
 		}
@@ -1284,11 +1348,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			cy := float32(hr.Min.Y + size/2)
 			vector.DrawFilledCircle(screen, cx, cy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
 			ebitenutil.DebugPrintAt(screen, "?", hr.Min.X+7, hr.Min.Y+5)
-			if g.showHelp {
-				tx := hr.Min.X - 170
-				ty := hr.Min.Y - 70
-				drawTextWithBG(screen, helpMessage, tx, ty)
-			}
 
 			gr := g.geyserRect()
 			gcx := float32(gr.Min.X + size/2)
@@ -1322,6 +1381,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 		if useNumbers && !g.screenshotMode {
 			g.drawNumberLegend(screen)
+		}
+		if g.showHelp && !g.screenshotMode {
+			scale := g.uiScale()
+			hr := g.helpRect()
+			tx := hr.Min.X - int(170*scale)
+			ty := hr.Min.Y - int(70*scale)
+			drawTextWithBGScale(screen, helpMessage, tx, ty, scale)
 		}
 
 		if !g.screenshotMode {

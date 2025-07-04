@@ -30,7 +30,7 @@ func (g *Game) screenshotMenuRect() image.Rectangle {
 		}
 	}
 	w := maxW*LabelCharWidth + 4
-	h := len(labels)*ScreenshotMenuSpacing + 4
+	h := (len(labels)+1)*ScreenshotMenuSpacing + 4
 	x := g.screenshotRect().Min.X - w - 10
 	if x < 0 {
 		x = 0
@@ -46,7 +46,11 @@ func (g *Game) drawScreenshotMenu(dst *ebiten.Image) {
 	rect := g.screenshotMenuRect()
 	vector.DrawFilledRect(dst, float32(rect.Min.X), float32(rect.Min.Y), float32(rect.Dx()), float32(rect.Dy()), colorRGBA(0, 0, 0, 200), false)
 	drawTextWithBG(dst, "Image quality:", rect.Min.X+2, rect.Min.Y+2)
-	items := []string{"Low (1x)", "Medium (2x)", "High (4x)", "Extreme (8x)", "Save Screenshot"}
+	label := "Save Screenshot"
+	if time.Since(g.ssSaved) < 2*time.Second {
+		label = "Saved!"
+	}
+	items := []string{"Low (1x)", "Medium (2x)", "High (4x)", "Extreme (8x)", label}
 	y := rect.Min.Y + 2 + ScreenshotMenuSpacing
 	for i, it := range items {
 		selected := i == g.ssQuality
@@ -56,6 +60,9 @@ func (g *Game) drawScreenshotMenu(dst *ebiten.Image) {
 			drawTextWithBG(dst, it, rect.Min.X+2, y)
 		}
 		y += ScreenshotMenuSpacing
+		if i == 3 {
+			y += ScreenshotMenuSpacing
+		}
 	}
 }
 
@@ -74,12 +81,15 @@ func (g *Game) clickScreenshotMenu(mx, my int) bool {
 				g.ssQuality = i
 			case 4:
 				g.saveScreenshot()
-				g.showShotMenu = false
+				g.ssSaved = time.Now()
 			}
 			g.needsRedraw = true
 			return true
 		}
 		y += ScreenshotMenuSpacing
+		if i == 3 {
+			y += ScreenshotMenuSpacing
+		}
 	}
 	return false
 }

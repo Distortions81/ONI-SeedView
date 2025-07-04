@@ -198,7 +198,7 @@ func formatNum(n float64) string {
 }
 
 func formatGeyserInfo(g Geyser) string {
-	return fmt.Sprintf("X: %d\nY: %d\nActive Cycles: %s\nAvg Emit Rate: %s\nDormancy Cycles: %s\nEmit Rate: %s\nEruption Time: %s\nIdle Time: %s",
+	return fmt.Sprintf("POS: %d,%d\nActive Cycles: %s\nAvg Emit Rate: %s\nDormancy Cycles: %s\nEmit Rate: %s\nEruption Time: %s\nIdle Time: %s",
 		g.X, g.Y,
 		formatNum(g.ActiveCycles),
 		formatNum(g.AvgEmitRate),
@@ -209,5 +209,5 @@ func formatGeyserInfo(g Geyser) string {
 }
 
 func formatPOIInfo(p PointOfInterest) string {
-	return fmt.Sprintf("X: %d\nY: %d", p.X, p.Y)
+	return fmt.Sprintf("POS: %d,%d", p.X, p.Y)
 }
