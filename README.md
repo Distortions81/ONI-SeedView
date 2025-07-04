@@ -1,6 +1,6 @@
 # Oni-SeedView
 
-Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data. It downloads seed information from [Maps Not Included](https://mapsnotincluded.org) and displays an interactive map of an asteroid using [Ebiten](https://ebiten.org/). The viewer renders geysers, points of interest and biome boundaries with scaling icons and a small legend. You can pan around and zoom in or out while the center of the map remains fixed.
+Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data. It downloads seed information from [Maps Not Included](https://mapsnotincluded.org) and displays an interactive map of an asteroid using [Ebiten](https://ebiten.org/). The viewer renders geysers, points of interest and biome boundaries with scaling icons and a small legend. You can pan around and zoom in or out.
 
 ![Screenshot](screenshot.png)
 
@@ -28,7 +28,7 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
 
 - **Arrow keys/WASD** – pan the camera.
 - **Mouse wheel or `+`/`-`** – zoom in and out.
-- **Drag with the mouse** – pan while keeping the center fixed.
+- **Drag with the mouse** – pan.
 - **Pinch gestures** – zoom on touch devices.
 - **Camera icon** – open the screenshot menu.
 - **Water-drop icon** – show a list of all geysers.
