@@ -25,6 +25,8 @@ const (
 	NumberLegendXOffset = 150
 	LegendRowSpacing    = 25
 	ScreenshotFile      = "screenshot.png"
+	HelpIconSize        = 24
+	HelpMargin          = 10
 	// WheelThrottle controls how often mouse wheel zoom is applied
 	// in WASM to account for faster scroll events.
 	WheelThrottle = 75 * time.Millisecond

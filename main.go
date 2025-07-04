@@ -30,6 +30,11 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
+const helpMessage = "Controls:\n" +
+	"Arrow keys/WASD or drag to pan\n" +
+	"Mouse wheel or +/- to zoom\n" +
+	"Pinch to zoom on touch"
+
 // fetchSeedCBOR retrieves the seed data in CBOR format for a given coordinate.
 func fetchSeedCBOR(coordinate string) ([]byte, error) {
 	url := BaseURL + coordinate
@@ -1025,6 +1030,7 @@ type Game struct {
 	legendEntries  []string
 	legendColors   []color.RGBA
 	legendImage    *ebiten.Image
+	showHelp       bool
 	lastWheel      time.Time
 }
 
@@ -1038,6 +1044,13 @@ type label struct {
 type touchPoint struct {
 	x int
 	y int
+}
+
+func (g *Game) helpRect() image.Rectangle {
+	size := HelpIconSize
+	x := g.width - size - HelpMargin
+	y := g.height - size - HelpMargin
+	return image.Rect(x, y, x+size, y+size)
 }
 
 func (g *Game) clampCamera() {
@@ -1172,6 +1185,17 @@ func (g *Game) Update() error {
 		worldY := (cy - g.camY) / oldZoom
 		g.camX = cx - worldX*g.zoom
 		g.camY = cy - worldY*g.zoom
+	}
+
+	mx, my := ebiten.CursorPosition()
+	if g.showHelp {
+		if !g.helpRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+			g.showHelp = false
+			g.needsRedraw = true
+		}
+	} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && g.helpRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		g.showHelp = true
+		g.needsRedraw = true
 	}
 
 	g.clampCamera()
@@ -1347,6 +1371,18 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 		if useNumbers {
 			g.drawNumberLegend(screen)
+		}
+
+		// Draw help icon
+		hr := g.helpRect()
+		cx := float32(hr.Min.X + HelpIconSize/2)
+		cy := float32(hr.Min.Y + HelpIconSize/2)
+		vector.DrawFilledCircle(screen, cx, cy, HelpIconSize/2, color.RGBA{0, 0, 0, 180}, true)
+		ebitenutil.DebugPrintAt(screen, "?", hr.Min.X+7, hr.Min.Y+5)
+		if g.showHelp {
+			tx := hr.Min.X - 170
+			ty := hr.Min.Y - 70
+			drawTextWithBG(screen, helpMessage, tx, ty)
 		}
 
 		g.needsRedraw = false
