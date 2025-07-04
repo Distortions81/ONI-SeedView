@@ -469,6 +469,9 @@ type Game struct {
 	touchStartX    int
 	touchStartY    int
 	touchMoved     bool
+	showShotMenu   bool
+	ssAspect       int
+	ssQuality      int
 }
 
 type label struct {
@@ -776,6 +779,18 @@ iconsLoop:
 		} else if mousePressed && g.helpRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.showHelp = true
 			g.needsRedraw = true
+		} else if g.showShotMenu {
+			if mousePressed {
+				if !g.clickScreenshotMenu(mx, my) {
+					if !g.screenshotMenuRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) && !g.screenshotRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+						g.showShotMenu = false
+						g.needsRedraw = true
+					}
+				}
+			}
+		} else if mousePressed && g.screenshotRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+			g.showShotMenu = true
+			g.needsRedraw = true
 		}
 	}
 
@@ -982,6 +997,16 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 
 		if !g.mobile {
+			// Draw screenshot icon
+			sr := g.screenshotRect()
+			scx := float32(sr.Min.X + HelpIconSize/2)
+			scy := float32(sr.Min.Y + HelpIconSize/2)
+			vector.DrawFilledCircle(screen, scx, scy, HelpIconSize/2, color.RGBA{0, 0, 0, 180}, true)
+			ebitenutil.DebugPrintAt(screen, "SS", sr.Min.X+3, sr.Min.Y+5)
+			if g.showShotMenu {
+				g.drawScreenshotMenu(screen)
+			}
+
 			// Draw help icon
 			hr := g.helpRect()
 			cx := float32(hr.Min.X + HelpIconSize/2)
