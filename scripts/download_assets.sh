@@ -9,12 +9,22 @@ if [ -n "$(ls -A "$ASSET_DIR" 2>/dev/null | grep -v '.gitkeep' || true)" ]; then
     exit 0
 fi
 
-echo "Cloning ONITraitFinder repository..."
-git clone --depth 1 https://github.com/MapsNotIncluded/ONITraitFinder "$TEMP_DIR"
+if ! command -v dwebp >/dev/null; then
+    echo "dwebp command not found. Please install the 'webp' package." >&2
+    exit 1
+fi
+
+echo "Cloning oni-seed-browser repository..."
+git clone --depth 1 https://github.com/MapsNotIncluded/oni-seed-browser "$TEMP_DIR"
 
 echo "Copying assets..."
 mkdir -p "$ASSET_DIR"
-find "$TEMP_DIR"/docs/images -name '*.png' -exec cp {} "$ASSET_DIR" \;
+ASSET_SRC="$TEMP_DIR/app/src/commonMain/composeResources/drawable"
+find "$ASSET_SRC" -name '*.png' -exec cp {} "$ASSET_DIR" \;
+find "$ASSET_SRC" -name '*.webp' -print0 | while IFS= read -r -d '' img; do
+    out="$ASSET_DIR/$(basename "${img%.webp}").png"
+    dwebp "$img" -o "$out" >/dev/null
+done
 
 echo "Cleaning up..."
 rm -rf "$TEMP_DIR"
