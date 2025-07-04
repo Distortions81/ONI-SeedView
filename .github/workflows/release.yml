@@ -14,17 +14,21 @@ jobs:
         with:
           go-version: 'stable'
       - name: Install deps
-        run: sudo apt-get update && sudo apt-get install -y xvfb
+        run: sudo apt-get update && sudo apt-get install -y xvfb webp
       - name: Download assets
         run: ./scripts/download_assets.sh
       - name: Run tests
         run: xvfb-run --auto-servernum --server-args='-screen 0 1280x720x24' go test ./...
       - name: Build binaries
         run: ./scripts/build_all.sh
+      - name: Copy assets
+        run: |
+          cp -r assets dist/
+          cp -r icons dist/
       - uses: actions/upload-artifact@v4
         with:
           name: oni-view-builds
-          path: dist/*
+          path: dist
 
   release:
     needs: test-and-build
@@ -38,5 +42,6 @@ jobs:
           path: dist
       - uses: softprops/action-gh-release@v1
         with:
-          files: dist/*
+          files: |
+            dist/**
 
