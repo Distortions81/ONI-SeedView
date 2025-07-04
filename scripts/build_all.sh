@@ -24,4 +24,4 @@ rm dist/oni-view.wasm
 
 # Copy the JS runtime and HTML loader for WASM builds.
 cp -f $(go env GOROOT)/lib/wasm/wasm_exec.js dist/
-
+cp -f index.html dist/
