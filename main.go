@@ -875,6 +875,16 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		if useNumbers {
 			g.drawNumberLegend(screen)
 		}
+
+		cx := g.width / 2
+		cy := g.height / 2
+		crossClr := color.RGBA{255, 255, 255, 30}
+		vector.StrokeLine(screen, float32(cx-CrosshairSize), float32(cy), float32(cx+CrosshairSize), float32(cy), 1, crossClr, true)
+		vector.StrokeLine(screen, float32(cx), float32(cy-CrosshairSize), float32(cx), float32(cy+CrosshairSize), 1, crossClr, true)
+		worldX := int(math.Round(((float64(cx) - g.camX) / g.zoom) / 2))
+		worldY := int(math.Round(((float64(cy) - g.camY) / g.zoom) / 2))
+		coords := fmt.Sprintf("X: %d Y: %d", worldX, worldY)
+		drawTextWithBG(screen, coords, 5, g.height-20)
 		if g.showInfo {
 			scale := 1.0
 			if g.height > 850 && !g.mobile {
@@ -966,6 +976,9 @@ func main() {
 		game.astWidth = ast.SizeX
 		game.astHeight = ast.SizeY
 		game.legend = buildLegendImage(bps)
+		zoomX := float64(game.width) / (float64(game.astWidth) * 2)
+		zoomY := float64(game.height) / (float64(game.astHeight) * 2)
+		game.zoom = math.Min(zoomX, zoomY)
 		game.camX = (float64(game.width) - float64(game.astWidth)*2*game.zoom) / 2
 		game.camY = (float64(game.height) - float64(game.astHeight)*2*game.zoom) / 2
 		game.clampCamera()
