@@ -22,6 +22,8 @@ const (
 	NumberLegendXOffset = 150
 	LegendRowSpacing    = 25
 	ScreenshotFile      = "screenshot.png"
+	HelpIconSize        = 24
+	HelpMargin          = 10
 )
 
 var LegendZoomThreshold = math.Pow(WheelZoomFactor, LegendZoomExponent)
