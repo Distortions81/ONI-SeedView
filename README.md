@@ -13,6 +13,26 @@ Oni View is a small utility for inspecting **Oxygen Not Included** seed data. It
 * Mouse wheel and `+`/`-` keys control zoom. The window can be resized at any time.
 * Legends for biome colors along with icons for geysers and points of interest.
 * Supports running in headless environments using `Xvfb`.
+* Click the camera icon to capture screenshots. A menu allows
+  selecting image quality from low (1x) to extreme (8x).
+* Hover over geyser or POI icons to show an information panel.
+  Clicking pins the panel so it stays visible while panning.
+* A help icon displays the available controls at any time.
+* Crosshairs at the center show the current world coordinates,
+  useful for lining up precise screenshots.
+* A water-drop icon opens a scrollable list of all geysers
+  present on the map.
+* Icons load asynchronously so the map is usable immediately.
+
+## Controls
+
+- **Arrow keys/WASD** – pan the camera.
+- **Mouse wheel or `+`/`-`** – zoom in and out.
+- **Drag with the mouse** – pan while keeping the center fixed.
+- **Pinch gestures** – zoom on touch devices.
+- **Camera icon** – open the screenshot menu.
+- **Water-drop icon** – show a list of all geysers.
+- **Question mark** – display the help overlay.
 
 ## Getting Started
 
@@ -58,19 +78,35 @@ Open `dist/index.html` in a browser to test the WebAssembly build. The page load
 You can specify the seed coordinate in the URL using `?coord=<seed>` or in the
 fragment like `#coord=<seed>` and the viewer will load it automatically.
 
+## Saving Screenshots
+
+Click the camera icon to open the screenshot menu. Choose a quality level
+(1×–8×) and the current view is written to a PNG named after the seed.
+You can also generate a screenshot non-interactively:
+
+```bash
+go run . -coord SNDST-A-7-0-0-0 -screenshot myshot.png
+```
+
 ## Repository Layout
 
 ```
 assets/     # Image files used by the viewer (downloaded separately)
-main.go     # Program entry point and rendering logic
 scripts/    # Helper scripts for asset download and headless execution
+main.go     # Program entry point and rendering logic
+display.go  # Icon selection and drawing helpers
+parse.go    # Functions for decoding biome path strings
+colors.go   # Color definitions for different biomes
+const.go    # Miscellaneous constants and configuration
 names.json  # Mapping tables for translating internal IDs to display names
 ```
 
-Unit tests live alongside the code (`main_test.go`, `zoom_test.go`). Run them with:
+Unit tests live alongside the code (`main_test.go`, `zoom_test.go`). Format the
+Go files and run the tests with the `test` build tag:
 
 ```bash
-go test ./...
+gofmt -w *.go
+go test -tags test ./...
 ```
 
 ## License
