@@ -424,6 +424,9 @@ type Game struct {
 	infoText       string
 	infoX          int
 	infoY          int
+	lastMouseX     int
+	lastMouseY     int
+	touchUsed      bool
 }
 
 type label struct {
@@ -581,6 +584,9 @@ iconsLoop:
 
 	// Touch gestures
 	touchIDs := ebiten.TouchIDs()
+	if len(touchIDs) > 0 {
+		g.touchUsed = true
+	}
 	switch len(touchIDs) {
 	case 1:
 		id := touchIDs[0]
@@ -665,6 +671,10 @@ iconsLoop:
 	mx, my := 0, 0
 	if !g.mobile {
 		mx, my = ebiten.CursorPosition()
+		if mx != g.lastMouseX || my != g.lastMouseY {
+			g.touchUsed = false
+		}
+		g.lastMouseX, g.lastMouseY = mx, my
 		if g.showHelp {
 			if !g.helpRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 				g.showHelp = false
@@ -685,7 +695,10 @@ iconsLoop:
 	prevPinned := g.infoPinned
 	prevText := g.infoText
 
-	info, ix, iy, found := g.itemAt(mx, my)
+	info, ix, iy, found := "", 0, 0, false
+	if !g.touchUsed {
+		info, ix, iy, found = g.itemAt(mx, my)
+	}
 	if found {
 		g.infoText = info
 		g.infoX = ix
