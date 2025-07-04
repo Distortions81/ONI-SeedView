@@ -1069,6 +1069,7 @@ type Game struct {
 	status         string
 	iconResults    chan loadedIcon
 	coord          string
+	mobile         bool
 }
 
 type label struct {
@@ -1301,7 +1302,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				float32(float64(g.astHeight)*2*g.zoom), clr, false)
 		}
 		labels := []label{}
-		useNumbers := g.zoom < LegendZoomThreshold
+		useNumbers := !g.mobile && g.zoom < LegendZoomThreshold
 		if g.legendMap == nil {
 			g.initObjectLegend()
 		}
@@ -1490,6 +1491,7 @@ func main() {
 		loading: true,
 		status:  "Fetching...",
 		coord:   *coord,
+		mobile:  isMobile(),
 	}
 	go func() {
 		fmt.Println("Fetching:", *coord)
