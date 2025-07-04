@@ -330,17 +330,10 @@ func resolveAssetName(name string) string {
 
 var missingImage = ebiten.NewImage(1, 1)
 
-func loadImage(cache map[string]*ebiten.Image, name string) (*ebiten.Image, error) {
-	if img, ok := cache[name]; ok {
-		if img == missingImage {
-			return nil, fmt.Errorf("missing")
-		}
-		return img, nil
-	}
+func loadImageFile(name string) (*ebiten.Image, error) {
 	resolved := resolveAssetName(name)
 	f, err := openAsset(resolved)
 	if err != nil {
-		cache[name] = missingImage
 		return nil, err
 	}
 	defer f.Close()
@@ -363,9 +356,7 @@ func loadImage(cache map[string]*ebiten.Image, name string) (*ebiten.Image, erro
 				nrgba.Pix[i] = 0
 			}
 		}
-		img := ebiten.NewImageFromImage(nrgba)
-		cache[name] = img
-		return img, nil
+		return ebiten.NewImageFromImage(nrgba), nil
 	}
 	bounds := src.Bounds()
 	dst := image.NewNRGBA(bounds)
@@ -375,7 +366,21 @@ func loadImage(cache map[string]*ebiten.Image, name string) (*ebiten.Image, erro
 			dst.Pix[i] = 0
 		}
 	}
-	img := ebiten.NewImageFromImage(dst)
+	return ebiten.NewImageFromImage(dst), nil
+}
+
+func loadImage(cache map[string]*ebiten.Image, name string) (*ebiten.Image, error) {
+	if img, ok := cache[name]; ok {
+		if img == missingImage {
+			return nil, fmt.Errorf("missing")
+		}
+		return img, nil
+	}
+	img, err := loadImageFile(name)
+	if err != nil {
+		cache[name] = missingImage
+		return nil, err
+	}
 	cache[name] = img
 	return img, nil
 }
@@ -1060,6 +1065,9 @@ type Game struct {
 	legendImage    *ebiten.Image
 	showHelp       bool
 	lastWheel      time.Time
+	loading        bool
+	status         string
+	iconResults    chan loadedIcon
 }
 
 type label struct {
@@ -1072,6 +1080,11 @@ type label struct {
 type touchPoint struct {
 	x int
 	y int
+}
+
+type loadedIcon struct {
+	name string
+	img  *ebiten.Image
 }
 
 func (g *Game) helpRect() image.Rectangle {
@@ -1099,8 +1112,36 @@ func (g *Game) clampCamera() {
 	}
 }
 
+func (g *Game) startIconLoader(names []string) {
+	g.iconResults = make(chan loadedIcon, len(names))
+	go func() {
+		for _, n := range names {
+			img, _ := loadImageFile(n)
+			g.iconResults <- loadedIcon{name: n, img: img}
+		}
+		close(g.iconResults)
+	}()
+}
+
 func (g *Game) Update() error {
 	const panSpeed = PanSpeed
+
+iconsLoop:
+	for g.iconResults != nil {
+		select {
+		case li, ok := <-g.iconResults:
+			if !ok {
+				g.iconResults = nil
+				continue
+			}
+			if g.icons != nil {
+				g.icons[li.name] = li.img
+			}
+			g.needsRedraw = true
+		default:
+			break iconsLoop
+		}
+	}
 
 	oldX, oldY, oldZoom := g.camX, g.camY, g.zoom
 
@@ -1240,6 +1281,17 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
+	if g.loading || (len(g.biomes) == 0 && g.status != "") {
+		screen.Fill(color.RGBA{30, 30, 30, 255})
+		msg := g.status
+		if msg == "" {
+			msg = "Fetching..."
+		}
+		x := g.width/2 - len(msg)*LabelCharWidth/2
+		y := g.height / 2
+		drawTextWithBG(screen, msg, x, y)
+		return
+	}
 	if g.needsRedraw {
 		screen.Fill(color.RGBA{30, 30, 30, 255})
 		if clr, ok := biomeColors["Space"]; ok {
@@ -1292,7 +1344,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 
 			if iconName := iconForGeyser(gy.ID); iconName != "" {
-				if img, err := loadImage(g.icons, iconName); err == nil {
+				if img, ok := g.icons[iconName]; ok && img != nil {
 					op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
 					op.GeoM.Scale(g.zoom*IconScale, g.zoom*IconScale)
 					w := float64(img.Bounds().Dx()) * g.zoom * IconScale
@@ -1327,7 +1379,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 
 			if iconName := iconForPOI(poi.ID); iconName != "" {
-				if img, err := loadImage(g.icons, iconName); err == nil {
+				if img, ok := g.icons[iconName]; ok && img != nil {
 					op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
 					op.GeoM.Scale(g.zoom*IconScale, g.zoom*IconScale)
 					w := float64(img.Bounds().Dx()) * g.zoom * IconScale
@@ -1424,47 +1476,70 @@ func main() {
 	screenshot := flag.String("screenshot", "", "path to save a PNG screenshot and exit")
 	flag.Parse()
 
-	fmt.Println("Fetching:", *coord)
-	cborData, err := fetchSeedCBOR(*coord)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
-
-	seed, err := decodeSeed(cborData)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
-
-	if *out != "" {
-		jsonData, _ := json.MarshalIndent(seed, "", "  ")
-		if err := saveToFile(*out, jsonData); err != nil {
-			fmt.Println("Error writing file:", err)
-		}
-	}
-
-	ast := seed.Asteroids[0]
-	bps := parseBiomePaths(ast.BiomePaths)
 	game := &Game{
-		geysers:   ast.Geysers,
-		pois:      ast.POIs,
-		biomes:    bps,
-		icons:     make(map[string]*ebiten.Image),
-		width:     DefaultWidth,
-		height:    DefaultHeight,
-		astWidth:  ast.SizeX,
-		astHeight: ast.SizeY,
-		zoom:      1.0,
-		legend:    buildLegendImage(bps),
+		icons:   make(map[string]*ebiten.Image),
+		width:   DefaultWidth,
+		height:  DefaultHeight,
+		zoom:    1.0,
+		loading: true,
+		status:  "Fetching...",
 	}
+	go func() {
+		fmt.Println("Fetching:", *coord)
+		cborData, err := fetchSeedCBOR(*coord)
+		if err != nil {
+			game.status = "Error: " + err.Error()
+			game.needsRedraw = true
+			game.loading = false
+			return
+		}
+		seed, err := decodeSeed(cborData)
+		if err != nil {
+			game.status = "Error: " + err.Error()
+			game.needsRedraw = true
+			game.loading = false
+			return
+		}
+		if *out != "" {
+			jsonData, _ := json.MarshalIndent(seed, "", "  ")
+			_ = saveToFile(*out, jsonData)
+		}
+		ast := seed.Asteroids[0]
+		bps := parseBiomePaths(ast.BiomePaths)
+		game.geysers = ast.Geysers
+		game.pois = ast.POIs
+		game.biomes = bps
+		game.astWidth = ast.SizeX
+		game.astHeight = ast.SizeY
+		game.legend = buildLegendImage(bps)
+		game.camX = (float64(game.width) - float64(game.astWidth)*2*game.zoom) / 2
+		game.camY = (float64(game.height) - float64(game.astHeight)*2*game.zoom) / 2
+		game.clampCamera()
+		names := []string{}
+		set := make(map[string]struct{})
+		for _, gy := range ast.Geysers {
+			if n := iconForGeyser(gy.ID); n != "" {
+				if _, ok := set[n]; !ok {
+					set[n] = struct{}{}
+					names = append(names, n)
+				}
+			}
+		}
+		for _, poi := range ast.POIs {
+			if n := iconForPOI(poi.ID); n != "" {
+				if _, ok := set[n]; !ok {
+					set[n] = struct{}{}
+					names = append(names, n)
+				}
+			}
+		}
+		game.startIconLoader(names)
+		game.loading = false
+		game.needsRedraw = true
+	}()
 	if *screenshot != "" {
 		game.screenshotPath = *screenshot
 	}
-	game.camX = (float64(game.width) - float64(game.astWidth)*2*game.zoom) / 2
-	game.camY = (float64(game.height) - float64(game.astHeight)*2*game.zoom) / 2
-	game.clampCamera()
-	game.needsRedraw = true
 	ebiten.SetWindowSize(game.width, game.height)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	ebiten.SetWindowTitle("Geysers - " + *coord)
