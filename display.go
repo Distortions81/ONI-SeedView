@@ -197,13 +197,21 @@ func formatLabel(name string) (string, int) {
 	return formatted, width
 }
 
+func formatNum(n float64) string {
+	s := fmt.Sprintf("%.2f", n)
+	if strings.HasSuffix(s, ".00") {
+		s = strings.TrimSuffix(s, ".00")
+	}
+	return s
+}
+
 func formatGeyserInfo(g Geyser) string {
-	return "Active Cycles: " + fmt.Sprintf("%.2f", g.ActiveCycles) +
-		"\nAvg Emit Rate: " + fmt.Sprintf("%.2f", g.AvgEmitRate) +
-		"\nDormancy Cycles: " + fmt.Sprintf("%.2f", g.DormancyCycles) +
-		"\nEmit Rate: " + fmt.Sprintf("%.2f", g.EmitRate) +
-		"\nEruption Time: " + fmt.Sprintf("%.2f", g.EruptionTime) +
-		"\nIdle Time: " + fmt.Sprintf("%.2f", g.IdleTime)
+	return "Active Cycles: " + formatNum(g.ActiveCycles) +
+		"\nAvg Emit Rate: " + formatNum(g.AvgEmitRate) +
+		"\nDormancy Cycles: " + formatNum(g.DormancyCycles) +
+		"\nEmit Rate: " + formatNum(g.EmitRate) +
+		"\nEruption Time: " + formatNum(g.EruptionTime) +
+		"\nIdle Time: " + formatNum(g.IdleTime)
 }
 
 func formatPOIInfo(p PointOfInterest) string {
