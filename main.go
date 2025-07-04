@@ -472,7 +472,7 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 	if g.hoverItem >= 0 {
 		hy := y + float64(10+LegendRowSpacing*(g.hoverItem+1))*scale
 		hh := float64(LegendRowSpacing) * scale
-		vector.StrokeRect(dst, float32(math.Round(x))+0.5, float32(math.Round(hy))+0.5, float32(math.Round(w))-1, float32(math.Round(hh))-1, 2, color.RGBA{255, 0, 0, 255}, false)
+		vector.StrokeRect(dst, float32(math.Round(x))+0.5, float32(math.Round(hy))-4, float32(math.Round(w))-1, float32(math.Round(hh))-1, 2, color.RGBA{255, 0, 0, 255}, false)
 	}
 }
 
@@ -1376,7 +1376,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			y0 := math.Round(float64(10+LegendRowSpacing+g.hoverBiome*LegendRowSpacing) * scale)
 			h := math.Round(float64(LegendRowSpacing) * scale)
 			w := math.Round(float64(g.legend.Bounds().Dx()) * scale)
-			vector.StrokeRect(screen, 0.5, float32(y0)+0.5, float32(w)-1, float32(h)-1, 2, color.RGBA{255, 0, 0, 255}, false)
+			vector.StrokeRect(screen, 0.5, float32(y0)-4, float32(w)-1, float32(h)-1, 2, color.RGBA{255, 0, 0, 255}, false)
 		}
 		if useNumbers && !g.screenshotMode {
 			g.drawNumberLegend(screen)
@@ -1530,7 +1530,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 
 			vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, dotClr, true)
-			vector.StrokeRect(screen, float32(x-3), float32(y-3), 6, 6, 2, dotClr, false)
+			vector.StrokeRect(screen, float32(x-3), float32(y-1), 6, 6, 2, dotClr, false)
 			if useNumbers {
 				formatted = strconv.Itoa(g.legendMap["p"+name])
 				width = len(formatted)
