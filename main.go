@@ -331,13 +331,19 @@ func resolveAssetName(name string) string {
 	return name
 }
 
+var missingImage = ebiten.NewImage(1, 1)
+
 func loadImage(cache map[string]*ebiten.Image, name string) (*ebiten.Image, error) {
 	if img, ok := cache[name]; ok {
+		if img == missingImage {
+			return nil, fmt.Errorf("missing")
+		}
 		return img, nil
 	}
 	resolved := resolveAssetName(name)
 	f, err := openAsset(resolved)
 	if err != nil {
+		cache[name] = missingImage
 		return nil, err
 	}
 	defer f.Close()
@@ -1246,7 +1252,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 		labels := []label{}
 		useNumbers := g.zoom < LegendZoomThreshold
-		if useNumbers && g.legendMap == nil {
+		if g.legendMap == nil {
 			g.initObjectLegend()
 		}
 
@@ -1280,6 +1286,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		for _, gy := range g.geysers {
 			x := math.Round((float64(gy.X) * 2 * g.zoom) + g.camX)
 			y := math.Round((float64(gy.Y) * 2 * g.zoom) + g.camY)
+
+			name := displayGeyser(gy.ID)
+			formatted, width := formatLabel(name)
+			clr := color.RGBA{}
+			if idx, ok := g.legendMap["g"+name]; ok && idx-1 < len(g.legendColors) {
+				clr = g.legendColors[idx-1]
+			}
+
 			if iconName := iconForGeyser(gy.ID); iconName != "" {
 				if img, err := loadImage(g.icons, iconName); err == nil {
 					op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
@@ -1288,49 +1302,33 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					h := float64(img.Bounds().Dy()) * g.zoom * IconScale
 					op.GeoM.Translate(x-w/2, y-h/2)
 					screen.DrawImage(img, op)
-					var formatted string
-					var width int
-					clr := color.RGBA{}
 					if useNumbers {
-						name := displayGeyser(gy.ID)
-						num := g.legendMap["g"+name]
-						formatted = strconv.Itoa(num)
+						formatted = strconv.Itoa(g.legendMap["g"+name])
 						width = len(formatted)
-						if num-1 < len(g.legendColors) {
-							clr = g.legendColors[num-1]
-						}
-					} else {
-						d := displayGeyser(gy.ID)
-						formatted, width = formatLabel(d)
 					}
 					labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, clr})
-				} else {
-					fmt.Printf("loading %s: %v\n", iconName, err)
+					continue
 				}
-			} else {
-				vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, color.RGBA{255, 0, 0, 255}, false)
-				var formatted string
-				var width int
-				clr := color.RGBA{}
-				if useNumbers {
-					name := displayGeyser(gy.ID)
-					num := g.legendMap["g"+name]
-					formatted = strconv.Itoa(num)
-					width = len(formatted)
-					if num-1 < len(g.legendColors) {
-						clr = g.legendColors[num-1]
-					}
-				} else {
-					d := displayGeyser(gy.ID)
-					formatted, width = formatLabel(d)
-				}
-				labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, clr})
 			}
-		}
 
+			vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, clr)
+			if useNumbers {
+				formatted = strconv.Itoa(g.legendMap["g"+name])
+				width = len(formatted)
+			}
+			labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, clr})
+		}
 		for _, poi := range g.pois {
 			x := math.Round((float64(poi.X) * 2 * g.zoom) + g.camX)
 			y := math.Round((float64(poi.Y) * 2 * g.zoom) + g.camY)
+
+			name := displayPOI(poi.ID)
+			formatted, width := formatLabel(name)
+			clr := color.RGBA{}
+			if idx, ok := g.legendMap["p"+name]; ok && idx-1 < len(g.legendColors) {
+				clr = g.legendColors[idx-1]
+			}
+
 			if iconName := iconForPOI(poi.ID); iconName != "" {
 				if img, err := loadImage(g.icons, iconName); err == nil {
 					op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
@@ -1339,44 +1337,21 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					h := float64(img.Bounds().Dy()) * g.zoom * IconScale
 					op.GeoM.Translate(x-w/2, y-h/2)
 					screen.DrawImage(img, op)
-					var formatted string
-					var width int
 					if useNumbers {
-						name := displayPOI(poi.ID)
-						num := g.legendMap["p"+name]
-						formatted = strconv.Itoa(num)
+						formatted = strconv.Itoa(g.legendMap["p"+name])
 						width = len(formatted)
-						clr := color.RGBA{}
-						if num-1 < len(g.legendColors) {
-							clr = g.legendColors[num-1]
-						}
-						labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, clr})
-					} else {
-						d := displayPOI(poi.ID)
-						formatted, width = formatLabel(d)
-						labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, color.RGBA{}})
 					}
-				} else {
-					fmt.Printf("loading %s: %v\n", iconName, err)
+					labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, clr})
+					continue
 				}
-			} else {
-				var formatted string
-				var width int
-				clr := color.RGBA{}
-				if useNumbers {
-					name := displayPOI(poi.ID)
-					num := g.legendMap["p"+name]
-					formatted = strconv.Itoa(num)
-					width = len(formatted)
-					if num-1 < len(g.legendColors) {
-						clr = g.legendColors[num-1]
-					}
-				} else {
-					d := displayPOI(poi.ID)
-					formatted, width = formatLabel(d)
-				}
-				labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, clr})
 			}
+
+			vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, clr)
+			if useNumbers {
+				formatted = strconv.Itoa(g.legendMap["p"+name])
+				width = len(formatted)
+			}
+			labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, clr})
 		}
 
 		if g.legend == nil {
