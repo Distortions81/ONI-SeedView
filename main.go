@@ -1179,6 +1179,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				float32(float64(g.astHeight)*2*g.zoom), clr, false)
 		}
 		labels := []label{}
+		var highlightGeysers []Geyser
+		var highlightPOIs []PointOfInterest
 		useNumbers := !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
 		if g.legendMap == nil {
 			g.initObjectLegend()
@@ -1189,26 +1191,29 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if !ok {
 				clr = color.RGBA{60, 60, 60, 255}
 			}
-			drawBiome(screen, bp.Polygons, clr, g.camX, g.camY, g.zoom)
 			highlight := g.hoverBiome >= 0 && g.hoverBiome < len(g.legendBiomes) && g.legendBiomes[g.hoverBiome] == bp.Name
+			if g.hoverBiome >= 0 && !highlight {
+				clr = color.RGBA{100, 100, 100, 255}
+			}
+			drawBiome(screen, bp.Polygons, clr, g.camX, g.camY, g.zoom)
 			/*
-							switch bp.Name {
-							case "FrozenWastes", "IceCaves":
-								drawTundraGradient(screen, bp.Polygons, g.camX, g.camY, g.zoom)
-								drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, tundraPattern)
-							case "MagmaCore":
-								drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, magmaPattern)
-							case "Ocean":
-								drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, oceanPattern)
-							case "Sandstone":
-								drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, sandPattern)
-							case "ToxicJungle":
-								drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, toxicPattern)
-							case "OilField":
-								drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, oilPattern)
-			                                case "BoggyMarsh":
-			                                        drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, marshPattern)
-			                                } */
+								switch bp.Name {
+								case "FrozenWastes", "IceCaves":
+									drawTundraGradient(screen, bp.Polygons, g.camX, g.camY, g.zoom)
+									drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, tundraPattern)
+								case "MagmaCore":
+									drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, magmaPattern)
+								case "Ocean":
+									drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, oceanPattern)
+								case "Sandstone":
+									drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, sandPattern)
+								case "ToxicJungle":
+									drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, toxicPattern)
+								case "OilField":
+									drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, oilPattern)
+				                                case "BoggyMarsh":
+				                                        drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, marshPattern)
+				                                } */
 			outlineClr := color.RGBA{255, 255, 255, 128}
 			if highlight {
 				outlineClr = color.RGBA{255, 0, 0, 255}
@@ -1235,6 +1240,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				hover = true
 				dotClr = color.RGBA{255, 0, 0, 255}
 				labelClr = dotClr
+				highlightGeysers = append(highlightGeysers, gy)
+				continue
 			}
 
 			if iconName := iconForGeyser(gy.ID); iconName != "" {
@@ -1288,6 +1295,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				hover = true
 				dotClr = color.RGBA{255, 0, 0, 255}
 				labelClr = dotClr
+				highlightPOIs = append(highlightPOIs, poi)
+				continue
 			}
 
 			if iconName := iconForPOI(poi.ID); iconName != "" {
@@ -1316,6 +1325,88 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if hover {
 				vector.StrokeRect(screen, float32(x-3), float32(y-3), 6, 6, 2, dotClr, false)
 			}
+			if useNumbers {
+				formatted = strconv.Itoa(g.legendMap["p"+name])
+				width = len(formatted)
+			}
+			labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, width, labelClr})
+		}
+
+		for _, gy := range highlightGeysers {
+			x := math.Round((float64(gy.X) * 2 * g.zoom) + g.camX)
+			y := math.Round((float64(gy.Y) * 2 * g.zoom) + g.camY)
+
+			name := displayGeyser(gy.ID)
+			formatted, width := formatLabel(name)
+			dotClr := color.RGBA{255, 0, 0, 255}
+			labelClr := dotClr
+			if !useNumbers {
+				labelClr = color.RGBA{}
+			}
+
+			if iconName := iconForGeyser(gy.ID); iconName != "" {
+				if img, ok := g.icons[iconName]; ok && img != nil {
+					op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
+					maxDim := math.Max(float64(img.Bounds().Dx()), float64(img.Bounds().Dy()))
+					scale := g.zoom * IconScale * float64(BaseIconPixels) / maxDim
+					op.GeoM.Scale(scale, scale)
+					w := float64(img.Bounds().Dx()) * scale
+					h := float64(img.Bounds().Dy()) * scale
+					op.GeoM.Translate(x-w/2, y-h/2)
+					screen.DrawImage(img, op)
+					vector.StrokeRect(screen, float32(x-w/2), float32(y-h/2), float32(w), float32(h), 2, dotClr, false)
+					if useNumbers {
+						formatted = strconv.Itoa(g.legendMap["g"+name])
+						width = len(formatted)
+					}
+					labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, width, labelClr})
+					continue
+				}
+			}
+
+			vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, dotClr, true)
+			vector.StrokeRect(screen, float32(x-3), float32(y-3), 6, 6, 2, dotClr, false)
+			if useNumbers {
+				formatted = strconv.Itoa(g.legendMap["g"+name])
+				width = len(formatted)
+			}
+			labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, width, labelClr})
+		}
+
+		for _, poi := range highlightPOIs {
+			x := math.Round((float64(poi.X) * 2 * g.zoom) + g.camX)
+			y := math.Round((float64(poi.Y) * 2 * g.zoom) + g.camY)
+
+			name := displayPOI(poi.ID)
+			formatted, width := formatLabel(name)
+			dotClr := color.RGBA{255, 0, 0, 255}
+			labelClr := dotClr
+			if !useNumbers {
+				labelClr = color.RGBA{}
+			}
+
+			if iconName := iconForPOI(poi.ID); iconName != "" {
+				if img, ok := g.icons[iconName]; ok && img != nil {
+					op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
+					maxDim := math.Max(float64(img.Bounds().Dx()), float64(img.Bounds().Dy()))
+					scale := g.zoom * IconScale * float64(BaseIconPixels) / maxDim
+					op.GeoM.Scale(scale, scale)
+					w := float64(img.Bounds().Dx()) * scale
+					h := float64(img.Bounds().Dy()) * scale
+					op.GeoM.Translate(x-w/2, y-h/2)
+					screen.DrawImage(img, op)
+					vector.StrokeRect(screen, float32(x-w/2), float32(y-h/2), float32(w), float32(h), 2, dotClr, false)
+					if useNumbers {
+						formatted = strconv.Itoa(g.legendMap["p"+name])
+						width = len(formatted)
+					}
+					labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, width, labelClr})
+					continue
+				}
+			}
+
+			vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, dotClr, true)
+			vector.StrokeRect(screen, float32(x-3), float32(y-3), 6, 6, 2, dotClr, false)
 			if useNumbers {
 				formatted = strconv.Itoa(g.legendMap["p"+name])
 				width = len(formatted)
