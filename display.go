@@ -150,19 +150,11 @@ func displayPOI(id string) string {
 }
 
 func fullGeyserName(id string) string {
-	id = simplifyID(id)
-	if v, ok := names.Geysers[id]; ok {
-		return v
-	}
-	return id
+	return displayGeyser(id)
 }
 
 func fullPOIName(id string) string {
-	id = simplifyID(id)
-	if v, ok := names.POIs[id]; ok {
-		return v
-	}
-	return id
+	return displayPOI(id)
 }
 
 // formatLabel splits long names so they wrap every two words.

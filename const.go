@@ -37,6 +37,7 @@ const (
 	InfoPanelAlpha        = 200
 	TouchDragThreshold    = 10
 	ScreenshotMenuSpacing = 26
+	GeyserRowSpacing      = 60
 
 	// WheelThrottle controls how often mouse wheel zoom is applied
 	// in WASM to account for faster scroll events.
