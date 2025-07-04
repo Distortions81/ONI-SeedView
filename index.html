@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <title>Oni View Web</title>
   <script src="wasm_exec.js"></script>
+  <script src="https://unpkg.com/pako@2.1.0/dist/pako.min.js"></script>
   <script>
     if (!WebAssembly.instantiateStreaming) {
       WebAssembly.instantiateStreaming = async (resp, importObject) => {
@@ -12,11 +13,18 @@
       };
     }
     const go = new Go();
-    WebAssembly.instantiateStreaming(fetch("oni-view.wasm"), go.importObject).then((result) => {
-      go.run(result.instance);
-    }).catch((err) => {
-      console.error(err);
-    });
+    fetch("oni-view.wasm.gz")
+      .then((resp) => resp.arrayBuffer())
+      .then((buf) => {
+        const decompressed = pako.ungzip(new Uint8Array(buf)).buffer;
+        return WebAssembly.instantiate(decompressed, go.importObject);
+      })
+      .then((result) => {
+        go.run(result.instance);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   </script>
 </head>
 <body>
