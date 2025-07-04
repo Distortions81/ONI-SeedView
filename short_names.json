@@ -43,8 +43,8 @@
     "PropSurfaceSatellite3": "Crushed Sat",
     "TemporalTearOpener": "Tear Opener",
     "CryoTank": "Cryotank",
-    "PropFacilityStatue": "Vending Machine",
-    "GeothermalVentEntity": "Geothermal Vent",
+    "PropFacilityStatue": "Vending",
+    "GeothermalVentEntity": "Geo Vent",
     "GeothermalControllerEntity": "Geo Controller",
     "POICeresTechUnlock": "Ceres Unlock"
   }
