@@ -1311,7 +1311,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				}
 			}
 
-			vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, clr)
+			vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, clr, true)
 			if useNumbers {
 				formatted = strconv.Itoa(g.legendMap["g"+name])
 				width = len(formatted)
@@ -1346,7 +1346,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				}
 			}
 
-			vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, clr)
+			vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, clr, true)
 			if useNumbers {
 				formatted = strconv.Itoa(g.legendMap["p"+name])
 				width = len(formatted)
