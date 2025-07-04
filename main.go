@@ -1289,15 +1289,17 @@ iconsLoop:
 		g.camY = cy - worldY*g.zoom
 	}
 
-	mx, my := ebiten.CursorPosition()
-	if g.showHelp {
-		if !g.helpRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-			g.showHelp = false
+	if !g.mobile {
+		mx, my := ebiten.CursorPosition()
+		if g.showHelp {
+			if !g.helpRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+				g.showHelp = false
+				g.needsRedraw = true
+			}
+		} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && g.helpRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+			g.showHelp = true
 			g.needsRedraw = true
 		}
-	} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) && g.helpRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-		g.showHelp = true
-		g.needsRedraw = true
 	}
 
 	if g.dragging {
@@ -1479,6 +1481,18 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			drawTextWithBG(screen, g.coord, x, 10)
 		}
 
+		// Draw help icon when not running on mobile
+		if !g.mobile {
+			hr := g.helpRect()
+			cx := float32(hr.Min.X + HelpIconSize/2)
+			cy := float32(hr.Min.Y + HelpIconSize/2)
+			vector.DrawFilledCircle(screen, cx, cy, HelpIconSize/2, color.RGBA{0, 0, 0, 180}, true)
+			ebitenutil.DebugPrintAt(screen, "?", hr.Min.X+7, hr.Min.Y+5)
+			if g.showHelp {
+				tx := hr.Min.X - 170
+				ty := hr.Min.Y - 70
+				drawTextWithBG(screen, helpMessage, tx, ty)
+			}
 		if g.showInfo {
 			tx := g.infoX + 10
 			ty := g.infoY - 20
