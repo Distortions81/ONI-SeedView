@@ -42,6 +42,30 @@ func drawTextWithBG(dst *ebiten.Image, text string, x, y int) {
 	ebitenutil.DebugPrintAt(dst, text, x, y)
 }
 
+func drawTextWithBGScale(dst *ebiten.Image, text string, x, y int, scale float64) {
+	if scale == 1.0 {
+		drawTextWithBG(dst, text, x, y)
+		return
+	}
+	lines := strings.Split(text, "\n")
+	width := 0
+	for _, l := range lines {
+		if len(l) > width {
+			width = len(l)
+		}
+	}
+	height := len(lines) * 16
+	w := width*6 + 4
+	h := height + 4
+	img := ebiten.NewImage(w, h)
+	vector.DrawFilledRect(img, 0, 0, float32(w), float32(h), color.RGBA{0, 0, 0, 128}, false)
+	ebitenutil.DebugPrintAt(img, text, 2, 2)
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(scale, scale)
+	op.GeoM.Translate(float64(x-2), float64(y-2))
+	dst.DrawImage(img, op)
+}
+
 func drawTextWithBGBorder(dst *ebiten.Image, text string, x, y int, border color.Color) {
 	lines := strings.Split(text, "\n")
 	width := 0
@@ -350,7 +374,7 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 		g.legendImage = img
 	}
 	scale := 1.0
-	if g.height > 850 {
+	if g.height > 850 && !g.mobile {
 		scale = 2.0
 	}
 	w := float64(g.legendImage.Bounds().Dx()) * scale
@@ -844,7 +868,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			g.legend = buildLegendImage(g.biomes)
 		}
 		opLegend := &ebiten.DrawImageOptions{}
-		if g.height > 850 {
+		if g.height > 850 && !g.mobile {
 			opLegend.GeoM.Scale(2, 2)
 		}
 		screen.DrawImage(g.legend, opLegend)
@@ -852,10 +876,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			g.drawNumberLegend(screen)
 		}
 		if g.showInfo {
+			scale := 1.0
+			if g.height > 850 && !g.mobile {
+				scale = 2.0
+			}
 			w, h := textDimensions(g.infoText)
-			tx := g.width/2 - w/2
-			ty := g.height - h - 30
-			drawTextWithBG(screen, g.infoText, tx, ty)
+			tx := g.width/2 - int(float64(w)*scale)/2
+			ty := g.height - int(float64(h)*scale) - 30
+			drawTextWithBGScale(screen, g.infoText, tx, ty, scale)
 		}
 
 		g.needsRedraw = false
