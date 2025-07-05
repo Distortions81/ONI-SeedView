@@ -268,15 +268,16 @@ func drawPattern(dst *ebiten.Image, polys [][]Point, camX, camY, zoom float64, p
 		p.Close()
 	}
 	vs, is := p.AppendVerticesAndIndicesForFilling(nil, nil)
+	scale := 1.0 / BiomeTextureScale
 	for i := range vs {
 		worldX := float64(vs[i].DstX)
 		worldY := float64(vs[i].DstY)
 		x := worldX*zoom + camX
 		y := worldY*zoom + camY
-		vs[i].DstX = float32(math.Round(x))
-		vs[i].DstY = float32(math.Round(y))
-		vs[i].SrcX = float32(worldX)
-		vs[i].SrcY = float32(worldY)
+		vs[i].DstX = float32(x)
+		vs[i].DstY = float32(y)
+		vs[i].SrcX = float32(worldX * scale)
+		vs[i].SrcY = float32(worldY * scale)
 		vs[i].ColorR = 1
 		vs[i].ColorG = 1
 		vs[i].ColorB = 1
