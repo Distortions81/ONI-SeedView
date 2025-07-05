@@ -2041,8 +2041,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				switch g.hoverIcon {
 				case hoverScreenshot:
 					g.drawTooltip(screen, "Screenshot", sr, scale)
-				case hoverPrint:
-					g.drawTooltip(screen, "Print", pr, scale)
 				case hoverMagnify:
 					lbl := "Enlarge UI"
 					if g.magnify {
