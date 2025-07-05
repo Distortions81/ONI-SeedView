@@ -102,6 +102,24 @@
   </div>
   <script>
   const baseURL = "https://ingest.mapsnotincluded.org/coordinate/";
+  function seedFromURL() {
+    const search = window.location.search.slice(1);
+    for (const part of search.split('&')) {
+      if (part.startsWith('coord=')) return decodeURIComponent(part.slice(6));
+      if (part.startsWith('seed=')) return decodeURIComponent(part.slice(5));
+    }
+    let hash = window.location.hash.slice(1);
+    if (hash.startsWith('coord=')) return decodeURIComponent(hash.slice(6));
+    if (hash.startsWith('seed=')) return decodeURIComponent(hash.slice(5));
+    if (hash && !hash.includes('=')) return decodeURIComponent(hash);
+    return '';
+  }
+
+  const urlSeed = seedFromURL();
+  if (urlSeed) {
+    window.location.href = 'view.html?coord=' + encodeURIComponent(urlSeed);
+  }
+
   document.getElementById('seedForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const seed = document.getElementById('seedInput').value.trim();
