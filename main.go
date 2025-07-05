@@ -1785,13 +1785,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		if !g.mobile && !g.screenshotMode {
 			tray := g.bottomTrayRect()
-			vector.DrawFilledRect(screen, float32(tray.Min.X), float32(tray.Min.Y), float32(tray.Dx()), float32(tray.Dy()), color.RGBA{0, 0, 0, 180}, false)
+			vector.DrawFilledRect(screen, float32(tray.Min.X), float32(tray.Min.Y), float32(tray.Dx()), float32(tray.Dy()), color.RGBA{0, 139, 139, 180}, false)
 			vector.StrokeRect(screen, float32(tray.Min.X)+0.5, float32(tray.Min.Y)+0.5, float32(tray.Dx())-1, float32(tray.Dy())-1, 1, color.RGBA{255, 255, 255, 255}, false)
 			size := g.iconSize()
 			sr := g.screenshotRect()
 			scx := float32(sr.Min.X + size/2)
 			scy := float32(sr.Min.Y + size/2)
 			vector.DrawFilledCircle(screen, scx, scy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
+			vector.StrokeCircle(screen, scx, scy, float32(size)/2, 1, color.RGBA{255, 255, 255, 255}, true)
 			if cam, ok := g.icons["../icons/camera.png"]; ok && cam != nil {
 				op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
 				scale := float64(size) / math.Max(float64(cam.Bounds().Dx()), float64(cam.Bounds().Dy()))
@@ -1809,12 +1810,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			mcx := float32(mr.Min.X + size/2)
 			mcy := float32(mr.Min.Y + size/2)
 			vector.DrawFilledCircle(screen, mcx, mcy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
+			vector.StrokeCircle(screen, mcx, mcy, float32(size)/2, 1, color.RGBA{255, 255, 255, 255}, true)
 			drawPlusMinus(screen, mr, g.magnify)
 
 			hr := g.helpRect()
 			cx := float32(hr.Min.X + size/2)
 			cy := float32(hr.Min.Y + size/2)
 			vector.DrawFilledCircle(screen, cx, cy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
+			vector.StrokeCircle(screen, cx, cy, float32(size)/2, 1, color.RGBA{255, 255, 255, 255}, true)
 			if helpImg, ok := g.icons["../icons/help.png"]; ok && helpImg != nil {
 				op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
 				sc := float64(size) / math.Max(float64(helpImg.Bounds().Dx()), float64(helpImg.Bounds().Dy()))
@@ -1829,6 +1832,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			ocx := float32(or.Min.X + size/2)
 			ocy := float32(or.Min.Y + size/2)
 			vector.DrawFilledCircle(screen, ocx, ocy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
+			vector.StrokeCircle(screen, ocx, ocy, float32(size)/2, 1, color.RGBA{255, 255, 255, 255}, true)
 			if gear, ok := g.icons["../icons/gear.png"]; ok && gear != nil {
 				op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
 				sc := float64(size) / math.Max(float64(gear.Bounds().Dx()), float64(gear.Bounds().Dy()))
@@ -1846,6 +1850,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			gcx := float32(gr.Min.X + size/2)
 			gcy := float32(gr.Min.Y + size/2)
 			vector.DrawFilledCircle(screen, gcx, gcy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
+			vector.StrokeCircle(screen, gcx, gcy, float32(size)/2, 1, color.RGBA{255, 255, 255, 255}, true)
 			if icon, ok := g.icons["geyser_water.png"]; ok && icon != nil {
 				op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
 				sc := float64(size) / math.Max(float64(icon.Bounds().Dx()), float64(icon.Bounds().Dy()))
