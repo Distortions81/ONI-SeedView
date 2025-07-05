@@ -1,7 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-ASSET_DIR="$(dirname "$0")/../assets"
+REPO_ROOT="$(dirname "$0")/.."
+ASSET_DIR="$REPO_ROOT/assets"
 TEMP_DIR=$(mktemp -d)
 
 if [ -n "$(ls -A "$ASSET_DIR" 2>/dev/null | grep -v '.gitkeep' || true)" ]; then
@@ -20,14 +21,16 @@ git clone --depth 1 https://github.com/MapsNotIncluded/oni-seed-browser "$TEMP_D
 echo "Copying assets..."
 mkdir -p "$ASSET_DIR"
 ASSET_SRC="$TEMP_DIR/app/src/commonMain/composeResources/drawable"
-find "$ASSET_SRC" -name '*.png' -exec cp {} "$ASSET_DIR" \;
-find "$ASSET_SRC" -name '*.webp' -print0 | while IFS= read -r -d '' img; do
-    out="$ASSET_DIR/$(basename "${img%.webp}").png"
-    dwebp "$img" -o "$out" >/dev/null
+USED_NAMES=$(grep -ho '[A-Za-z0-9_]*\.png' "$REPO_ROOT"/display.go "$REPO_ROOT"/main.go | sort -u)
+for name in $USED_NAMES; do
+    if [ -f "$ASSET_SRC/$name" ]; then
+        cp "$ASSET_SRC/$name" "$ASSET_DIR/$name"
+    elif [ -f "$ASSET_SRC/${name%.png}.webp" ]; then
+        dwebp "$ASSET_SRC/${name%.png}.webp" -o "$ASSET_DIR/$name" >/dev/null
+    else
+        echo "Missing asset $name" >&2
+    fi
 done
-
-# copy local icons if present
-cp "$(dirname "$0")/../icons"/*.png "$ASSET_DIR" 2>/dev/null || true
 
 echo "Cleaning up..."
 rm -rf "$TEMP_DIR"
