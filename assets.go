@@ -156,19 +156,6 @@ func loadBiomeTextures() map[string]*ebiten.Image {
 	bounds := src.Bounds()
 	atlas := image.NewNRGBA(bounds)
 	draw.Draw(atlas, bounds, src, bounds.Min, draw.Src)
-	for i := 0; i < len(atlas.Pix); i += 4 {
-		r := atlas.Pix[i]
-		g := atlas.Pix[i+1]
-		b := atlas.Pix[i+2]
-		a := atlas.Pix[i+3]
-		lum := uint8((299*int(r) + 587*int(g) + 114*int(b)) / 1000)
-		atlas.Pix[i] = lum
-		atlas.Pix[i+1] = lum
-		atlas.Pix[i+2] = lum
-		if a < 64 {
-			atlas.Pix[i+3] = 0
-		}
-	}
 	w, h := atlas.Bounds().Dx(), atlas.Bounds().Dy()
 	cols, rows := 4, 6
 	tw, th := w/cols, h/rows

@@ -42,7 +42,7 @@ const (
 
 	// BiomeTextureScale controls the repetition of biome textures.
 	// Smaller values result in more repetitions.
-	BiomeTextureScale = 0.25
+	BiomeTextureScale = 0.1
 
 	// WheelThrottle controls how often mouse wheel zoom is applied
 	// in WASM to account for faster scroll events.
