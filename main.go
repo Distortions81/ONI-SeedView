@@ -645,6 +645,8 @@ type Game struct {
 	screenshotMode bool
 	ssQuality      int
 	ssSaved        time.Time
+	ssPending      int
+	skipClickTicks int
 }
 
 type label struct {
@@ -823,6 +825,19 @@ iconsLoop:
 		}
 	}
 
+	if g.ssPending > 0 {
+		if g.ssPending == 1 {
+			g.saveScreenshot()
+			g.ssSaved = time.Now()
+			g.showShotMenu = false
+			g.skipClickTicks = 1
+		}
+		g.ssPending--
+		g.needsRedraw = true
+	} else if g.skipClickTicks > 0 {
+		g.skipClickTicks--
+	}
+
 	if g.showGeyserList {
 		_, wheelY := ebiten.Wheel()
 		if wheelY != 0 {
@@ -869,6 +884,9 @@ iconsLoop:
 	if mxTmp < 0 || mxTmp >= g.width || myTmp < 0 || myTmp >= g.height {
 		mousePressed = false
 	}
+	if g.ssPending > 0 || g.skipClickTicks > 0 {
+		mousePressed = false
+	}
 
 	// Mouse dragging
 	if mousePressed {
@@ -885,6 +903,9 @@ iconsLoop:
 
 	// Touch gestures
 	touchIDs := ebiten.TouchIDs()
+	if g.ssPending > 0 || g.skipClickTicks > 0 {
+		touchIDs = nil
+	}
 	// Filter out touches outside the window
 	valid := make([]ebiten.TouchID, 0, len(touchIDs))
 	for _, id := range touchIDs {

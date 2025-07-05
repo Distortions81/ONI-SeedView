@@ -96,6 +96,8 @@ the environments are:
 
 Click the camera icon to open the screenshot menu. Choose a quality level
 (1×–8×) and the current view is written to a PNG named after the seed.
+After clicking **Save Screenshot** the button briefly shows *Taking Screenshot...*
+with a red outline before the menu closes automatically.
 You can also generate a screenshot non-interactively:
 
 ```bash
