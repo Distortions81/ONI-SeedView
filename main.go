@@ -1805,7 +1805,7 @@ func main() {
 		game.startIconLoader(names)
 		game.loading = false
 		game.needsRedraw = true
-	}()
+	}(asteroidIdx)
 	if *screenshot != "" {
 		game.screenshotPath = *screenshot
 		game.screenshotMode = true
