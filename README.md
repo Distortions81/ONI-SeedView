@@ -16,7 +16,8 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
 * Biome texture mapping is documented in [BIOME_TEXTURES.md](BIOME_TEXTURES.md).
 * Supports running in headless environments using `Xvfb`.
 * Click the camera icon to capture screenshots. A menu allows
-  selecting image quality from low (2K) to high (8K).
+  selecting image quality from low (2K) to high (8K) and includes a
+  "Black and White" toggle for printing or color-blind accessibility.
 * Hover over geyser or POI icons to show an information panel.
   Clicking pins the panel so it stays visible while panning.
 * Hover over the bottom icons for tooltips describing their actions. Tooltips

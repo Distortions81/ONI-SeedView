@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	ClientVersion    = "v0.0.5-2507052242"
+	ClientVersion    = "v0.0.0-2507052255"
 	BaseURL          = "https://ingest.mapsnotincluded.org/coordinate/"
 	AcceptCBORHeader = "application/cbor"
 	PanSpeed         = 15
@@ -47,6 +47,7 @@ const (
 	ScreenshotSaveLabel   = "Save Screenshot"
 	ScreenshotTakingLabel = "Taking Screenshot..."
 	ScreenshotSavedLabel  = "Saved!"
+	ScreenshotBWLabel     = "Black and White"
 	GeyserRowSpacing      = 60
 	OptionsMenuSpacing    = 26
 	OptionsMenuTitle      = "Options:"
