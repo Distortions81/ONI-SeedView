@@ -45,17 +45,9 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
    sudo apt-get install xorg-dev libgl1-mesa-dev mingw-w64
    ```
 
-3. **Download the image assets** – Icons used by the viewer are stored in the [`oni-seed-browser`](https://github.com/MapsNotIncluded/oni-seed-browser) repository. Run the helper script to clone the repo and copy the assets:
-
-   ```bash
-   ./scripts/download_assets.sh
-   ```
-
-   The script converts `.webp` icons to `.png` using `dwebp` and only downloads
-   the images referenced by the code. After it completes the PNG files will be
-   placed in the `assets/` directory. Install the `webp` package if needed.
-
-4. **Build and run** – Execute the program with a seed coordinate. The window defaults to 1280×720 but can be resized.
+3. **Build and run** – Execute the program with a seed coordinate. All required
+   image assets are embedded so no additional downloads are needed. The window
+   defaults to 1280×720 but can be resized.
 
    ```bash
    go run . -coord SNDST-A-7-0-0-0
@@ -117,8 +109,8 @@ go run . -coord SNDST-A-7-0-0-0 -screenshot myshot.png
 ## Repository Layout
 
 ```
-assets/     # Image files used by the viewer (downloaded separately)
-scripts/    # Helper scripts for asset download and headless execution
+assets/     # Embedded image files used by the viewer
+scripts/    # Helper scripts for headless execution
 main.go     # Program entry point and rendering logic
 display.go  # Icon selection and drawing helpers
 parse.go    # Functions for decoding biome path strings

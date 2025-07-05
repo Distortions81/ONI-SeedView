@@ -3,43 +3,32 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"image"
 	"image/draw"
 	"image/jpeg"
 	"image/png"
 	"io"
-	"net/http"
-	"os"
 	"path"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-func openFile(name string) (io.ReadCloser, error) {
-	if runtime.GOOS == "js" {
-		resp, err := http.Get(name)
-		if err != nil {
-			return nil, err
-		}
-		if resp.StatusCode != http.StatusOK {
-			b, _ := io.ReadAll(resp.Body)
-			resp.Body.Close()
-			return nil, fmt.Errorf("failed to fetch %s: %s", name, b)
-		}
-		return resp.Body, nil
-	}
-	return os.Open(name)
-}
+// embed all PNG assets so no runtime fetching is needed
+//
+//go:embed assets/*.png icons/*.png
+var assetFS embed.FS
 
 func openAsset(name string) (io.ReadCloser, error) {
-	if runtime.GOOS == "js" {
-		return openFile(path.Join(WebAssetBase, name))
+	n := path.Clean(name)
+	n = strings.TrimPrefix(n, "../")
+	if !strings.HasPrefix(n, "assets/") && !strings.HasPrefix(n, "icons/") {
+		n = path.Join("assets", n)
 	}
-	return openFile(filepath.Join("assets", name))
+	return assetFS.Open(n)
 }
 
 func toCamel(s string) string {
