@@ -689,7 +689,7 @@ func (g *Game) updateHover(mx, my int) {
 			}
 		}
 	}
-	useNumbers := g.useNumbers && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+	useNumbers := g.useNumbers && g.showItemNames && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
 	if useNumbers && g.legendImage != nil {
 		w := int(float64(g.legendImage.Bounds().Dx()) * scale)
 		x0 := g.width - w - 12
@@ -769,7 +769,7 @@ func (g *Game) clickLegend(mx, my int) bool {
 			}
 		}
 	}
-	useNumbers := g.useNumbers && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+	useNumbers := g.useNumbers && g.showItemNames && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
 	if useNumbers && g.legendImage != nil {
 		w := int(float64(g.legendImage.Bounds().Dx()) * scale)
 		x0 := g.width - w - 12
@@ -1272,7 +1272,7 @@ iconsLoop:
 						g.touchUI = true
 					}
 				}
-				useNumbers := g.useNumbers && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+				useNumbers := g.useNumbers && g.showItemNames && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
 				if !g.touchUI && useNumbers && g.legendImage != nil {
 					lw := int(float64(g.legendImage.Bounds().Dx()) * scale)
 					x0 := g.width - lw - 12
@@ -1311,7 +1311,7 @@ iconsLoop:
 							g.updateHover(x, y)
 						}
 					}
-					useNumbers := g.useNumbers && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+					useNumbers := g.useNumbers && g.showItemNames && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
 					if useNumbers && g.legendImage != nil {
 						lw := int(float64(g.legendImage.Bounds().Dx()) * scale)
 						x0 := g.width - lw - 12
@@ -1356,7 +1356,7 @@ iconsLoop:
 							g.touchUI = true
 						}
 					}
-					useNumbers := g.useNumbers && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+					useNumbers := g.useNumbers && g.showItemNames && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
 					if !g.touchUI && useNumbers && g.legendImage != nil {
 						lw := int(float64(g.legendImage.Bounds().Dx()) * scale)
 						x0 := g.width - lw - 12
@@ -1515,7 +1515,7 @@ iconsLoop:
 		} else {
 			handled := false
 			scale := g.uiScale()
-			useNumbers := g.useNumbers && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+			useNumbers := g.useNumbers && g.showItemNames && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
 			if g.legend != nil {
 				lw := int(float64(g.legend.Bounds().Dx()) * scale)
 				lh := int(float64(g.legend.Bounds().Dy()) * scale)
@@ -1763,7 +1763,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		labels := []label{}
 		var highlightGeysers []Geyser
 		var highlightPOIs []PointOfInterest
-		useNumbers := g.useNumbers && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+		useNumbers := g.useNumbers && g.showItemNames && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
 		if g.legendMap == nil {
 			g.initObjectLegend()
 		}
@@ -2084,92 +2084,94 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 
 		highlightLabels := []label{}
-		for _, gy := range highlightGeysers {
-			x := math.Round((float64(gy.X) * 2 * g.zoom) + g.camX)
-			y := math.Round((float64(gy.Y) * 2 * g.zoom) + g.camY)
+		if g.showItemNames {
+			for _, gy := range highlightGeysers {
+				x := math.Round((float64(gy.X) * 2 * g.zoom) + g.camX)
+				y := math.Round((float64(gy.Y) * 2 * g.zoom) + g.camY)
 
-			name := displayGeyser(gy.ID)
-			formatted, width := formatLabel(name)
-			dotClr := color.RGBA{255, 0, 0, 255}
-			labelClr := dotClr
-			if !useNumbers {
-				labelClr = color.RGBA{}
-			}
-
-			if iconName := iconForGeyser(gy.ID); iconName != "" {
-				if img, ok := g.icons[iconName]; ok && img != nil {
-					op := &ebiten.DrawImageOptions{Filter: g.filterMode()}
-					maxDim := math.Max(float64(img.Bounds().Dx()), float64(img.Bounds().Dy()))
-					scale := g.zoom * IconScale * g.iconScale * float64(BaseIconPixels) / maxDim
-					op.GeoM.Scale(scale, scale)
-					w := float64(img.Bounds().Dx()) * scale
-					h := float64(img.Bounds().Dy()) * scale
-					left := math.Round(x - w/2)
-					top := math.Round(y - h/2)
-					op.GeoM.Translate(left, top)
-					screen.DrawImage(img, op)
-					vector.StrokeRect(screen, float32(left)+0.5, float32(top)+0.5, float32(math.Round(w))-1, float32(math.Round(h))-1, 2, dotClr, false)
-					if useNumbers {
-						formatted = strconv.Itoa(g.legendMap["g"+name])
-						width = len(formatted)
-					}
-					highlightLabels = append(highlightLabels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, width, labelClr})
-					continue
+				name := displayGeyser(gy.ID)
+				formatted, width := formatLabel(name)
+				dotClr := color.RGBA{255, 0, 0, 255}
+				labelClr := dotClr
+				if !useNumbers {
+					labelClr = color.RGBA{}
 				}
-			}
 
-			vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, dotClr, true)
-			vector.StrokeRect(screen, float32(x-3), float32(y-3), 6, 6, 2, dotClr, false)
-			if useNumbers {
-				formatted = strconv.Itoa(g.legendMap["g"+name])
-				width = len(formatted)
-			}
-			highlightLabels = append(highlightLabels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, width, labelClr})
-		}
-
-		for _, poi := range highlightPOIs {
-			x := math.Round((float64(poi.X) * 2 * g.zoom) + g.camX)
-			y := math.Round((float64(poi.Y) * 2 * g.zoom) + g.camY)
-
-			name := displayPOI(poi.ID)
-			formatted, width := formatLabel(name)
-			dotClr := color.RGBA{255, 0, 0, 255}
-			labelClr := dotClr
-			if !useNumbers {
-				labelClr = color.RGBA{}
-			}
-
-			if iconName := iconForPOI(poi.ID); iconName != "" {
-				if img, ok := g.icons[iconName]; ok && img != nil {
-					op := &ebiten.DrawImageOptions{Filter: g.filterMode()}
-					maxDim := math.Max(float64(img.Bounds().Dx()), float64(img.Bounds().Dy()))
-					scale := g.zoom * IconScale * g.iconScale * float64(BaseIconPixels) / maxDim
-					op.GeoM.Scale(scale, scale)
-					w := float64(img.Bounds().Dx()) * scale
-					h := float64(img.Bounds().Dy()) * scale
-					left := math.Round(x - w/2)
-					top := math.Round(y - h/2)
-					op.GeoM.Translate(left, top)
-					screen.DrawImage(img, op)
-					vector.StrokeRect(screen, float32(left)+0.5, float32(top)+0.5, float32(math.Round(w))-1, float32(math.Round(h))-1, 2, dotClr, false)
-					if useNumbers {
-						formatted = strconv.Itoa(g.legendMap["p"+name])
-						width = len(formatted)
+				if iconName := iconForGeyser(gy.ID); iconName != "" {
+					if img, ok := g.icons[iconName]; ok && img != nil {
+						op := &ebiten.DrawImageOptions{Filter: g.filterMode()}
+						maxDim := math.Max(float64(img.Bounds().Dx()), float64(img.Bounds().Dy()))
+						scale := g.zoom * IconScale * g.iconScale * float64(BaseIconPixels) / maxDim
+						op.GeoM.Scale(scale, scale)
+						w := float64(img.Bounds().Dx()) * scale
+						h := float64(img.Bounds().Dy()) * scale
+						left := math.Round(x - w/2)
+						top := math.Round(y - h/2)
+						op.GeoM.Translate(left, top)
+						screen.DrawImage(img, op)
+						vector.StrokeRect(screen, float32(left)+0.5, float32(top)+0.5, float32(math.Round(w))-1, float32(math.Round(h))-1, 2, dotClr, false)
+						if useNumbers {
+							formatted = strconv.Itoa(g.legendMap["g"+name])
+							width = len(formatted)
+						}
+						highlightLabels = append(highlightLabels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, width, labelClr})
+						continue
 					}
-					highlightLabels = append(highlightLabels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, width, labelClr})
-					continue
 				}
+
+				vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, dotClr, true)
+				vector.StrokeRect(screen, float32(x-3), float32(y-3), 6, 6, 2, dotClr, false)
+				if useNumbers {
+					formatted = strconv.Itoa(g.legendMap["g"+name])
+					width = len(formatted)
+				}
+				highlightLabels = append(highlightLabels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, width, labelClr})
 			}
 
-			vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, dotClr, true)
-			vector.StrokeRect(screen, float32(x-3), float32(y-1), 6, 6, 2, dotClr, false)
-			if useNumbers {
-				formatted = strconv.Itoa(g.legendMap["p"+name])
-				width = len(formatted)
+			for _, poi := range highlightPOIs {
+				x := math.Round((float64(poi.X) * 2 * g.zoom) + g.camX)
+				y := math.Round((float64(poi.Y) * 2 * g.zoom) + g.camY)
+
+				name := displayPOI(poi.ID)
+				formatted, width := formatLabel(name)
+				dotClr := color.RGBA{255, 0, 0, 255}
+				labelClr := dotClr
+				if !useNumbers {
+					labelClr = color.RGBA{}
+				}
+
+				if iconName := iconForPOI(poi.ID); iconName != "" {
+					if img, ok := g.icons[iconName]; ok && img != nil {
+						op := &ebiten.DrawImageOptions{Filter: g.filterMode()}
+						maxDim := math.Max(float64(img.Bounds().Dx()), float64(img.Bounds().Dy()))
+						scale := g.zoom * IconScale * g.iconScale * float64(BaseIconPixels) / maxDim
+						op.GeoM.Scale(scale, scale)
+						w := float64(img.Bounds().Dx()) * scale
+						h := float64(img.Bounds().Dy()) * scale
+						left := math.Round(x - w/2)
+						top := math.Round(y - h/2)
+						op.GeoM.Translate(left, top)
+						screen.DrawImage(img, op)
+						vector.StrokeRect(screen, float32(left)+0.5, float32(top)+0.5, float32(math.Round(w))-1, float32(math.Round(h))-1, 2, dotClr, false)
+						if useNumbers {
+							formatted = strconv.Itoa(g.legendMap["p"+name])
+							width = len(formatted)
+						}
+						highlightLabels = append(highlightLabels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, width, labelClr})
+						continue
+					}
+				}
+
+				vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, dotClr, true)
+				vector.StrokeRect(screen, float32(x-3), float32(y-1), 6, 6, 2, dotClr, false)
+				if useNumbers {
+					formatted = strconv.Itoa(g.legendMap["p"+name])
+					width = len(formatted)
+				}
+				highlightLabels = append(highlightLabels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, width, labelClr})
 			}
-			highlightLabels = append(highlightLabels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, width, labelClr})
+
 		}
-
 		if len(highlightLabels) > 0 {
 			labelScale := g.uiScale()
 			for _, l := range highlightLabels {
