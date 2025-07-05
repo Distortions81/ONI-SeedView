@@ -3,6 +3,7 @@
 package main
 
 import (
+	"net/url"
 	"strings"
 	"syscall/js"
 )
@@ -37,4 +38,26 @@ func coordFromURL() string {
 		return hash
 	}
 	return ""
+}
+
+// asteroidFromURL retrieves the asteroid ID from the URL if present.
+// It looks for an `asteroid=ID` query parameter or hash fragment.
+func asteroidFromURL() (string, bool) {
+	loc := js.Global().Get("location")
+	if !loc.Truthy() {
+		return "", false
+	}
+	search := strings.TrimPrefix(loc.Get("search").String(), "?")
+	for _, part := range strings.Split(search, "&") {
+		if strings.HasPrefix(part, "asteroid=") {
+			id, _ := url.QueryUnescape(strings.TrimPrefix(part, "asteroid="))
+			return id, true
+		}
+	}
+	hash := strings.TrimPrefix(loc.Get("hash").String(), "#")
+	if strings.HasPrefix(hash, "asteroid=") {
+		id, _ := url.QueryUnescape(strings.TrimPrefix(hash, "asteroid="))
+		return id, true
+	}
+	return "", false
 }
