@@ -896,9 +896,6 @@ func (g *Game) uiScale() float64 {
 	if g.magnify {
 		scale = 2.0
 	}
-	if g.halfRes {
-		scale /= 2.0
-	}
 	return scale
 }
 
