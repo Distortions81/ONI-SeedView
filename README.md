@@ -76,15 +76,14 @@ sudo apt-get install xvfb   # one-time setup
 
 ## WebAssembly Build
 
-Run the build script to compile the program and copy the necessary runtime files. The WebAssembly module is optimized and compressed, with the runtime JavaScript and `index.html` placed in `dist/`.
+Run the build script to compile the program and copy the necessary runtime files. The WebAssembly module is optimized and compressed, with the runtime JavaScript and HTML files placed in `dist/`.
 
 ```bash
 ./scripts/build_all.sh
 ```
 
-Open `dist/index.html` in a browser to test the WebAssembly build. The page loads `oni-view.wasm.gz` and decompresses it with [Pako](https://github.com/nodeca/pako).
-You can specify the seed coordinate in the URL using `?coord=<seed>` or in the
-fragment like `#coord=<seed>` and the viewer will load it automatically.
+Open `dist/index.html` in a browser to enter a seed. Valid seeds redirect to `view.html` which loads `oni-view.wasm.gz` and decompresses it with [Pako](https://github.com/nodeca/pako).
+You can still specify the seed coordinate directly in the viewer URL using `view.html?coord=<seed>` or `view.html#coord=<seed>`.
 
 ## Desktop vs Web and Mobile
 
