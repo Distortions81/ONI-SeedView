@@ -47,14 +47,20 @@ func (g *Game) drawScreenshotMenu(dst *ebiten.Image) {
 	vector.DrawFilledRect(dst, float32(rect.Min.X), float32(rect.Min.Y), float32(rect.Dx()), float32(rect.Dy()), colorRGBA(0, 0, 0, 200), false)
 	drawTextWithBG(dst, "Image quality:", rect.Min.X+2, rect.Min.Y+2)
 	label := "Save Screenshot"
-	if time.Since(g.ssSaved) < 2*time.Second {
+	border := colorRGBA(255, 255, 255, 255)
+	if g.ssPending > 0 {
+		label = "Taking Screenshot..."
+		border = colorRGBA(255, 0, 0, 255)
+	} else if time.Since(g.ssSaved) < 2*time.Second {
 		label = "Saved!"
 	}
 	items := []string{"Low (1x)", "Medium (2x)", "High (4x)", "Extreme (8x)", label}
 	y := rect.Min.Y + 2 + ScreenshotMenuSpacing
 	for i, it := range items {
 		selected := i == g.ssQuality
-		if selected {
+		if i == 4 && g.ssPending > 0 {
+			drawTextWithBGBorder(dst, it, rect.Min.X+2, y, border)
+		} else if selected {
 			drawTextWithBGBorder(dst, it, rect.Min.X+2, y, colorRGBA(255, 255, 255, 255))
 		} else {
 			drawTextWithBG(dst, it, rect.Min.X+2, y)
@@ -80,8 +86,9 @@ func (g *Game) clickScreenshotMenu(mx, my int) bool {
 			case 0, 1, 2, 3:
 				g.ssQuality = i
 			case 4:
-				g.saveScreenshot()
-				g.ssSaved = time.Now()
+				if g.ssPending == 0 {
+					g.ssPending = 2
+				}
 			}
 			g.needsRedraw = true
 			return true
