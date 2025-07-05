@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	ClientVersion    = "v0.0.0-2507052134"
+	ClientVersion    = "v0.0.4-2507052134"
 	BaseURL          = "https://ingest.mapsnotincluded.org/coordinate/"
 	AcceptCBORHeader = "application/cbor"
 	PanSpeed         = 15
