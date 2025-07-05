@@ -1912,6 +1912,13 @@ func main() {
 			astIdxSel = asteroidIndexByID(seed.Asteroids, id)
 			if astIdxSel < 0 {
 				game.status = fmt.Sprintf("%s\nAsteroid ID: %s\nThis location does not contain Asteroid ID: %s", game.coord, id, id)
+				if len(seed.Asteroids) > 0 {
+					valid := make([]string, 0, len(seed.Asteroids))
+					for _, a := range seed.Asteroids {
+						valid = append(valid, a.ID)
+					}
+					game.status += fmt.Sprintf("\nValid IDs: %s", strings.Join(valid, ", "))
+				}
 				game.statusError = true
 				game.needsRedraw = true
 				game.loading = false
