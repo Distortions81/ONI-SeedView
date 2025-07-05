@@ -598,6 +598,8 @@ type Game struct {
 	ssSaved        time.Time
 	ssPending      int
 	skipClickTicks int
+	lastDraw       time.Time
+	wasMinimized   bool
 }
 
 type label struct {
@@ -758,6 +760,15 @@ func (g *Game) startIconLoader(names []string) {
 
 func (g *Game) Update() error {
 	const panSpeed = PanSpeed
+
+	minimized := ebiten.IsWindowMinimized()
+	if g.wasMinimized && !minimized {
+		g.needsRedraw = true
+	}
+	g.wasMinimized = minimized
+	if time.Since(g.lastDraw) >= time.Second {
+		g.needsRedraw = true
+	}
 
 iconsLoop:
 	for g.iconResults != nil {
@@ -1128,6 +1139,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		screen.Fill(color.Black)
 		g.drawGeyserList(screen)
 		g.needsRedraw = false
+		g.lastDraw = time.Now()
 		return
 	}
 	if g.loading || (len(g.biomes) == 0 && g.status != "") {
@@ -1147,6 +1159,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		} else {
 			drawTextWithBGScale(screen, msg, x, y, scale)
 		}
+		g.lastDraw = time.Now()
 		return
 	}
 	if g.needsRedraw {
@@ -1539,6 +1552,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 
 		g.needsRedraw = false
+		g.lastDraw = time.Now()
 	}
 	if g.screenshotPath != "" && !g.captured {
 		b := screen.Bounds()
