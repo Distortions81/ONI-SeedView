@@ -42,26 +42,28 @@ func coordFromURL() string {
 
 // asteroidFromURL retrieves the asteroid index from the URL if present.
 // It looks for an `asteroid=NUM` query parameter or hash fragment.
-func asteroidFromURL() int {
+func asteroidFromURL() (int, bool) {
 	loc := js.Global().Get("location")
 	if !loc.Truthy() {
-		return -1
+		return -1, false
 	}
 	search := strings.TrimPrefix(loc.Get("search").String(), "?")
 	for _, part := range strings.Split(search, "&") {
 		if strings.HasPrefix(part, "asteroid=") {
 			num, err := strconv.Atoi(strings.TrimPrefix(part, "asteroid="))
-			if err == nil {
-				return num
+			if err != nil {
+				return -1, true
 			}
+			return num, true
 		}
 	}
 	hash := strings.TrimPrefix(loc.Get("hash").String(), "#")
 	if strings.HasPrefix(hash, "asteroid=") {
 		num, err := strconv.Atoi(strings.TrimPrefix(hash, "asteroid="))
-		if err == nil {
-			return num
+		if err != nil {
+			return -1, true
 		}
+		return num, true
 	}
-	return -1
+	return -1, false
 }
