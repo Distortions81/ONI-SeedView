@@ -27,6 +27,9 @@ func (g *Game) optionsMenuRect() image.Rectangle {
 		"Use Item Numbers",
 		"Icon Size [-] [+]",
 		"Smart Rendering",
+		"Half Resolution",
+		"Auto Low-Res",
+		"Linear Filtering",
 		"FPS: 60.0",
 		"Version: " + ClientVersion,
 		"Close",
@@ -82,6 +85,9 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	y += OptionsMenuSpacing
 
 	drawToggle("Smart Rendering", g.smartRender)
+	drawToggle("Half Resolution", g.halfRes)
+	drawToggle("Auto Low-Res", g.autoLowRes)
+	drawToggle("Linear Filtering", g.linearFilter)
 
 	fps := fmt.Sprintf("FPS: %.1f", ebiten.ActualFPS())
 	ebitenutil.DebugPrintAt(dst, fps, rect.Min.X+6, y)
@@ -171,6 +177,33 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	r = image.Rect(rect.Min.X+4, y-4, rect.Max.X-4, y-4+22)
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.smartRender = !g.smartRender
+		g.needsRedraw = true
+		return true
+	}
+	y += OptionsMenuSpacing
+
+	// Half Resolution
+	r = image.Rect(rect.Min.X+4, y-4, rect.Max.X-4, y-4+22)
+	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		g.halfRes = !g.halfRes
+		g.needsRedraw = true
+		return true
+	}
+	y += OptionsMenuSpacing
+
+	// Auto Low-Res
+	r = image.Rect(rect.Min.X+4, y-4, rect.Max.X-4, y-4+22)
+	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		g.autoLowRes = !g.autoLowRes
+		g.needsRedraw = true
+		return true
+	}
+	y += OptionsMenuSpacing
+
+	// Linear Filtering
+	r = image.Rect(rect.Min.X+4, y-4, rect.Max.X-4, y-4+22)
+	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		g.linearFilter = !g.linearFilter
 		g.needsRedraw = true
 		return true
 	}
