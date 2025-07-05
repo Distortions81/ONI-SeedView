@@ -12,6 +12,7 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
 * Touch controls for panning and pinch-to-zoom on supported devices.
 * Mouse wheel and `+`/`-` keys control zoom. The window can be resized at any time.
 * Textured biomes with a color legend and icons for geysers and points of interest.
+* Biome texture mapping is documented in [BIOME_TEXTURES.md](BIOME_TEXTURES.md).
 * Supports running in headless environments using `Xvfb`.
 * Click the camera icon to capture screenshots. A menu allows
   selecting image quality from low (2K) to high (8K).
