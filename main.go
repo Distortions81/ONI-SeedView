@@ -595,6 +595,7 @@ type Game struct {
 	pois           []PointOfInterest
 	biomes         []BiomePath
 	icons          map[string]*ebiten.Image
+	biomeTextures  map[string]*ebiten.Image
 	width          int
 	height         int
 	astWidth       int
@@ -1219,10 +1220,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				clr = color.RGBA{60, 60, 60, 255}
 			}
 			highlight := g.hoverBiome >= 0 && g.hoverBiome < len(g.legendBiomes) && g.legendBiomes[g.hoverBiome] == bp.Name
-			if g.hoverBiome >= 0 && !highlight {
-				clr = color.RGBA{100, 100, 100, 255}
+			texClr := clr
+			if tex, ok := g.biomeTextures[bp.Name]; ok {
+				drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, tex)
+				texClr.A = 160
 			}
-			drawBiome(screen, bp.Polygons, clr, g.camX, g.camY, g.zoom)
+			if g.hoverBiome >= 0 && !highlight {
+				texClr = color.RGBA{100, 100, 100, texClr.A}
+			}
+			drawBiome(screen, bp.Polygons, texClr, g.camX, g.camY, g.zoom)
 			/*
 								switch bp.Name {
 								case "FrozenWastes", "IceCaves":
@@ -1701,6 +1707,7 @@ func main() {
 		game.camX = (float64(game.width) - float64(game.astWidth)*2*game.zoom) / 2
 		game.camY = (float64(game.height) - float64(game.astHeight)*2*game.zoom) / 2
 		game.clampCamera()
+		game.biomeTextures = loadBiomeTextures()
 		names := []string{"../icons/camera.png", "../icons/help.png", "geyser_water.png"}
 		set := make(map[string]struct{})
 		for _, gy := range ast.Geysers {

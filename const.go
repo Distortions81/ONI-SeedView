@@ -51,3 +51,28 @@ const (
 )
 
 var LegendZoomThreshold = math.Pow(WheelZoomFactor, LegendZoomExponent)
+
+var biomeOrder = []string{
+	"Sandstone",
+	"Barren",
+	"Space",
+	"FrozenWastes",
+	"BoggyMarsh",
+	"ToxicJungle",
+	"Ocean",
+	"Rust",
+	"Forest",
+	"Radioactive",
+	"Swamp",
+	"Wasteland",
+	"Metallic",
+	"Moo",
+	"IceCaves",
+	"CarrotQuarry",
+	"SugarWoods",
+	"PrehistoricGarden",
+	"PrehistoricRaptor",
+	"PrehistoricWetlands",
+	"OilField",
+	"MagmaCore",
+}
