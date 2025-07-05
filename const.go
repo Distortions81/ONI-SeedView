@@ -40,6 +40,10 @@ const (
 	ScreenshotMenuSpacing = 26
 	GeyserRowSpacing      = 60
 
+	// BiomeTextureScale controls the repetition of biome textures.
+	// Smaller values result in more repetitions.
+	BiomeTextureScale = 0.25
+
 	// WheelThrottle controls how often mouse wheel zoom is applied
 	// in WASM to account for faster scroll events.
 	WheelThrottle = 75 * time.Millisecond
