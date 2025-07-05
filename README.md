@@ -111,13 +111,20 @@ go run . -coord SNDST-A-7-0-0-0 -screenshot myshot.png
 
 ```
 assets/     # Embedded image files used by the viewer
-scripts/    # Helper scripts for headless execution
+scripts/    # Helper scripts for headless execution and asset conversion
 main.go     # Program entry point and rendering logic
 display.go  # Icon selection and drawing helpers
 parse.go    # Functions for decoding biome path strings
 colors.go   # Color definitions for different biomes
 const.go    # Miscellaneous constants and configuration
 names.json  # Mapping tables for translating internal IDs to display names
+scripts/convert_biomes.sh  # Convert PNG biome textures to JPEG
+```
+
+Run the conversion script before building to generate the JPEG biome textures:
+
+```bash
+./scripts/convert_biomes.sh
 ```
 
 Unit tests live alongside the code (`main_test.go`, `zoom_test.go`). Format the
