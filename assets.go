@@ -19,13 +19,13 @@ import (
 
 // embed all PNG assets so no runtime fetching is needed
 //
-//go:embed assets/*.png icons/*.png
+//go:embed assets/*.png icons/*.png biomes/*.png
 var assetFS embed.FS
 
 func openAsset(name string) (io.ReadCloser, error) {
 	n := path.Clean(name)
 	n = strings.TrimPrefix(n, "../")
-	if !strings.HasPrefix(n, "assets/") && !strings.HasPrefix(n, "icons/") {
+	if !strings.HasPrefix(n, "assets/") && !strings.HasPrefix(n, "icons/") && !strings.HasPrefix(n, "biomes/") {
 		n = path.Join("assets", n)
 	}
 	return assetFS.Open(n)
@@ -131,33 +131,14 @@ func loadImage(cache map[string]*ebiten.Image, name string) (*ebiten.Image, erro
 }
 
 func loadBiomeTextures() map[string]*ebiten.Image {
-	f, err := openAsset("../icons/textures.png")
-	if err != nil {
-		fmt.Println("load atlas:", err)
-		return nil
-	}
-	defer f.Close()
-	src, err := png.Decode(f)
-	if err != nil {
-		fmt.Println("decode atlas:", err)
-		return nil
-	}
-	bounds := src.Bounds()
-	atlas := image.NewNRGBA(bounds)
-	draw.Draw(atlas, bounds, src, bounds.Min, draw.Src)
-	w, h := atlas.Bounds().Dx(), atlas.Bounds().Dy()
-	cols, rows := 26, 1
-	tw, th := w/cols, h/rows
 	textures := make(map[string]*ebiten.Image)
-	for i, name := range biomeOrder {
-		if i >= cols*rows {
-			break
+	for _, name := range biomeOrder {
+		img, err := loadImageFile("../biomes/" + name + ".png")
+		if err != nil {
+			fmt.Println("load biome", name, ":", err)
+			continue
 		}
-		col := i % cols
-		row := i / cols
-		r := image.Rect(col*tw+1, row*th+1, (col+1)*tw-1, (row+1)*th-1)
-		sub := atlas.SubImage(r).(*image.NRGBA)
-		textures[name] = ebiten.NewImageFromImage(sub)
+		textures[name] = img
 	}
 	return textures
 }
