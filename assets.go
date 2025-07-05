@@ -17,9 +17,9 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-// embed all PNG assets so no runtime fetching is needed
+// embed all image assets so no runtime fetching is needed
 //
-//go:embed assets/*.png icons/*.png biomes/*.png
+//go:embed assets/*.png icons/*.png biomes/*.jpg
 var assetFS embed.FS
 
 func openAsset(name string) (io.ReadCloser, error) {
@@ -133,7 +133,7 @@ func loadImage(cache map[string]*ebiten.Image, name string) (*ebiten.Image, erro
 func loadBiomeTextures() map[string]*ebiten.Image {
 	textures := make(map[string]*ebiten.Image)
 	for _, name := range biomeOrder {
-		img, err := loadImageFile("../biomes/" + name + ".png")
+		img, err := loadImageFile("../biomes/" + name + ".jpg")
 		if err != nil {
 			fmt.Println("load biome", name, ":", err)
 			continue
