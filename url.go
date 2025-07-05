@@ -8,6 +8,6 @@ func coordFromURL() string {
 }
 
 // asteroidFromURL returns -1 on non-web builds.
-func asteroidFromURL() int {
-	return -1
+func asteroidFromURL() (int, bool) {
+	return -1, false
 }

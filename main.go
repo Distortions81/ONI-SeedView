@@ -1727,13 +1727,17 @@ func main() {
 	flag.Parse()
 	asteroidIdx := 0
 	asteroidSpecified := false
+	invalidAsteroid := false
 	if runtime.GOARCH == "wasm" {
 		if c := coordFromURL(); c != "" {
 			*coord = c
 		}
-		if a := asteroidFromURL(); a >= 0 {
+		if a, ok := asteroidFromURL(); ok {
 			asteroidIdx = a
 			asteroidSpecified = true
+			if a < 0 {
+				invalidAsteroid = true
+			}
 		}
 	}
 
@@ -1754,68 +1758,79 @@ func main() {
 		hoverItem:         -1,
 		mousePrev:         false,
 	}
-	go func(idx int) {
-		fmt.Println("Fetching:", *coord)
-		cborData, err := fetchSeedCBOR(*coord)
-		if err != nil {
-			game.status = "Error: " + err.Error()
-			game.needsRedraw = true
-			game.loading = false
-			return
-		}
-		seed, err := decodeSeed(cborData)
-		if err != nil {
-			game.status = "Error: " + err.Error()
-			game.needsRedraw = true
-			game.loading = false
-			return
-		}
-		if *out != "" {
-			jsonData, _ := json.MarshalIndent(seed, "", "  ")
-			_ = saveToFile(*out, jsonData)
-		}
-		astIdxSel := 0
-		if idx >= 0 && idx < len(seed.Asteroids) {
-			astIdxSel = idx
-		}
-		ast := seed.Asteroids[astIdxSel]
-		bps := parseBiomePaths(ast.BiomePaths)
-		game.geysers = ast.Geysers
-		game.pois = ast.POIs
-		game.biomes = bps
-		game.astWidth = ast.SizeX
-		game.astHeight = ast.SizeY
-		game.legend, game.legendBiomes = buildLegendImage(bps)
-		zoomX := float64(game.width) / (float64(game.astWidth) * 2)
-		zoomY := float64(game.height) / (float64(game.astHeight) * 2)
-		game.zoom = math.Min(zoomX, zoomY)
-		game.minZoom = game.zoom * 0.25
-		game.camX = (float64(game.width) - float64(game.astWidth)*2*game.zoom) / 2
-		game.camY = (float64(game.height) - float64(game.astHeight)*2*game.zoom) / 2
-		game.clampCamera()
-		game.biomeTextures = loadBiomeTextures()
-		names := []string{"../icons/camera.png", "../icons/help.png", "geyser_water.png"}
-		set := make(map[string]struct{})
-		for _, gy := range ast.Geysers {
-			if n := iconForGeyser(gy.ID); n != "" {
-				if _, ok := set[n]; !ok {
-					set[n] = struct{}{}
-					names = append(names, n)
-				}
-			}
-		}
-		for _, poi := range ast.POIs {
-			if n := iconForPOI(poi.ID); n != "" {
-				if _, ok := set[n]; !ok {
-					set[n] = struct{}{}
-					names = append(names, n)
-				}
-			}
-		}
-		game.startIconLoader(names)
+	if invalidAsteroid {
+		game.status = "invalid asteroid ID"
 		game.loading = false
-		game.needsRedraw = true
-	}(asteroidIdx)
+	} else {
+		go func(idx int) {
+			fmt.Println("Fetching:", *coord)
+			cborData, err := fetchSeedCBOR(*coord)
+			if err != nil {
+				game.status = "Error: " + err.Error()
+				game.needsRedraw = true
+				game.loading = false
+				return
+			}
+			seed, err := decodeSeed(cborData)
+			if err != nil {
+				game.status = "Error: " + err.Error()
+				game.needsRedraw = true
+				game.loading = false
+				return
+			}
+			if game.asteroidSpecified && (idx < 0 || idx >= len(seed.Asteroids)) {
+				game.status = "invalid asteroid ID"
+				game.needsRedraw = true
+				game.loading = false
+				return
+			}
+			if *out != "" {
+				jsonData, _ := json.MarshalIndent(seed, "", "  ")
+				_ = saveToFile(*out, jsonData)
+			}
+			astIdxSel := 0
+			if idx >= 0 && idx < len(seed.Asteroids) {
+				astIdxSel = idx
+			}
+			ast := seed.Asteroids[astIdxSel]
+			bps := parseBiomePaths(ast.BiomePaths)
+			game.geysers = ast.Geysers
+			game.pois = ast.POIs
+			game.biomes = bps
+			game.astWidth = ast.SizeX
+			game.astHeight = ast.SizeY
+			game.legend, game.legendBiomes = buildLegendImage(bps)
+			zoomX := float64(game.width) / (float64(game.astWidth) * 2)
+			zoomY := float64(game.height) / (float64(game.astHeight) * 2)
+			game.zoom = math.Min(zoomX, zoomY)
+			game.minZoom = game.zoom * 0.25
+			game.camX = (float64(game.width) - float64(game.astWidth)*2*game.zoom) / 2
+			game.camY = (float64(game.height) - float64(game.astHeight)*2*game.zoom) / 2
+			game.clampCamera()
+			game.biomeTextures = loadBiomeTextures()
+			names := []string{"../icons/camera.png", "../icons/help.png", "geyser_water.png"}
+			set := make(map[string]struct{})
+			for _, gy := range ast.Geysers {
+				if n := iconForGeyser(gy.ID); n != "" {
+					if _, ok := set[n]; !ok {
+						set[n] = struct{}{}
+						names = append(names, n)
+					}
+				}
+			}
+			for _, poi := range ast.POIs {
+				if n := iconForPOI(poi.ID); n != "" {
+					if _, ok := set[n]; !ok {
+						set[n] = struct{}{}
+						names = append(names, n)
+					}
+				}
+			}
+			game.startIconLoader(names)
+			game.loading = false
+			game.needsRedraw = true
+		}(asteroidIdx)
+	}
 	if *screenshot != "" {
 		game.screenshotPath = *screenshot
 		game.screenshotMode = true
