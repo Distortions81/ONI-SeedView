@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	ClientVersion    = "v0.0.3"
 	BaseURL          = "https://ingest.mapsnotincluded.org/coordinate/"
 	AcceptCBORHeader = "application/cbor"
 	PanSpeed         = 15
@@ -46,6 +47,8 @@ const (
 	ScreenshotTakingLabel = "Taking Screenshot..."
 	ScreenshotSavedLabel  = "Saved!"
 	GeyserRowSpacing      = 60
+	OptionsMenuSpacing    = 26
+	OptionsMenuTitle      = "Options:"
 
 	// BiomeTextureScale controls the repetition of biome textures.
 	// Smaller values result in more repetitions.

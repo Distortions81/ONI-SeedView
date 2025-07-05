@@ -625,6 +625,12 @@ func (g *Game) updateHover(mx, my int) {
 	prevItem := g.hoverItem
 	g.hoverBiome = -1
 	g.hoverItem = -1
+	if !g.showLegend {
+		if prevBiome != -1 || prevItem != -1 {
+			g.needsRedraw = true
+		}
+		return
+	}
 	scale := g.uiScale()
 	if g.legend != nil && len(g.legendBiomes) > 0 {
 		w := int(float64(g.legend.Bounds().Dx()) * scale)
@@ -640,7 +646,7 @@ func (g *Game) updateHover(mx, my int) {
 			}
 		}
 	}
-	useNumbers := !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+	useNumbers := g.useNumbers && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
 	if useNumbers && g.legendImage != nil {
 		w := int(float64(g.legendImage.Bounds().Dx()) * scale)
 		x0 := g.width - w - 12
@@ -719,6 +725,7 @@ type Game struct {
 	touchMoved        bool
 	touchUI           bool
 	showShotMenu      bool
+	showOptions       bool
 	screenshotMode    bool
 	ssQuality         int
 	ssSaved           time.Time
@@ -730,6 +737,15 @@ type Game struct {
 	asteroidID        string
 	asteroidSpecified bool
 	statusError       bool
+
+	textures      bool
+	vsync         bool
+	touchControls bool
+	showItemNames bool
+	showLegend    bool
+	useNumbers    bool
+	iconScale     float64
+	smartRender   bool
 }
 
 type label struct {
@@ -848,7 +864,7 @@ func (g *Game) itemAt(mx, my int) (string, int, int, *ebiten.Image, bool) {
 		if iconName := iconForGeyser(gy.ID); iconName != "" {
 			if img, ok := g.icons[iconName]; ok && img != nil {
 				maxDim := math.Max(float64(img.Bounds().Dx()), float64(img.Bounds().Dy()))
-				scale := g.zoom * IconScale * float64(BaseIconPixels) / maxDim
+				scale := g.zoom * IconScale * g.iconScale * float64(BaseIconPixels) / maxDim
 				w := float64(img.Bounds().Dx()) * scale
 				h := float64(img.Bounds().Dy()) * scale
 				left = x - w/2
@@ -873,7 +889,7 @@ func (g *Game) itemAt(mx, my int) (string, int, int, *ebiten.Image, bool) {
 		if iconName := iconForPOI(poi.ID); iconName != "" {
 			if img, ok := g.icons[iconName]; ok && img != nil {
 				maxDim := math.Max(float64(img.Bounds().Dx()), float64(img.Bounds().Dy()))
-				scale := g.zoom * IconScale * float64(BaseIconPixels) / maxDim
+				scale := g.zoom * IconScale * g.iconScale * float64(BaseIconPixels) / maxDim
 				w := float64(img.Bounds().Dx()) * scale
 				h := float64(img.Bounds().Dy()) * scale
 				left = x - w/2
@@ -914,6 +930,10 @@ func (g *Game) startIconLoader(names []string) {
 
 func (g *Game) Update() error {
 	const panSpeed = PanSpeed
+
+	if !g.smartRender {
+		g.needsRedraw = true
+	}
 
 	minimized := ebiten.IsWindowMinimized()
 	if g.wasMinimized && !minimized {
@@ -1058,7 +1078,7 @@ iconsLoop:
 							g.updateHover(x, y)
 						}
 					}
-					useNumbers := !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+					useNumbers := g.useNumbers && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
 					if useNumbers && g.legendImage != nil {
 						lw := int(float64(g.legendImage.Bounds().Dx()) * scale)
 						x0 := g.width - lw - 12
@@ -1093,7 +1113,7 @@ iconsLoop:
 			} else {
 				pt := image.Rect(x, y, x+1, y+1)
 				if g.helpRect().Overlaps(pt) || g.screenshotRect().Overlaps(pt) ||
-					g.magnifyRect().Overlaps(pt) || g.geyserRect().Overlaps(pt) {
+					g.magnifyRect().Overlaps(pt) || g.geyserRect().Overlaps(pt) || g.optionsRect().Overlaps(pt) {
 					g.touchUI = true
 				} else {
 					scale := g.uiScale()
@@ -1103,7 +1123,7 @@ iconsLoop:
 							g.touchUI = true
 						}
 					}
-					useNumbers := !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+					useNumbers := g.useNumbers && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
 					if !g.touchUI && useNumbers && g.legendImage != nil {
 						lw := int(float64(g.legendImage.Bounds().Dx()) * scale)
 						x0 := g.width - lw - 12
@@ -1166,8 +1186,18 @@ iconsLoop:
 						g.needsRedraw = true
 					}
 				}
+			} else if g.showOptions {
+				if !g.clickOptionsMenu(mx, my) {
+					if !g.optionsMenuRect().Overlaps(pt) && !g.optionsRect().Overlaps(pt) {
+						g.showOptions = false
+						g.needsRedraw = true
+					}
+				}
 			} else if g.screenshotRect().Overlaps(pt) {
 				g.showShotMenu = true
+				g.needsRedraw = true
+			} else if g.optionsRect().Overlaps(pt) {
+				g.showOptions = true
 				g.needsRedraw = true
 			} else if g.magnifyRect().Overlaps(pt) {
 				g.magnify = !g.magnify
@@ -1252,7 +1282,7 @@ iconsLoop:
 		} else {
 			handled := false
 			scale := g.uiScale()
-			useNumbers := !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+			useNumbers := g.useNumbers && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
 			if g.legend != nil {
 				lw := int(float64(g.legend.Bounds().Dx()) * scale)
 				lh := int(float64(g.legend.Bounds().Dy()) * scale)
@@ -1338,8 +1368,20 @@ iconsLoop:
 					}
 				}
 			}
+		} else if g.showOptions {
+			if justPressed {
+				if !g.clickOptionsMenu(mx, my) {
+					if !g.optionsMenuRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) && !g.optionsRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+						g.showOptions = false
+						g.needsRedraw = true
+					}
+				}
+			}
 		} else if justPressed && g.screenshotRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.showShotMenu = true
+			g.needsRedraw = true
+		} else if justPressed && g.optionsRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+			g.showOptions = true
 			g.needsRedraw = true
 		} else if justPressed && g.magnifyRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.magnify = !g.magnify
@@ -1457,18 +1499,24 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 	if g.needsRedraw {
 		screen.Fill(color.RGBA{30, 30, 30, 255})
-		if tex := g.biomeTextures["Space"]; tex != nil {
-			clr := color.RGBA{255, 255, 255, 255}
-			if c, ok := biomeColors["Space"]; ok {
-				clr = c
+		if g.textures && g.biomeTextures != nil {
+			if tex := g.biomeTextures["Space"]; tex != nil {
+				clr := color.RGBA{255, 255, 255, 255}
+				if c, ok := biomeColors["Space"]; ok {
+					clr = c
+				}
+				rect := [][]Point{{
+					{0, 0},
+					{g.astWidth, 0},
+					{g.astWidth, g.astHeight},
+					{0, g.astHeight},
+				}}
+				drawBiomeTextured(screen, rect, tex, clr, g.camX, g.camY, g.zoom)
+			} else if clr, ok := biomeColors["Space"]; ok {
+				vector.DrawFilledRect(screen, float32(g.camX), float32(g.camY),
+					float32(float64(g.astWidth)*2*g.zoom),
+					float32(float64(g.astHeight)*2*g.zoom), clr, false)
 			}
-			rect := [][]Point{{
-				{0, 0},
-				{g.astWidth, 0},
-				{g.astWidth, g.astHeight},
-				{0, g.astHeight},
-			}}
-			drawBiomeTextured(screen, rect, tex, clr, g.camX, g.camY, g.zoom)
 		} else if clr, ok := biomeColors["Space"]; ok {
 			vector.DrawFilledRect(screen, float32(g.camX), float32(g.camY),
 				float32(float64(g.astWidth)*2*g.zoom),
@@ -1477,7 +1525,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		labels := []label{}
 		var highlightGeysers []Geyser
 		var highlightPOIs []PointOfInterest
-		useNumbers := !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+		useNumbers := g.useNumbers && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
 		if g.legendMap == nil {
 			g.initObjectLegend()
 		}
@@ -1492,8 +1540,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if g.hoverBiome >= 0 && !highlight {
 				texClr = color.RGBA{100, 100, 100, texClr.A}
 			}
-			if tex := g.biomeTextures[bp.Name]; tex != nil {
-				drawBiomeTextured(screen, bp.Polygons, tex, texClr, g.camX, g.camY, g.zoom)
+			if g.textures {
+				if tex := g.biomeTextures[bp.Name]; tex != nil {
+					drawBiomeTextured(screen, bp.Polygons, tex, texClr, g.camX, g.camY, g.zoom)
+				} else {
+					drawBiome(screen, bp.Polygons, texClr, g.camX, g.camY, g.zoom)
+				}
 			} else {
 				drawBiome(screen, bp.Polygons, texClr, g.camX, g.camY, g.zoom)
 			}
@@ -1526,7 +1578,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				if img, ok := g.icons[iconName]; ok && img != nil {
 					op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
 					maxDim := math.Max(float64(img.Bounds().Dx()), float64(img.Bounds().Dy()))
-					scale := g.zoom * IconScale * float64(BaseIconPixels) / maxDim
+					scale := g.zoom * IconScale * g.iconScale * float64(BaseIconPixels) / maxDim
 					op.GeoM.Scale(scale, scale)
 					w := float64(img.Bounds().Dx()) * scale
 					h := float64(img.Bounds().Dy()) * scale
@@ -1541,7 +1593,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 						formatted = strconv.Itoa(g.legendMap["g"+name])
 						width = len(formatted)
 					}
-					labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, width, labelClr})
+					if g.showItemNames || useNumbers {
+						if g.showItemNames || useNumbers {
+							labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, width, labelClr})
+						}
+					}
 					continue
 				}
 			}
@@ -1554,7 +1610,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				formatted = strconv.Itoa(g.legendMap["g"+name])
 				width = len(formatted)
 			}
-			labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, width, labelClr})
+			if g.showItemNames || useNumbers {
+				if g.showItemNames || useNumbers {
+					labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, width, labelClr})
+				}
+			}
 		}
 		for _, poi := range g.pois {
 			x := math.Round((float64(poi.X) * 2 * g.zoom) + g.camX)
@@ -1581,7 +1641,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				if img, ok := g.icons[iconName]; ok && img != nil {
 					op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
 					maxDim := math.Max(float64(img.Bounds().Dx()), float64(img.Bounds().Dy()))
-					scale := g.zoom * IconScale * float64(BaseIconPixels) / maxDim
+					scale := g.zoom * IconScale * g.iconScale * float64(BaseIconPixels) / maxDim
 					op.GeoM.Scale(scale, scale)
 					w := float64(img.Bounds().Dx()) * scale
 					h := float64(img.Bounds().Dy()) * scale
@@ -1646,22 +1706,24 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			drawTextWithBGScale(screen, label, x, 10, scale)
 		}
 
-		if g.legend == nil {
-			g.legend, g.legendBiomes = buildLegendImage(g.biomes)
-		}
-		opLegend := &ebiten.DrawImageOptions{}
-		scale := g.uiScale()
-		opLegend.GeoM.Scale(scale, scale)
-		opLegend.GeoM.Translate(0, -g.biomeScroll)
-		screen.DrawImage(g.legend, opLegend)
-		if g.hoverBiome >= 0 {
-			y0 := math.Round(float64(10+LegendRowSpacing+g.hoverBiome*LegendRowSpacing)*scale - g.biomeScroll)
-			h := math.Round(float64(LegendRowSpacing) * scale)
-			w := math.Round(float64(g.legend.Bounds().Dx()) * scale)
-			vector.StrokeRect(screen, 0.5, float32(y0)-4, float32(w)-1, float32(h)-1, 2, color.RGBA{255, 0, 0, 255}, false)
-		}
-		if useNumbers && !g.screenshotMode {
-			g.drawNumberLegend(screen)
+		if g.showLegend {
+			if g.legend == nil {
+				g.legend, g.legendBiomes = buildLegendImage(g.biomes)
+			}
+			opLegend := &ebiten.DrawImageOptions{}
+			scale := g.uiScale()
+			opLegend.GeoM.Scale(scale, scale)
+			opLegend.GeoM.Translate(0, -g.biomeScroll)
+			screen.DrawImage(g.legend, opLegend)
+			if g.hoverBiome >= 0 {
+				y0 := math.Round(float64(10+LegendRowSpacing+g.hoverBiome*LegendRowSpacing)*scale - g.biomeScroll)
+				h := math.Round(float64(LegendRowSpacing) * scale)
+				w := math.Round(float64(g.legend.Bounds().Dx()) * scale)
+				vector.StrokeRect(screen, 0.5, float32(y0)-4, float32(w)-1, float32(h)-1, 2, color.RGBA{255, 0, 0, 255}, false)
+			}
+			if useNumbers && !g.screenshotMode {
+				g.drawNumberLegend(screen)
+			}
 		}
 
 		if !g.mobile && !g.screenshotMode {
@@ -1701,6 +1763,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				h := float64(helpImg.Bounds().Dy()) * sc
 				op.GeoM.Translate(float64(hr.Min.X)+(float64(size)-w)/2, float64(hr.Min.Y)+(float64(size)-h)/2)
 				screen.DrawImage(helpImg, op)
+			}
+
+			or := g.optionsRect()
+			ocx := float32(or.Min.X + size/2)
+			ocy := float32(or.Min.Y + size/2)
+			vector.DrawFilledCircle(screen, ocx, ocy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
+			drawGear(screen, or)
+			if g.showOptions {
+				g.drawOptionsMenu(screen)
 			}
 
 			gr := g.geyserRect()
@@ -1756,7 +1827,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				if img, ok := g.icons[iconName]; ok && img != nil {
 					op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
 					maxDim := math.Max(float64(img.Bounds().Dx()), float64(img.Bounds().Dy()))
-					scale := g.zoom * IconScale * float64(BaseIconPixels) / maxDim
+					scale := g.zoom * IconScale * g.iconScale * float64(BaseIconPixels) / maxDim
 					op.GeoM.Scale(scale, scale)
 					w := float64(img.Bounds().Dx()) * scale
 					h := float64(img.Bounds().Dy()) * scale
@@ -1799,7 +1870,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				if img, ok := g.icons[iconName]; ok && img != nil {
 					op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
 					maxDim := math.Max(float64(img.Bounds().Dx()), float64(img.Bounds().Dy()))
-					scale := g.zoom * IconScale * float64(BaseIconPixels) / maxDim
+					scale := g.zoom * IconScale * g.iconScale * float64(BaseIconPixels) / maxDim
 					op.GeoM.Scale(scale, scale)
 					w := float64(img.Bounds().Dx()) * scale
 					h := float64(img.Bounds().Dy()) * scale
@@ -1950,6 +2021,14 @@ func main() {
 		asteroidID:        asteroidIDVal,
 		asteroidSpecified: asteroidSpecified,
 		mobile:            isMobile(),
+		textures:          true,
+		vsync:             true,
+		touchControls:     isMobile(),
+		showItemNames:     true,
+		showLegend:        true,
+		useNumbers:        true,
+		iconScale:         1.0,
+		smartRender:       true,
 		ssQuality:         1,
 		hoverBiome:        -1,
 		hoverItem:         -1,
@@ -2055,7 +2134,7 @@ func main() {
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	ebiten.SetWindowTitle("Geysers - " + *coord)
 	ebiten.SetScreenClearedEveryFrame(false)
-	ebiten.SetVsyncEnabled(true)
+	ebiten.SetVsyncEnabled(game.vsync)
 	if err := ebiten.RunGame(game); err != nil {
 		fmt.Println("Error running game:", err)
 	}
