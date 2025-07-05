@@ -3,7 +3,7 @@
 package main
 
 import (
-	"strconv"
+	"net/url"
 	"strings"
 	"syscall/js"
 )
@@ -40,30 +40,24 @@ func coordFromURL() string {
 	return ""
 }
 
-// asteroidFromURL retrieves the asteroid index from the URL if present.
-// It looks for an `asteroid=NUM` query parameter or hash fragment.
-func asteroidFromURL() (int, bool) {
+// asteroidFromURL retrieves the asteroid ID from the URL if present.
+// It looks for an `asteroid=ID` query parameter or hash fragment.
+func asteroidFromURL() (string, bool) {
 	loc := js.Global().Get("location")
 	if !loc.Truthy() {
-		return -1, false
+		return "", false
 	}
 	search := strings.TrimPrefix(loc.Get("search").String(), "?")
 	for _, part := range strings.Split(search, "&") {
 		if strings.HasPrefix(part, "asteroid=") {
-			num, err := strconv.Atoi(strings.TrimPrefix(part, "asteroid="))
-			if err != nil {
-				return -1, true
-			}
-			return num, true
+			id, _ := url.QueryUnescape(strings.TrimPrefix(part, "asteroid="))
+			return id, true
 		}
 	}
 	hash := strings.TrimPrefix(loc.Get("hash").String(), "#")
 	if strings.HasPrefix(hash, "asteroid=") {
-		num, err := strconv.Atoi(strings.TrimPrefix(hash, "asteroid="))
-		if err != nil {
-			return -1, true
-		}
-		return num, true
+		id, _ := url.QueryUnescape(strings.TrimPrefix(hash, "asteroid="))
+		return id, true
 	}
-	return -1, false
+	return "", false
 }
