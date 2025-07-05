@@ -17,17 +17,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            webp xorg-dev libgl1-mesa-dev mingw-w64
-      - name: Download assets
-        run: ./scripts/download_assets.sh
+            xorg-dev libgl1-mesa-dev mingw-w64
       - name: Run tests
         run: go test -tags test ./...
       - name: Build binaries
         run: ./scripts/build_all.sh
-      - name: Copy assets
-        run: |
-          cp -r assets dist/
-          cp -r icons dist/
       - uses: actions/upload-artifact@v4
         with:
           name: oni-view-builds

@@ -7,8 +7,8 @@ This repository contains a small ebiten viewer written in Go.
   gofmt -w *.go
   go test -tags test ./...
   ```
-- The assets directory is normally empty. If you need the image assets
-  run `./scripts/download_assets.sh`.
+- Image assets are committed to the repo and embedded at build time, so no
+  download step is required.
 
 Additional tasks to keep the project healthy:
  - Keep `README.md` up to date when features or build steps change.
