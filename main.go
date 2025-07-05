@@ -252,47 +252,6 @@ func drawBiome(dst *ebiten.Image, polys [][]Point, clr color.Color, camX, camY, 
 	dst.DrawTriangles(vs, is, whitePixel, op)
 }
 
-func drawPattern(dst *ebiten.Image, polys [][]Point, camX, camY, zoom float64, pattern *ebiten.Image) {
-	if len(polys) == 0 {
-		return
-	}
-	var p vector.Path
-	for _, pts := range polys {
-		if len(pts) == 0 {
-			continue
-		}
-		p.MoveTo(float32(pts[0].X*2), float32(pts[0].Y*2))
-		for _, pt := range pts[1:] {
-			p.LineTo(float32(pt.X*2), float32(pt.Y*2))
-		}
-		p.Close()
-	}
-	vs, is := p.AppendVerticesAndIndicesForFilling(nil, nil)
-	scale := 1.0 / BiomeTextureScale
-	for i := range vs {
-		worldX := float64(vs[i].DstX)
-		worldY := float64(vs[i].DstY)
-		x := worldX*zoom + camX
-		y := worldY*zoom + camY
-		vs[i].DstX = float32(x)
-		vs[i].DstY = float32(y)
-		vs[i].SrcX = float32(worldX * scale)
-		vs[i].SrcY = float32(worldY * scale)
-		vs[i].ColorR = 1
-		vs[i].ColorG = 1
-		vs[i].ColorB = 1
-		vs[i].ColorA = 1
-	}
-	op := &ebiten.DrawTrianglesOptions{
-		AntiAlias:      true,
-		ColorScaleMode: ebiten.ColorScaleModeStraightAlpha,
-		FillRule:       ebiten.FillRuleEvenOdd,
-		Address:        ebiten.AddressRepeat,
-		Filter:         ebiten.FilterLinear,
-	}
-	dst.DrawTriangles(vs, is, pattern, op)
-}
-
 func drawBiomeOutline(dst *ebiten.Image, polys [][]Point, camX, camY, zoom float64, clr color.Color) {
 	for _, pts := range polys {
 		if len(pts) < 2 {
@@ -1170,10 +1129,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 			highlight := g.hoverBiome >= 0 && g.hoverBiome < len(g.legendBiomes) && g.legendBiomes[g.hoverBiome] == bp.Name
 			texClr := clr
-			if tex, ok := g.biomeTextures[bp.Name]; ok {
-				drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, tex)
-				texClr.A = 160
-			}
 			if g.hoverBiome >= 0 && !highlight {
 				texClr = color.RGBA{100, 100, 100, texClr.A}
 			}
