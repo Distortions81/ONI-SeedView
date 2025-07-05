@@ -21,6 +21,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
@@ -717,7 +718,6 @@ type Game struct {
 	infoIcon          *ebiten.Image
 	lastMouseX        int
 	lastMouseY        int
-	mousePrev         bool
 	touchUsed         bool
 	touchActive       bool
 	touchStartX       int
@@ -989,17 +989,21 @@ iconsLoop:
 		}
 		mx, my := ebiten.CursorPosition()
 		if mx >= 0 && mx < g.width && my >= 0 && my < g.height {
-			if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+			if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 				if g.geyserCloseRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 					g.showGeyserList = false
 					g.needsRedraw = true
 				}
-				g.mousePrev = true
-			} else {
-				g.mousePrev = false
 			}
-		} else {
-			g.mousePrev = false
+		}
+		for _, id := range inpututil.AppendJustPressedTouchIDs(nil) {
+			x, y := ebiten.TouchPosition(id)
+			if x >= 0 && x < g.width && y >= 0 && y < g.height {
+				if g.geyserCloseRect().Overlaps(image.Rect(x, y, x+1, y+1)) {
+					g.showGeyserList = false
+					g.needsRedraw = true
+				}
+			}
 		}
 		return nil
 	}
@@ -1022,14 +1026,17 @@ iconsLoop:
 
 	mxTmp, myTmp := ebiten.CursorPosition()
 	mousePressed := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
+	mouseJustPressed := inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft)
 	if mxTmp < 0 || mxTmp >= g.width || myTmp < 0 || myTmp >= g.height {
 		mousePressed = false
+		mouseJustPressed = false
 	}
 	if g.ssPending > 0 || g.skipClickTicks > 0 {
 		mousePressed = false
+		mouseJustPressed = false
 	}
 
-	justPressed := mousePressed && !g.mousePrev
+	justPressed := mouseJustPressed
 
 	// Mouse dragging
 	if mousePressed {
@@ -1046,20 +1053,61 @@ iconsLoop:
 
 	// Touch gestures
 	touchIDs := ebiten.TouchIDs()
+	justPressedIDs := inpututil.AppendJustPressedTouchIDs(nil)
 	if g.ssPending > 0 || g.skipClickTicks > 0 {
 		touchIDs = nil
+		justPressedIDs = nil
 	}
-	// Filter out touches outside the window
-	valid := make([]ebiten.TouchID, 0, len(touchIDs))
-	for _, id := range touchIDs {
-		x, y := ebiten.TouchPosition(id)
-		if x >= 0 && x < g.width && y >= 0 && y < g.height {
-			valid = append(valid, id)
+	filter := func(ids []ebiten.TouchID) []ebiten.TouchID {
+		valid := make([]ebiten.TouchID, 0, len(ids))
+		for _, id := range ids {
+			x, y := ebiten.TouchPosition(id)
+			if x >= 0 && x < g.width && y >= 0 && y < g.height {
+				valid = append(valid, id)
+			}
 		}
+		return valid
 	}
-	touchIDs = valid
+	touchIDs = filter(touchIDs)
+	justPressedIDs = filter(justPressedIDs)
 	if len(touchIDs) > 0 {
 		g.touchUsed = true
+	}
+	for _, id := range justPressedIDs {
+		x, y := ebiten.TouchPosition(id)
+		g.touchStartX = x
+		g.touchStartY = y
+		g.touchMoved = false
+		g.touchActive = true
+		g.touchUI = false
+		if g.showGeyserList || g.showShotMenu {
+			g.touchUI = true
+		} else {
+			pt := image.Rect(x, y, x+1, y+1)
+			if g.helpRect().Overlaps(pt) || g.screenshotRect().Overlaps(pt) ||
+				g.magnifyRect().Overlaps(pt) || g.geyserRect().Overlaps(pt) || g.optionsRect().Overlaps(pt) {
+				g.touchUI = true
+			} else {
+				scale := g.uiScale()
+				if g.legend != nil {
+					lw := int(float64(g.legend.Bounds().Dx()) * scale)
+					if x >= 0 && x < lw {
+						g.touchUI = true
+					}
+				}
+				useNumbers := g.useNumbers && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+				if !g.touchUI && useNumbers && g.legendImage != nil {
+					lw := int(float64(g.legendImage.Bounds().Dx()) * scale)
+					x0 := g.width - lw - 12
+					if x >= x0 && x < x0+lw {
+						g.touchUI = true
+					}
+				}
+			}
+		}
+		if g.touchUI {
+			g.updateHover(x, y)
+		}
 	}
 	switch len(touchIDs) {
 	case 1:
@@ -1460,7 +1508,6 @@ iconsLoop:
 		g.needsRedraw = true
 	}
 
-	g.mousePrev = mousePressed
 	if g.captured {
 		return ebiten.Termination
 	}
@@ -2052,7 +2099,6 @@ func main() {
 		ssQuality:         1,
 		hoverBiome:        -1,
 		hoverItem:         -1,
-		mousePrev:         false,
 	}
 	go func(id string) {
 		fmt.Println("Fetching:", *coord)
