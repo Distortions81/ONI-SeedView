@@ -6,3 +6,8 @@ package main
 func coordFromURL() string {
 	return ""
 }
+
+// asteroidFromURL returns -1 on non-web builds.
+func asteroidFromURL() int {
+	return -1
+}
