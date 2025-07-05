@@ -149,6 +149,54 @@ func drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int,
 	dst.DrawImage(img, op)
 }
 
+func drawInfoRow(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int, scale float64) {
+	lines := strings.Split(text, "\n")
+	width := 0
+	for _, l := range lines {
+		if len(l) > width {
+			width = len(l)
+		}
+	}
+	txtW := width * LabelCharWidth
+	txtH := len(lines) * 16
+	iconW, iconH := 0, 0
+	if icon != nil {
+		iconW = InfoIconSize
+		iconH = InfoIconSize
+	}
+	gap := 4
+	w := txtW + iconW + gap
+	h := txtH
+	if iconH > txtH {
+		h = iconH
+	}
+	if scale == 1.0 {
+		if icon != nil {
+			opIcon := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
+			sc := float64(InfoIconSize) / math.Max(float64(icon.Bounds().Dx()), float64(icon.Bounds().Dy()))
+			opIcon.GeoM.Scale(sc, sc)
+			opIcon.GeoM.Translate(float64(x), float64(y+(h-iconH)/2))
+			dst.DrawImage(icon, opIcon)
+		}
+		ebitenutil.DebugPrintAt(dst, text, x+iconW+gap, y+(h-txtH)/2)
+		return
+	}
+
+	img := ebiten.NewImage(w, h)
+	if icon != nil {
+		opIcon := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
+		sc := float64(InfoIconSize) / math.Max(float64(icon.Bounds().Dx()), float64(icon.Bounds().Dy()))
+		opIcon.GeoM.Scale(sc, sc)
+		opIcon.GeoM.Translate(0, float64(h-iconH)/2)
+		img.DrawImage(icon, opIcon)
+	}
+	ebitenutil.DebugPrintAt(img, text, iconW+gap, (h-txtH)/2)
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(scale, scale)
+	op.GeoM.Translate(float64(x), float64(y))
+	dst.DrawImage(img, op)
+}
+
 func textDimensions(text string) (int, int) {
 	lines := strings.Split(text, "\n")
 	width := 0
@@ -182,6 +230,30 @@ func infoPanelSize(text string, icon *ebiten.Image) (int, int) {
 		h = iconH
 	}
 	h += 4
+	return w, h
+}
+
+func infoRowSize(text string, icon *ebiten.Image) (int, int) {
+	lines := strings.Split(text, "\n")
+	width := 0
+	for _, l := range lines {
+		if len(l) > width {
+			width = len(l)
+		}
+	}
+	txtW := width * LabelCharWidth
+	txtH := len(lines) * 16
+	iconW, iconH := 0, 0
+	if icon != nil {
+		iconW = InfoIconSize
+		iconH = InfoIconSize
+	}
+	gap := 4
+	w := txtW + iconW + gap
+	h := txtH
+	if iconH > txtH {
+		h = iconH
+	}
 	return w, h
 }
 
@@ -420,7 +492,7 @@ func (g *Game) drawGeyserList(dst *ebiten.Image) {
 			ic = g.icons[n]
 		}
 		txt := displayGeyser(gy.ID) + "\n" + formatGeyserInfo(gy)
-		w, h := infoPanelSize(txt, ic)
+		w, h := infoRowSize(txt, ic)
 		sw := int(float64(w) * scale)
 		sh := int(float64(h) * scale)
 		if sw > maxW {
@@ -449,7 +521,7 @@ func (g *Game) drawGeyserList(dst *ebiten.Image) {
 		x := spacing
 		for c := 0; c < cols && idx < len(items); c++ {
 			it := items[idx]
-			drawInfoPanel(dst, it.text, it.icon, x, y, scale)
+			drawInfoRow(dst, it.text, it.icon, x, y, scale)
 			x += maxW + spacing
 			idx++
 		}
@@ -472,7 +544,7 @@ func (g *Game) maxGeyserScroll() float64 {
 			ic = g.icons[n]
 		}
 		txt := displayGeyser(gy.ID) + "\n" + formatGeyserInfo(gy)
-		w, h := infoPanelSize(txt, ic)
+		w, h := infoRowSize(txt, ic)
 		sw := int(float64(w) * scale)
 		sh := int(float64(h) * scale)
 		if sw > maxW {
@@ -507,6 +579,17 @@ func (g *Game) maxGeyserScroll() float64 {
 		max = 0
 	}
 	return float64(max)
+}
+
+func (g *Game) adjustGeyserScroll(delta float64) {
+	g.geyserScroll += delta
+	if g.geyserScroll < 0 {
+		g.geyserScroll = 0
+	}
+	if max := g.maxGeyserScroll(); g.geyserScroll > max {
+		g.geyserScroll = max
+	}
+	g.needsRedraw = true
 }
 
 func (g *Game) maxBiomeScroll() float64 {
@@ -874,15 +957,7 @@ iconsLoop:
 	if g.showGeyserList {
 		_, wheelY := ebiten.Wheel()
 		if wheelY != 0 {
-			g.geyserScroll -= float64(wheelY) * 10
-			if g.geyserScroll < 0 {
-				g.geyserScroll = 0
-			}
-			max := g.maxGeyserScroll()
-			if g.geyserScroll > max {
-				g.geyserScroll = max
-			}
-			g.needsRedraw = true
+			g.adjustGeyserScroll(-float64(wheelY) * 10)
 		}
 		mx, my := ebiten.CursorPosition()
 		if mx >= 0 && mx < g.width && my >= 0 && my < g.height {
@@ -967,14 +1042,7 @@ iconsLoop:
 			dy := y - last.y
 			if g.touchUI {
 				if g.showGeyserList {
-					g.geyserScroll -= float64(dy)
-					if g.geyserScroll < 0 {
-						g.geyserScroll = 0
-					}
-					if max := g.maxGeyserScroll(); g.geyserScroll > max {
-						g.geyserScroll = max
-					}
-					g.needsRedraw = true
+					g.adjustGeyserScroll(-float64(dy))
 				} else {
 					scale := g.uiScale()
 					if g.legend != nil {
@@ -1180,14 +1248,7 @@ iconsLoop:
 	}
 	if wheelY != 0 {
 		if g.showGeyserList {
-			g.geyserScroll -= float64(wheelY) * 10
-			if g.geyserScroll < 0 {
-				g.geyserScroll = 0
-			}
-			max := g.maxGeyserScroll()
-			if g.geyserScroll > max {
-				g.geyserScroll = max
-			}
+			g.adjustGeyserScroll(-float64(wheelY) * 10)
 		} else {
 			handled := false
 			scale := g.uiScale()
