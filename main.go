@@ -600,6 +600,7 @@ type Game struct {
 	skipClickTicks int
 	lastDraw       time.Time
 	wasMinimized   bool
+	magnify        bool
 }
 
 type label struct {
@@ -627,10 +628,16 @@ func (g *Game) uiScale() float64 {
 	if g.mobile {
 		return 1.0
 	}
-	if g.height > 1700 {
-		return 4.0
+	if g.screenshotMode {
+		if g.height > 1700 {
+			return 4.0
+		}
+		if g.height > 850 {
+			return 2.0
+		}
+		return 1.0
 	}
-	if g.height > 850 {
+	if g.magnify {
 		return 2.0
 	}
 	return 1.0
@@ -640,16 +647,34 @@ func (g *Game) iconSize() int {
 	return int(float64(HelpIconSize) * g.uiScale())
 }
 
-func (g *Game) helpRect() image.Rectangle {
+func drawPlusMinus(dst *ebiten.Image, rect image.Rectangle, minus bool) {
+	cx := float32(rect.Min.X + rect.Dx()/2)
+	cy := float32(rect.Min.Y + rect.Dy()/2)
+	length := float32(rect.Dx()) * 0.5
+	thickness := float32(rect.Dx()) / 8
+	vector.StrokeLine(dst, cx-length/2, cy, cx+length/2, cy, thickness, color.RGBA{255, 255, 255, 255}, true)
+	if !minus {
+		vector.StrokeLine(dst, cx, cy-length/2, cx, cy+length/2, thickness, color.RGBA{255, 255, 255, 255}, true)
+	}
+}
+
+func (g *Game) magnifyRect() image.Rectangle {
 	size := g.iconSize()
 	x := g.width - size - HelpMargin
 	y := g.height - size - HelpMargin
 	return image.Rect(x, y, x+size, y+size)
 }
 
+func (g *Game) helpRect() image.Rectangle {
+	size := g.iconSize()
+	x := g.width - size*2 - HelpMargin*2
+	y := g.height - size - HelpMargin
+	return image.Rect(x, y, x+size, y+size)
+}
+
 func (g *Game) geyserRect() image.Rectangle {
 	size := g.iconSize()
-	x := g.width - size*3 - HelpMargin*3
+	x := g.width - size*4 - HelpMargin*4
 	y := g.height - size - HelpMargin
 	return image.Rect(x, y, x+size, y+size)
 }
@@ -1034,6 +1059,9 @@ iconsLoop:
 		} else if mousePressed && g.screenshotRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.showShotMenu = true
 			g.needsRedraw = true
+		} else if mousePressed && g.magnifyRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+			g.magnify = !g.magnify
+			g.needsRedraw = true
 		} else if mousePressed && g.geyserRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.camX = oldX
 			g.camY = oldY
@@ -1384,6 +1412,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if g.showShotMenu {
 				g.drawScreenshotMenu(screen)
 			}
+
+			mr := g.magnifyRect()
+			mcx := float32(mr.Min.X + size/2)
+			mcy := float32(mr.Min.Y + size/2)
+			vector.DrawFilledCircle(screen, mcx, mcy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
+			drawPlusMinus(screen, mr, g.magnify)
 
 			hr := g.helpRect()
 			cx := float32(hr.Min.X + size/2)

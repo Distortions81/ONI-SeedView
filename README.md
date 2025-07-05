@@ -20,6 +20,7 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
 * Hover over geyser or POI icons to show an information panel.
   Clicking pins the panel so it stays visible while panning.
 * A help icon displays the available controls at any time.
+* A `+` icon toggles enlarged UI text for accessibility.
 * Crosshairs at the center show the current world coordinates,
   useful for lining up precise screenshots.
 * A water-drop icon opens a scrollable list of all geysers
@@ -37,6 +38,7 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
 - **Camera icon** – open the screenshot menu.
 - **Water-drop icon** – show a list of all geysers.
 - **Question mark** – display the help overlay.
+- **Plus icon** – enlarge the UI (turns to a minus when active).
 
 ## Getting Started
 
