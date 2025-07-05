@@ -49,7 +49,9 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
    ./scripts/download_assets.sh
    ```
 
-   The script converts `.webp` icons to `.png` using `dwebp`. After it completes the PNG files will be placed in the `assets/` directory. Install the `webp` package if needed.
+   The script converts `.webp` icons to `.png` using `dwebp` and only downloads
+   the images referenced by the code. After it completes the PNG files will be
+   placed in the `assets/` directory. Install the `webp` package if needed.
 
 4. **Build and run** – Execute the program with a seed coordinate. The window defaults to 1280×720 but can be resized.
 
