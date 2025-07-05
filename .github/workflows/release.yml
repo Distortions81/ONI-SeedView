@@ -47,7 +47,7 @@ jobs:
           path: dist
       - uses: softprops/action-gh-release@v1
         with:
-          token: ${{ secrets.GIT_ACTIONS }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             dist/**
 
