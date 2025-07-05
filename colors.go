@@ -48,7 +48,7 @@ var biomeColors = map[string]color.RGBA{
 	"PrehistoricGarden":   {R: 61, G: 204, B: 90, A: 255},
 	"PrehistoricRaptor":   {R: 61, G: 61, B: 204, A: 255},
 	"PrehistoricWetlands": {R: 154, G: 134, B: 61, A: 255},
-	"OilField":            {R: 147, G: 126, B: 98, A: 255},
+	"OilField":            {R: 111, G: 78, B: 55, A: 255},
 	"MagmaCore":           {R: 204, G: 90, B: 61, A: 255},
 }
 
