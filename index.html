@@ -43,6 +43,19 @@
       font-size: 1.2em;
     }
 
+    .asteroid-group label {
+      font-size: 0.9em;
+      color: #bbb;
+    }
+
+    .asteroid-group input {
+      width: 6em;
+    }
+
+    .asteroid-group {
+      margin-top: 1em;
+    }
+
     input[type="text"] {
       width: 16em;
       padding: 0.5em;
@@ -96,9 +109,11 @@
     <form id="seedForm">
       <label for="seedInput">Enter Seed</label>
       <input id="seedInput" type="text" required />
-      <label for="astInput">Asteroid (optional)</label>
-      <input id="astInput" type="number" min="0" step="1" />
       <button type="submit"><span class="material-icons">search</span>View</button>
+      <div class="asteroid-group">
+        <label for="astInput">Asteroid (optional)</label>
+        <input id="astInput" type="number" min="0" step="1" />
+      </div>
     </form>
     <div id="message"></div>
   </div>
