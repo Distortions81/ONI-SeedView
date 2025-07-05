@@ -140,3 +140,26 @@ func loadImage(cache map[string]*ebiten.Image, name string) (*ebiten.Image, erro
 	cache[name] = img
 	return img, nil
 }
+
+func loadBiomeTextures() map[string]*ebiten.Image {
+	atlas, err := loadImageFile("../icons/textures.png")
+	if err != nil {
+		fmt.Println("load atlas:", err)
+		return nil
+	}
+	w, h := atlas.Bounds().Dx(), atlas.Bounds().Dy()
+	cols, rows := 4, 6
+	tw, th := w/cols, h/rows
+	textures := make(map[string]*ebiten.Image)
+	for i, name := range biomeOrder {
+		if i >= cols*rows {
+			break
+		}
+		col := i % cols
+		row := i / cols
+		r := image.Rect(col*tw, row*th, (col+1)*tw, (row+1)*th)
+		sub := atlas.SubImage(r).(*ebiten.Image)
+		textures[name] = sub
+	}
+	return textures
+}
