@@ -37,6 +37,8 @@ jobs:
     needs: test-and-build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
@@ -45,6 +47,7 @@ jobs:
           path: dist
       - uses: softprops/action-gh-release@v1
         with:
+          token: ${{ secrets.GIT_ACTIONS }}
           files: |
             dist/**
 
