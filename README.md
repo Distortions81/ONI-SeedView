@@ -7,7 +7,6 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
 ## Features
 
 * Fetches seed data in [CBOR](https://en.wikipedia.org/wiki/CBOR) format from the MapsNotIncluded ingest API.
-* Converts the data to JSON and optionally saves it to disk with the `-out` flag.
 * Smooth panning via arrow keys, **WASD** or by dragging with the mouse.
 * Touch controls for panning and pinch-to-zoom on supported devices.
 * Mouse wheel and `+`/`-` keys control zoom. The window can be resized at any time.
@@ -57,12 +56,6 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
    go run . -coord SNDST-A-7-0-0-0
    ```
 
-   To save the decoded seed as JSON use the optional `-out` flag:
-
-   ```bash
-   go run . -coord SNDST-A-7-0-0-0 -out seed.json
-   ```
-
 ## Running Headless
 
 If you need to run the viewer on a machine without a display, install `Xvfb` and use the provided script. The script starts a virtual framebuffer so the window can be created.
@@ -101,13 +94,13 @@ the environments are:
 ## Saving Screenshots
 
 Click the camera icon to open the screenshot menu. Choose a quality level
-(2K–8K) and the current view is written to a PNG named after the seed.
+(2K–8K) and the current view is written to a TIFF named after the seed.
 After clicking **Save Screenshot** the button briefly shows *Taking Screenshot...*
 with a red outline before the menu closes automatically.
 You can also generate a screenshot non-interactively:
 
 ```bash
-go run . -coord SNDST-A-7-0-0-0 -screenshot myshot.png
+go run . -coord SNDST-A-7-0-0-0 -screenshot myshot.tiff
 ```
 
 ## Repository Layout

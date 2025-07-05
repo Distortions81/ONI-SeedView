@@ -3,12 +3,10 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"image"
 	"image/color"
-	"image/png"
 	"math"
 	"os"
 	"runtime"
@@ -1579,7 +1577,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		screen.ReadPixels(pixels)
 		img := &image.RGBA{Pix: pixels, Stride: 4 * b.Dx(), Rect: b}
 		if f, err := os.Create(g.screenshotPath); err == nil {
-			_ = png.Encode(f, img)
+			data, _ := encodeTIFF(img)
+			_, _ = f.Write(data)
 			f.Close()
 		}
 		g.captured = true
@@ -1614,8 +1613,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 func main() {
 	coord := flag.String("coord", "SNDST-A-7-0-0-0", "seed coordinate")
-	out := flag.String("out", "", "optional path to save JSON")
-	screenshot := flag.String("screenshot", "", "path to save a PNG screenshot and exit")
+	screenshot := flag.String("screenshot", "", "path to save a TIFF screenshot and exit")
 	flag.Parse()
 	if runtime.GOARCH == "wasm" {
 		if c := coordFromURL(); c != "" {
@@ -1653,10 +1651,6 @@ func main() {
 			game.needsRedraw = true
 			game.loading = false
 			return
-		}
-		if *out != "" {
-			jsonData, _ := json.MarshalIndent(seed, "", "  ")
-			_ = saveToFile(*out, jsonData)
 		}
 		ast := seed.Asteroids[0]
 		bps := parseBiomePaths(ast.BiomePaths)

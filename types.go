@@ -1,11 +1,5 @@
 package main
 
-import (
-	"encoding/json"
-
-	_ "embed"
-)
-
 // Data structures used to decode the geyser information.
 type Geyser struct {
 	ID             string  `json:"id"`
@@ -51,13 +45,4 @@ type nameTables struct {
 	Biomes  map[string]string `json:"biomes"`
 	Geysers map[string]string `json:"geysers"`
 	POIs    map[string]string `json:"pois"`
-}
-
-var names nameTables
-
-//go:embed names.json
-var namesData []byte
-
-func init() {
-	_ = json.Unmarshal(namesData, &names)
 }

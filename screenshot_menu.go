@@ -3,11 +3,9 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"image"
 	"image/color"
-	"image/png"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -107,10 +105,9 @@ func (g *Game) saveScreenshot() {
 	width := int(float64(g.astWidth) * 2 * scale)
 	height := int(float64(g.astHeight) * 2 * scale)
 	img := g.captureScreenshot(width, height, scale)
-	var buf bytes.Buffer
-	_ = png.Encode(&buf, img)
-	name := fmt.Sprintf("%s-%s.png", g.coord, time.Now().Format("20060102-150405"))
-	_ = saveImageData(name, buf.Bytes())
+	data, _ := encodeTIFF(img)
+	name := fmt.Sprintf("%s-%s.tiff", g.coord, time.Now().Format("20060102-150405"))
+	_ = saveImageData(name, data)
 }
 
 func (g *Game) captureScreenshot(w, h int, zoom float64) *image.RGBA {
