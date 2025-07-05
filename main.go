@@ -1572,11 +1572,16 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		if g.coord != "" && !g.screenshotMode {
 			label := g.coord
-			if g.asteroidSpecified {
-				label += fmt.Sprintf("  ast: %s", g.asteroidID)
-			}
 			scale := g.uiScale()
-			x := g.width/2 - int(float64(len(label)*LabelCharWidth)*scale/2)
+			aName := g.asteroidID
+			if aName == "" {
+				aName = "Unknown"
+			}
+			astName := fmt.Sprintf("Asteroid: %s", aName)
+			x := g.width/2 - int(float64(len(astName)*LabelCharWidth)*scale/2)
+			drawTextWithBGScale(screen, astName, x, int(30*scale), scale)
+
+			x = g.width/2 - int(float64(len(label)*LabelCharWidth)*scale/2)
 			drawTextWithBGScale(screen, label, x, 10, scale)
 		}
 
@@ -1938,6 +1943,7 @@ func main() {
 			_ = saveToFile(*out, jsonData)
 		}
 		ast := seed.Asteroids[astIdxSel]
+		game.asteroidID = ast.ID
 		bps := parseBiomePaths(ast.BiomePaths)
 		game.geysers = ast.Geysers
 		game.pois = ast.POIs
