@@ -252,58 +252,6 @@ func drawBiome(dst *ebiten.Image, polys [][]Point, clr color.Color, camX, camY, 
 	dst.DrawTriangles(vs, is, whitePixel, op)
 }
 
-func drawTundraGradient(dst *ebiten.Image, polys [][]Point, camX, camY, zoom float64) {
-	if len(polys) == 0 {
-		return
-	}
-	minY, maxY := math.MaxFloat64, -math.MaxFloat64
-	for _, pts := range polys {
-		for _, pt := range pts {
-			y := float64(pt.Y*2)*zoom + camY
-			if y < minY {
-				minY = y
-			}
-			if y > maxY {
-				maxY = y
-			}
-		}
-	}
-	var p vector.Path
-	for _, pts := range polys {
-		if len(pts) == 0 {
-			continue
-		}
-		p.MoveTo(float32(pts[0].X*2), float32(pts[0].Y*2))
-		for _, pt := range pts[1:] {
-			p.LineTo(float32(pt.X*2), float32(pt.Y*2))
-		}
-		p.Close()
-	}
-	vs, is := p.AppendVerticesAndIndicesForFilling(nil, nil)
-	for i := range vs {
-		x := float64(vs[i].DstX)*zoom + camX
-		y := float64(vs[i].DstY)*zoom + camY
-		vs[i].DstX = float32(math.Round(x))
-		vs[i].DstY = float32(math.Round(y))
-		vs[i].SrcX = 0
-		vs[i].SrcY = 0
-		alpha := float32(0.0)
-		if maxY > minY {
-			alpha = float32(0.15 * (1 - (y-minY)/(maxY-minY)))
-		}
-		vs[i].ColorR = 1
-		vs[i].ColorG = 1
-		vs[i].ColorB = 1
-		vs[i].ColorA = alpha
-	}
-	op := &ebiten.DrawTrianglesOptions{
-		AntiAlias:      true,
-		ColorScaleMode: ebiten.ColorScaleModeStraightAlpha,
-		FillRule:       ebiten.FillRuleEvenOdd,
-	}
-	dst.DrawTriangles(vs, is, whitePixel, op)
-}
-
 func drawPattern(dst *ebiten.Image, polys [][]Point, camX, camY, zoom float64, pattern *ebiten.Image) {
 	if len(polys) == 0 {
 		return
@@ -327,8 +275,8 @@ func drawPattern(dst *ebiten.Image, polys [][]Point, camX, camY, zoom float64, p
 		y := worldY*zoom + camY
 		vs[i].DstX = float32(math.Round(x))
 		vs[i].DstY = float32(math.Round(y))
-		vs[i].SrcX = float32(worldX * zoom)
-		vs[i].SrcY = float32(worldY * zoom)
+		vs[i].SrcX = float32(worldX)
+		vs[i].SrcY = float32(worldY)
 		vs[i].ColorR = 1
 		vs[i].ColorG = 1
 		vs[i].ColorB = 1
@@ -1229,24 +1177,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				texClr = color.RGBA{100, 100, 100, texClr.A}
 			}
 			drawBiome(screen, bp.Polygons, texClr, g.camX, g.camY, g.zoom)
-			/*
-								switch bp.Name {
-								case "FrozenWastes", "IceCaves":
-									drawTundraGradient(screen, bp.Polygons, g.camX, g.camY, g.zoom)
-									drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, tundraPattern)
-								case "MagmaCore":
-									drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, magmaPattern)
-								case "Ocean":
-									drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, oceanPattern)
-								case "Sandstone":
-									drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, sandPattern)
-								case "ToxicJungle":
-									drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, toxicPattern)
-								case "OilField":
-									drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, oilPattern)
-				                                case "BoggyMarsh":
-				                                        drawPattern(screen, bp.Polygons, g.camX, g.camY, g.zoom, marshPattern)
-				                                } */
 			outlineClr := color.RGBA{255, 255, 255, 128}
 			drawBiomeOutline(screen, bp.Polygons, g.camX, g.camY, g.zoom, outlineClr)
 		}
