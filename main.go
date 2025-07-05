@@ -1917,7 +1917,15 @@ func main() {
 					for _, a := range seed.Asteroids {
 						valid = append(valid, a.ID)
 					}
-					game.status += fmt.Sprintf("\nValid IDs: %s", strings.Join(valid, ", "))
+					lines := make([]string, 0, (len(valid)+2)/3)
+					for i, v := range valid {
+						if i%3 == 0 {
+							lines = append(lines, v)
+						} else {
+							lines[len(lines)-1] = lines[len(lines)-1] + ", " + v
+						}
+					}
+					game.status += fmt.Sprintf("\nValid IDs: %s", strings.Join(lines, "\n"))
 				}
 				game.statusError = true
 				game.needsRedraw = true
