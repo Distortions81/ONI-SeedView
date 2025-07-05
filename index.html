@@ -96,6 +96,8 @@
     <form id="seedForm">
       <label for="seedInput">Enter Seed</label>
       <input id="seedInput" type="text" required />
+      <label for="astInput">Asteroid (optional)</label>
+      <input id="astInput" type="number" min="0" step="1" />
       <button type="submit"><span class="material-icons">search</span>View</button>
     </form>
     <div id="message"></div>
@@ -127,6 +129,9 @@
 
   const urlSeed = seedFromURL();
   const urlAsteroid = asteroidFromURL();
+  if (urlAsteroid) {
+    document.getElementById('astInput').value = urlAsteroid;
+  }
   if (urlSeed) {
     let dest = 'view.html?coord=' + encodeURIComponent(urlSeed);
     if (urlAsteroid) dest += '&asteroid=' + encodeURIComponent(urlAsteroid);
@@ -136,6 +141,7 @@
   document.getElementById('seedForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const seed = document.getElementById('seedInput').value.trim();
+    const ast = document.getElementById('astInput').value.trim();
     if (!seed) return;
     document.getElementById('message').textContent = 'Checking…';
     try {
@@ -144,7 +150,9 @@
         if (resp.body && typeof resp.body.cancel === 'function') {
           resp.body.cancel();
         }
-        window.location.href = 'view.html?coord=' + encodeURIComponent(seed);
+        let dest = 'view.html?coord=' + encodeURIComponent(seed);
+        if (ast) dest += '&asteroid=' + encodeURIComponent(ast);
+        window.location.href = dest;
       } else if (resp.status === 404) {
         document.getElementById('message').textContent = 'Seed not found';
       } else {
