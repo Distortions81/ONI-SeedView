@@ -38,6 +38,10 @@ const (
 	InfoPanelAlpha        = 200
 	TouchDragThreshold    = 10
 	ScreenshotMenuSpacing = 26
+	ScreenshotMenuTitle   = "Image quality:"
+	ScreenshotSaveLabel   = "Save Screenshot"
+	ScreenshotTakingLabel = "Taking Screenshot..."
+	ScreenshotSavedLabel  = "Saved!"
 	GeyserRowSpacing      = 60
 
 	// BiomeTextureScale controls the repetition of biome textures.
@@ -55,6 +59,10 @@ const (
 )
 
 var LegendZoomThreshold = math.Pow(WheelZoomFactor, LegendZoomExponent)
+
+var ScreenshotQualities = []string{"Low (2K)", "Medium (4K)", "High (8K)"}
+
+var ScreenshotScales = []float64{4.0, 8.0, 16.0}
 
 var biomeOrder = []string{
 	"Sandstone",

@@ -22,7 +22,8 @@ func (g *Game) screenshotRect() image.Rectangle {
 }
 
 func (g *Game) screenshotMenuRect() image.Rectangle {
-	labels := []string{"Image quality:", "Low (1x)", "Medium (2x)", "High (4x)", "Extreme (8x)", "Save Screenshot"}
+	labels := append([]string{ScreenshotMenuTitle}, ScreenshotQualities...)
+	labels = append(labels, ScreenshotSaveLabel)
 	maxW := 0
 	for _, s := range labels {
 		if len(s) > maxW {
@@ -45,20 +46,20 @@ func (g *Game) screenshotMenuRect() image.Rectangle {
 func (g *Game) drawScreenshotMenu(dst *ebiten.Image) {
 	rect := g.screenshotMenuRect()
 	vector.DrawFilledRect(dst, float32(rect.Min.X), float32(rect.Min.Y), float32(rect.Dx()), float32(rect.Dy()), colorRGBA(0, 0, 0, 200), false)
-	drawTextWithBG(dst, "Image quality:", rect.Min.X+2, rect.Min.Y+2)
-	label := "Save Screenshot"
+	drawTextWithBG(dst, ScreenshotMenuTitle, rect.Min.X+2, rect.Min.Y+2)
+	label := ScreenshotSaveLabel
 	border := colorRGBA(255, 255, 255, 255)
 	if g.ssPending > 0 {
-		label = "Taking Screenshot..."
+		label = ScreenshotTakingLabel
 		border = colorRGBA(255, 0, 0, 255)
 	} else if time.Since(g.ssSaved) < 2*time.Second {
-		label = "Saved!"
+		label = ScreenshotSavedLabel
 	}
-	items := []string{"Low (1x)", "Medium (2x)", "High (4x)", "Extreme (8x)", label}
+	items := append(append([]string(nil), ScreenshotQualities...), label)
 	y := rect.Min.Y + 2 + ScreenshotMenuSpacing
 	for i, it := range items {
 		selected := i == g.ssQuality
-		if i == 4 && g.ssPending > 0 {
+		if i == len(ScreenshotQualities) && g.ssPending > 0 {
 			drawTextWithBGBorder(dst, it, rect.Min.X+2, y, border)
 		} else if selected {
 			drawTextWithBGBorder(dst, it, rect.Min.X+2, y, colorRGBA(255, 255, 255, 255))
@@ -66,7 +67,7 @@ func (g *Game) drawScreenshotMenu(dst *ebiten.Image) {
 			drawTextWithBG(dst, it, rect.Min.X+2, y)
 		}
 		y += ScreenshotMenuSpacing
-		if i == 3 {
+		if i == len(ScreenshotQualities)-1 {
 			y += ScreenshotMenuSpacing
 		}
 	}
@@ -77,15 +78,15 @@ func (g *Game) clickScreenshotMenu(mx, my int) bool {
 	if !rect.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		return false
 	}
-	items := []string{"Low (1x)", "Medium (2x)", "High (4x)", "Extreme (8x)", "Save Screenshot"}
+	items := append(append([]string(nil), ScreenshotQualities...), ScreenshotSaveLabel)
 	y := rect.Min.Y + 2 + ScreenshotMenuSpacing
 	for i := range items {
 		r := image.Rect(rect.Min.X, y-2, rect.Min.X+rect.Dx(), y-2+16+4)
 		if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			switch i {
-			case 0, 1, 2, 3:
+			case 0, 1, 2:
 				g.ssQuality = i
-			case 4:
+			case len(ScreenshotQualities):
 				if g.ssPending == 0 {
 					g.ssPending = 2
 				}
@@ -94,7 +95,7 @@ func (g *Game) clickScreenshotMenu(mx, my int) bool {
 			return true
 		}
 		y += ScreenshotMenuSpacing
-		if i == 3 {
+		if i == len(ScreenshotQualities)-1 {
 			y += ScreenshotMenuSpacing
 		}
 	}
@@ -102,17 +103,7 @@ func (g *Game) clickScreenshotMenu(mx, my int) bool {
 }
 
 func (g *Game) saveScreenshot() {
-	scale := 1.0
-	switch g.ssQuality {
-	case 0:
-		scale = 1.0
-	case 1:
-		scale = 2.0
-	case 2:
-		scale = 4.0
-	default:
-		scale = 8.0
-	}
+	scale := ScreenshotScales[g.ssQuality]
 	width := int(float64(g.astWidth) * 2 * scale)
 	height := int(float64(g.astHeight) * 2 * scale)
 	img := g.captureScreenshot(width, height, scale)

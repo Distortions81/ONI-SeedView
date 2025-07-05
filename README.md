@@ -14,7 +14,7 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
 * Textured biomes with a color legend and icons for geysers and points of interest.
 * Supports running in headless environments using `Xvfb`.
 * Click the camera icon to capture screenshots. A menu allows
-  selecting image quality from low (1x) to extreme (8x).
+  selecting image quality from low (2K) to high (8K).
 * Hover over geyser or POI icons to show an information panel.
   Clicking pins the panel so it stays visible while panning.
 * A help icon displays the available controls at any time.
@@ -97,7 +97,7 @@ the environments are:
 ## Saving Screenshots
 
 Click the camera icon to open the screenshot menu. Choose a quality level
-(1×–8×) and the current view is written to a PNG named after the seed.
+(2K–8K) and the current view is written to a PNG named after the seed.
 After clicking **Save Screenshot** the button briefly shows *Taking Screenshot...*
 with a red outline before the menu closes automatically.
 You can also generate a screenshot non-interactively:
