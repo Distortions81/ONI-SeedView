@@ -382,7 +382,7 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 	scale := g.uiScale()
 	w := float64(g.legendImage.Bounds().Dx()) * scale
 	x := float64(dst.Bounds().Dx()) - w - 12
-	y := 10.0
+	y := 10.0 - g.itemScroll
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(scale, scale)
 	op.GeoM.Translate(math.Round(x), math.Round(y))
@@ -507,6 +507,34 @@ func (g *Game) maxGeyserScroll() float64 {
 	return float64(max)
 }
 
+func (g *Game) maxBiomeScroll() float64 {
+	if g.legend == nil {
+		return 0
+	}
+	scale := g.uiScale()
+	h := float64(g.legend.Bounds().Dy()) * scale
+	extra := float64(LegendRowSpacing*LegendScrollExtraRows) * scale
+	max := h - float64(g.height) + extra
+	if max < 0 {
+		max = 0
+	}
+	return max
+}
+
+func (g *Game) maxItemScroll() float64 {
+	if g.legendImage == nil {
+		return 0
+	}
+	scale := g.uiScale()
+	h := float64(g.legendImage.Bounds().Dy()) * scale
+	extra := float64(LegendRowSpacing*LegendScrollExtraRows) * scale
+	max := h + 10 - float64(g.height) + extra
+	if max < 0 {
+		max = 0
+	}
+	return max
+}
+
 // Game implements ebiten.Game and displays geysers with their names.
 type Game struct {
 	geysers        []Geyser
@@ -540,6 +568,8 @@ type Game struct {
 	hoverItem      int
 	showGeyserList bool
 	geyserScroll   float64
+	biomeScroll    float64
+	itemScroll     float64
 	showHelp       bool
 	lastWheel      time.Time
 	loading        bool
@@ -938,6 +968,19 @@ iconsLoop:
 				g.camX += float64(g.width/2 - ix)
 				g.camY += float64(g.height/2 - iy)
 				g.clampCamera()
+
+				if max := g.maxBiomeScroll(); g.biomeScroll > max {
+					g.biomeScroll = max
+				}
+				if g.biomeScroll < 0 {
+					g.biomeScroll = 0
+				}
+				if max := g.maxItemScroll(); g.itemScroll > max {
+					g.itemScroll = max
+				}
+				if g.itemScroll < 0 {
+					g.itemScroll = 0
+				}
 				g.needsRedraw = true
 			}
 		}
@@ -982,10 +1025,48 @@ iconsLoop:
 				g.geyserScroll = max
 			}
 		} else {
-			if wheelY > 0 {
-				zoomFactor *= WheelZoomFactor
-			} else {
-				zoomFactor /= WheelZoomFactor
+			handled := false
+			scale := g.uiScale()
+			useNumbers := !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+			if g.legend != nil {
+				lw := int(float64(g.legend.Bounds().Dx()) * scale)
+				lh := int(float64(g.legend.Bounds().Dy()) * scale)
+				if lh > g.height && mxTmp >= 0 && mxTmp < lw {
+					g.biomeScroll -= float64(wheelY) * 10
+					if g.biomeScroll < 0 {
+						g.biomeScroll = 0
+					}
+					max := g.maxBiomeScroll()
+					if g.biomeScroll > max {
+						g.biomeScroll = max
+					}
+					g.needsRedraw = true
+					handled = true
+				}
+			}
+			if !handled && useNumbers && g.legendImage != nil {
+				lw := int(float64(g.legendImage.Bounds().Dx()) * scale)
+				lh := int(float64(g.legendImage.Bounds().Dy()) * scale)
+				x0 := g.width - lw - 12
+				if lh+10 > g.height && mxTmp >= x0 && mxTmp < x0+lw {
+					g.itemScroll -= float64(wheelY) * 10
+					if g.itemScroll < 0 {
+						g.itemScroll = 0
+					}
+					max := g.maxItemScroll()
+					if g.itemScroll > max {
+						g.itemScroll = max
+					}
+					g.needsRedraw = true
+					handled = true
+				}
+			}
+			if !handled {
+				if wheelY > 0 {
+					zoomFactor *= WheelZoomFactor
+				} else {
+					zoomFactor /= WheelZoomFactor
+				}
 			}
 		}
 	}
@@ -1037,6 +1118,16 @@ iconsLoop:
 			g.needsRedraw = true
 		} else if justPressed && g.magnifyRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.magnify = !g.magnify
+			if max := g.maxBiomeScroll(); max == 0 {
+				g.biomeScroll = 0
+			} else if g.biomeScroll > max {
+				g.biomeScroll = max
+			}
+			if max := g.maxItemScroll(); max == 0 {
+				g.itemScroll = 0
+			} else if g.itemScroll > max {
+				g.itemScroll = max
+			}
 			g.needsRedraw = true
 		} else if justPressed && g.geyserRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.camX = oldX
@@ -1056,7 +1147,7 @@ iconsLoop:
 		if g.legend != nil && len(g.legendBiomes) > 0 {
 			w := int(float64(g.legend.Bounds().Dx()) * scale)
 			if mx >= 0 && mx < w {
-				baseY := int(float64(10+LegendRowSpacing) * scale)
+				baseY := int(float64(10+LegendRowSpacing)*scale) - int(g.biomeScroll)
 				rowH := int(float64(LegendRowSpacing) * scale)
 				for i := range g.legendBiomes {
 					ry := baseY + i*rowH
@@ -1072,7 +1163,7 @@ iconsLoop:
 			w := int(float64(g.legendImage.Bounds().Dx()) * scale)
 			x0 := g.width - w - 12
 			if mx >= x0 && mx < x0+w {
-				baseY := int(float64(10+LegendRowSpacing) * scale)
+				baseY := int(float64(10+LegendRowSpacing)*scale) - int(g.itemScroll)
 				rowH := int(float64(LegendRowSpacing) * scale)
 				for i := range g.legendEntries {
 					ry := baseY + i*rowH
@@ -1355,10 +1446,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		opLegend := &ebiten.DrawImageOptions{}
 		scale := g.uiScale()
 		opLegend.GeoM.Scale(scale, scale)
-		opLegend.GeoM.Translate(0, 0)
+		opLegend.GeoM.Translate(0, -g.biomeScroll)
 		screen.DrawImage(g.legend, opLegend)
 		if g.hoverBiome >= 0 {
-			y0 := math.Round(float64(10+LegendRowSpacing+g.hoverBiome*LegendRowSpacing) * scale)
+			y0 := math.Round(float64(10+LegendRowSpacing+g.hoverBiome*LegendRowSpacing)*scale - g.biomeScroll)
 			h := math.Round(float64(LegendRowSpacing) * scale)
 			w := math.Round(float64(g.legend.Bounds().Dx()) * scale)
 			vector.StrokeRect(screen, 0.5, float32(y0)-4, float32(w)-1, float32(h)-1, 2, color.RGBA{255, 0, 0, 255}, false)
@@ -1605,6 +1696,17 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 			zx := float64(g.width) / (float64(g.astWidth) * 2)
 			zy := float64(g.height) / (float64(g.astHeight) * 2)
 			g.minZoom = math.Min(zx, zy) * 0.25
+		}
+
+		if max := g.maxBiomeScroll(); max == 0 {
+			g.biomeScroll = 0
+		} else if g.biomeScroll > max {
+			g.biomeScroll = max
+		}
+		if max := g.maxItemScroll(); max == 0 {
+			g.itemScroll = 0
+		} else if g.itemScroll > max {
+			g.itemScroll = max
 		}
 
 		g.needsRedraw = true
