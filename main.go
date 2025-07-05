@@ -913,10 +913,14 @@ func (g *Game) uiScale() float64 {
 		}
 		return 1.0
 	}
+	scale := 1.0
 	if g.magnify {
-		return 2.0
+		scale = 2.0
 	}
-	return 1.0
+	if g.halfRes {
+		scale /= 2.0
+	}
+	return scale
 }
 
 func (g *Game) iconSize() int {
@@ -2235,15 +2239,22 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	if g.width != outsideWidth || g.height != outsideHeight {
+	screenW := outsideWidth
+	screenH := outsideHeight
+	if g.halfRes && !g.screenshotMode {
+		screenW /= 2
+		screenH /= 2
+	}
+
+	if g.width != screenW || g.height != screenH {
 		// Keep the world position at the center of the screen fixed so
 		// resizing doesn't shift the view.
 		cxOld, cyOld := float64(g.width)/2, float64(g.height)/2
 		worldX := (cxOld - g.camX) / g.zoom
 		worldY := (cyOld - g.camY) / g.zoom
 
-		g.width = outsideWidth
-		g.height = outsideHeight
+		g.width = screenW
+		g.height = screenH
 
 		cxNew, cyNew := float64(g.width)/2, float64(g.height)/2
 		g.camX = cxNew - worldX*g.zoom
@@ -2268,10 +2279,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 		g.needsRedraw = true
 	}
-	if g.halfRes && !g.screenshotMode {
-		return outsideWidth / 2, outsideHeight / 2
-	}
-	return outsideWidth, outsideHeight
+	return screenW, screenH
 }
 
 func main() {
