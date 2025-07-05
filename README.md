@@ -19,11 +19,13 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
   selecting image quality from low (2K) to high (8K).
 * Hover over geyser or POI icons to show an information panel.
   Clicking pins the panel so it stays visible while panning.
-* Hover over the bottom icons for tooltips describing their actions.
+* Hover over the bottom icons for tooltips describing their actions. Tooltips
+  automatically stay within the window bounds.
 * A help icon displays the available controls at any time.
 * A gear icon opens an options menu for toggling textures, Vsync,
-  item labels, legends, number labels and smart rendering,
-  adjusting icon size and showing the current FPS.
+  item labels, legends, number labels, smart rendering, half-resolution
+  mode, automatic low-res switching and linear filtering. You can also
+  adjust icon size and view the current FPS.
 * A `+` icon toggles enlarged UI text for accessibility.
 * Crosshairs at the center show the current world coordinates,
   useful for lining up precise screenshots.

@@ -123,7 +123,7 @@ func drawTextWithBGBorderScale(dst *ebiten.Image, text string, x, y int, border 
 	dst.DrawImage(img, op)
 }
 
-func drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int, scale float64) {
+func (g *Game) drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int, scale float64) {
 	lines := strings.Split(text, "\n")
 	width := 0
 	for _, l := range lines {
@@ -148,7 +148,7 @@ func drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int,
 	img := ebiten.NewImage(w, h)
 	vector.DrawFilledRect(img, 0, 0, float32(w), float32(h), color.RGBA{0, 30, 30, InfoPanelAlpha}, false)
 	if icon != nil {
-		opIcon := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
+		opIcon := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 		scaleIcon := float64(InfoIconSize) / math.Max(float64(icon.Bounds().Dx()), float64(icon.Bounds().Dy()))
 		opIcon.GeoM.Scale(scaleIcon, scaleIcon)
 		opIcon.GeoM.Translate(2, float64(h-iconH)/2)
@@ -161,7 +161,7 @@ func drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int,
 	dst.DrawImage(img, op)
 }
 
-func drawInfoRow(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int, scale float64) {
+func (g *Game) drawInfoRow(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int, scale float64) {
 	lines := strings.Split(text, "\n")
 	width := 0
 	for _, l := range lines {
@@ -184,7 +184,7 @@ func drawInfoRow(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int, s
 	}
 	if scale == 1.0 {
 		if icon != nil {
-			opIcon := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
+			opIcon := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 			sc := float64(InfoIconSize) / math.Max(float64(icon.Bounds().Dx()), float64(icon.Bounds().Dy()))
 			opIcon.GeoM.Scale(sc, sc)
 			opIcon.GeoM.Translate(float64(x), float64(y+(h-iconH)/2))
@@ -196,7 +196,7 @@ func drawInfoRow(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int, s
 
 	img := ebiten.NewImage(w, h)
 	if icon != nil {
-		opIcon := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
+		opIcon := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 		sc := float64(InfoIconSize) / math.Max(float64(icon.Bounds().Dx()), float64(icon.Bounds().Dy()))
 		opIcon.GeoM.Scale(sc, sc)
 		opIcon.GeoM.Translate(0, float64(h-iconH)/2)
@@ -306,7 +306,7 @@ func drawBiome(dst *ebiten.Image, polys [][]Point, clr color.Color, camX, camY, 
 	dst.DrawTriangles(vs, is, whitePixel, op)
 }
 
-func drawBiomeTextured(dst *ebiten.Image, polys [][]Point, tex *ebiten.Image, clr color.Color, camX, camY, zoom float64) {
+func drawBiomeTextured(dst *ebiten.Image, polys [][]Point, tex *ebiten.Image, clr color.Color, camX, camY, zoom float64, filter ebiten.Filter) {
 	if len(polys) == 0 || tex == nil {
 		return
 	}
@@ -343,7 +343,7 @@ func drawBiomeTextured(dst *ebiten.Image, polys [][]Point, tex *ebiten.Image, cl
 		ColorScaleMode: ebiten.ColorScaleModePremultipliedAlpha,
 		FillRule:       ebiten.FillRuleEvenOdd,
 		Address:        ebiten.AddressRepeat,
-		Filter:         ebiten.FilterLinear,
+		Filter:         filter,
 	}
 	dst.DrawTriangles(vs, is, tex, op)
 }
@@ -533,7 +533,7 @@ func (g *Game) drawGeyserList(dst *ebiten.Image) {
 		x := spacing
 		for c := 0; c < cols && idx < len(items); c++ {
 			it := items[idx]
-			drawInfoRow(dst, it.text, it.icon, x, y, scale)
+			g.drawInfoRow(dst, it.text, it.icon, x, y, scale)
 			x += maxW + spacing
 			idx++
 		}
@@ -852,6 +852,10 @@ type Game struct {
 	useNumbers    bool
 	iconScale     float64
 	smartRender   bool
+	linearFilter  bool
+	halfRes       bool
+	autoLowRes    bool
+	lowFPSStart   time.Time
 }
 
 type label struct {
@@ -898,6 +902,13 @@ func (g *Game) iconSize() int {
 	return int(float64(HelpIconSize) * g.uiScale())
 }
 
+func (g *Game) filterMode() ebiten.Filter {
+	if g.linearFilter {
+		return ebiten.FilterLinear
+	}
+	return ebiten.FilterNearest
+}
+
 func drawPlusMinus(dst *ebiten.Image, rect image.Rectangle, minus bool) {
 	cx := float32(rect.Min.X + rect.Dx()/2)
 	cy := float32(rect.Min.Y + rect.Dy()/2)
@@ -909,10 +920,19 @@ func drawPlusMinus(dst *ebiten.Image, rect image.Rectangle, minus bool) {
 	}
 }
 
-func drawTooltip(dst *ebiten.Image, text string, rect image.Rectangle, scale float64) {
+func (g *Game) drawTooltip(dst *ebiten.Image, text string, rect image.Rectangle, scale float64) {
 	w, h := textDimensions(text)
 	x := rect.Min.X + rect.Dx()/2 - int(float64(w)*scale/2)
 	y := rect.Min.Y - int(float64(h)*scale) - 4
+	if x < 0 {
+		x = 0
+	}
+	if x+int(float64(w)*scale) > g.width {
+		x = g.width - int(float64(w)*scale)
+	}
+	if y < 0 {
+		y = rect.Max.Y + 4
+	}
 	drawTextWithBGScale(dst, text, x, y, scale)
 }
 
@@ -1094,6 +1114,19 @@ iconsLoop:
 		g.needsRedraw = true
 	} else if g.skipClickTicks > 0 {
 		g.skipClickTicks--
+	}
+
+	if g.autoLowRes && !g.halfRes && g.ssPending == 0 && !g.screenshotMode {
+		if ebiten.ActualFPS() < 30 {
+			if g.lowFPSStart.IsZero() {
+				g.lowFPSStart = time.Now()
+			} else if time.Since(g.lowFPSStart) > 2*time.Second {
+				g.halfRes = true
+				g.lowFPSStart = time.Time{}
+			}
+		} else {
+			g.lowFPSStart = time.Time{}
+		}
 	}
 
 	if g.showGeyserList {
@@ -1686,7 +1719,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					{g.astWidth, g.astHeight},
 					{0, g.astHeight},
 				}}
-				drawBiomeTextured(screen, rect, tex, clr, g.camX, g.camY, g.zoom)
+				drawBiomeTextured(screen, rect, tex, clr, g.camX, g.camY, g.zoom, g.filterMode())
 			} else if clr, ok := biomeColors["Space"]; ok {
 				vector.DrawFilledRect(screen, float32(g.camX), float32(g.camY),
 					float32(float64(g.astWidth)*2*g.zoom),
@@ -1717,7 +1750,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 			if g.textures {
 				if tex := g.biomeTextures[bp.Name]; tex != nil {
-					drawBiomeTextured(screen, bp.Polygons, tex, texClr, g.camX, g.camY, g.zoom)
+					drawBiomeTextured(screen, bp.Polygons, tex, texClr, g.camX, g.camY, g.zoom, g.filterMode())
 				} else {
 					drawBiome(screen, bp.Polygons, texClr, g.camX, g.camY, g.zoom)
 				}
@@ -1752,7 +1785,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 				if iconName := iconForGeyser(gy.ID); iconName != "" {
 					if img, ok := g.icons[iconName]; ok && img != nil {
-						op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
+						op := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 						maxDim := math.Max(float64(img.Bounds().Dx()), float64(img.Bounds().Dy()))
 						scale := g.zoom * IconScale * g.iconScale * float64(BaseIconPixels) / maxDim
 						op.GeoM.Scale(scale, scale)
@@ -1815,7 +1848,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 				if iconName := iconForPOI(poi.ID); iconName != "" {
 					if img, ok := g.icons[iconName]; ok && img != nil {
-						op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
+						op := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 						maxDim := math.Max(float64(img.Bounds().Dx()), float64(img.Bounds().Dy()))
 						scale := g.zoom * IconScale * g.iconScale * float64(BaseIconPixels) / maxDim
 						op.GeoM.Scale(scale, scale)
@@ -1914,7 +1947,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			vector.DrawFilledCircle(screen, scx, scy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
 			vector.StrokeCircle(screen, scx, scy, float32(size)/2, 1, buttonBorderColor, true)
 			if cam, ok := g.icons["../icons/camera.png"]; ok && cam != nil {
-				op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
+				op := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 				scale := float64(size) / math.Max(float64(cam.Bounds().Dx()), float64(cam.Bounds().Dy()))
 				op.GeoM.Scale(scale, scale)
 				w := float64(cam.Bounds().Dx()) * scale
@@ -1939,7 +1972,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			vector.DrawFilledCircle(screen, cx, cy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
 			vector.StrokeCircle(screen, cx, cy, float32(size)/2, 1, buttonBorderColor, true)
 			if helpImg, ok := g.icons["../icons/help.png"]; ok && helpImg != nil {
-				op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
+				op := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 				sc := float64(size) / math.Max(float64(helpImg.Bounds().Dx()), float64(helpImg.Bounds().Dy()))
 				op.GeoM.Scale(sc, sc)
 				w := float64(helpImg.Bounds().Dx()) * sc
@@ -1954,7 +1987,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			vector.DrawFilledCircle(screen, ocx, ocy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
 			vector.StrokeCircle(screen, ocx, ocy, float32(size)/2, 1, buttonBorderColor, true)
 			if gear, ok := g.icons["../icons/gear.png"]; ok && gear != nil {
-				op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
+				op := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 				sc := float64(size) / math.Max(float64(gear.Bounds().Dx()), float64(gear.Bounds().Dy()))
 				op.GeoM.Scale(sc, sc)
 				w := float64(gear.Bounds().Dx()) * sc
@@ -1972,7 +2005,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			vector.DrawFilledCircle(screen, gcx, gcy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
 			vector.StrokeCircle(screen, gcx, gcy, float32(size)/2, 1, buttonBorderColor, true)
 			if icon, ok := g.icons["geyser_water.png"]; ok && icon != nil {
-				op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
+				op := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 				sc := float64(size) / math.Max(float64(icon.Bounds().Dx()), float64(icon.Bounds().Dy()))
 				op.GeoM.Scale(sc, sc)
 				w := float64(icon.Bounds().Dx()) * sc
@@ -1985,19 +2018,19 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				scale := g.uiScale()
 				switch g.hoverIcon {
 				case hoverScreenshot:
-					drawTooltip(screen, "Screenshot", sr, scale)
+					g.drawTooltip(screen, "Screenshot", sr, scale)
 				case hoverMagnify:
 					lbl := "Enlarge UI"
 					if g.magnify {
 						lbl = "Shrink UI"
 					}
-					drawTooltip(screen, lbl, mr, scale)
+					g.drawTooltip(screen, lbl, mr, scale)
 				case hoverHelp:
-					drawTooltip(screen, "Help", hr, scale)
+					g.drawTooltip(screen, "Help", hr, scale)
 				case hoverOptions:
-					drawTooltip(screen, "Options", or, scale)
+					g.drawTooltip(screen, "Options", or, scale)
 				case hoverGeysers:
-					drawTooltip(screen, "Geyser List", gr, scale)
+					g.drawTooltip(screen, "Geyser List", gr, scale)
 				}
 			}
 		}
@@ -2038,7 +2071,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 			if iconName := iconForGeyser(gy.ID); iconName != "" {
 				if img, ok := g.icons[iconName]; ok && img != nil {
-					op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
+					op := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 					maxDim := math.Max(float64(img.Bounds().Dx()), float64(img.Bounds().Dy()))
 					scale := g.zoom * IconScale * g.iconScale * float64(BaseIconPixels) / maxDim
 					op.GeoM.Scale(scale, scale)
@@ -2081,7 +2114,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 			if iconName := iconForPOI(poi.ID); iconName != "" {
 				if img, ok := g.icons[iconName]; ok && img != nil {
-					op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
+					op := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 					maxDim := math.Max(float64(img.Bounds().Dx()), float64(img.Bounds().Dy()))
 					scale := g.zoom * IconScale * g.iconScale * float64(BaseIconPixels) / maxDim
 					op.GeoM.Scale(scale, scale)
@@ -2148,7 +2181,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 			tx := g.width/2 - int(float64(panelW)*scale)/2
 			ty := g.height - int(float64(panelH)*scale) - 30
-			drawInfoPanel(screen, g.infoText, g.infoIcon, tx, ty, scale)
+			g.drawInfoPanel(screen, g.infoText, g.infoIcon, tx, ty, scale)
 		}
 
 		g.needsRedraw = false
@@ -2201,6 +2234,9 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 
 		g.needsRedraw = true
 	}
+	if g.halfRes && !g.screenshotMode {
+		return outsideWidth / 2, outsideHeight / 2
+	}
 	return outsideWidth, outsideHeight
 }
 
@@ -2241,6 +2277,9 @@ func main() {
 		useNumbers:        true,
 		iconScale:         1.0,
 		smartRender:       true,
+		linearFilter:      true,
+		halfRes:           false,
+		autoLowRes:        true,
 		ssQuality:         1,
 		hoverBiome:        -1,
 		hoverItem:         -1,
