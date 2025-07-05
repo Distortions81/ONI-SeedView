@@ -21,14 +21,17 @@ const (
 	// BaseIconPixels is the target pixel size used when scaling
 	// geyser and POI icons. Larger icons are scaled down so the
 	// on-screen size is consistent across all items.
-	BaseIconPixels        = 96
-	LegendZoomExponent    = 10
-	DefaultWidth          = 1200
-	DefaultHeight         = 1200
-	InitialZoom           = 1.0
-	LabelCharWidth        = 6
-	NumberLegendXOffset   = 150
-	LegendRowSpacing      = 25
+	BaseIconPixels      = 96
+	LegendZoomExponent  = 10
+	DefaultWidth        = 1200
+	DefaultHeight       = 1200
+	InitialZoom         = 1.0
+	LabelCharWidth      = 6
+	NumberLegendXOffset = 150
+	LegendRowSpacing    = 25
+	// LegendScrollExtraRows controls how many additional rows the legend
+	// panels can scroll beyond the bottom of the screen.
+	LegendScrollExtraRows = 3
 	ScreenshotFile        = "screenshot.png"
 	HelpIconSize          = 24
 	HelpMargin            = 10

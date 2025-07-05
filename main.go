@@ -513,7 +513,8 @@ func (g *Game) maxBiomeScroll() float64 {
 	}
 	scale := g.uiScale()
 	h := float64(g.legend.Bounds().Dy()) * scale
-	max := h - float64(g.height)
+	extra := float64(LegendRowSpacing*LegendScrollExtraRows) * scale
+	max := h - float64(g.height) + extra
 	if max < 0 {
 		max = 0
 	}
@@ -526,7 +527,8 @@ func (g *Game) maxItemScroll() float64 {
 	}
 	scale := g.uiScale()
 	h := float64(g.legendImage.Bounds().Dy()) * scale
-	max := h + 10 - float64(g.height)
+	extra := float64(LegendRowSpacing*LegendScrollExtraRows) * scale
+	max := h + 10 - float64(g.height) + extra
 	if max < 0 {
 		max = 0
 	}
@@ -1684,6 +1686,17 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 			zx := float64(g.width) / (float64(g.astWidth) * 2)
 			zy := float64(g.height) / (float64(g.astHeight) * 2)
 			g.minZoom = math.Min(zx, zy) * 0.25
+		}
+
+		if max := g.maxBiomeScroll(); max == 0 {
+			g.biomeScroll = 0
+		} else if g.biomeScroll > max {
+			g.biomeScroll = max
+		}
+		if max := g.maxItemScroll(); max == 0 {
+			g.itemScroll = 0
+		} else if g.itemScroll > max {
+			g.itemScroll = max
 		}
 
 		g.needsRedraw = true
