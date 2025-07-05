@@ -52,6 +52,12 @@ var biomeColors = map[string]color.RGBA{
 	"MagmaCore":           {R: 204, G: 90, B: 61, A: 255},
 }
 
+func init() {
+	for c, _ := range biomeColors {
+		biomeColors[c] = darkenColor(biomeColors[c], 0.8)
+	}
+}
+
 var whitePixel = func() *ebiten.Image {
 	img := ebiten.NewImage(1, 1)
 	img.Fill(color.White)
