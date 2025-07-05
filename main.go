@@ -1982,11 +1982,13 @@ func main() {
 		game.needsRedraw = true
 	}(asteroidIDVal)
 	if *screenshot != "" {
+
 		game.screenshotPath = *screenshot
-		game.screenshotMode = true
-		game.showHelp = false
-		game.showInfo = false
+		//game.screenshotMode = true
+		//game.showHelp = false
+		//game.showInfo = false
 		game.showShotMenu = false
+
 	}
 	ebiten.SetWindowSize(game.width, game.height)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
