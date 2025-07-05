@@ -23,10 +23,13 @@
     if (!seed) return;
     document.getElementById('message').textContent = 'Checking…';
     try {
-      const resp = await fetch(baseURL + encodeURIComponent(seed), { method: 'HEAD' });
+      const resp = await fetch(baseURL + encodeURIComponent(seed));
       if (resp.status === 404) {
         document.getElementById('message').textContent = 'Seed not found';
       } else if (resp.ok) {
+        if (resp.body && 'cancel' in resp.body) {
+          resp.body.cancel();
+        }
         window.location.href = 'view.html?coord=' + encodeURIComponent(seed);
       } else {
         document.getElementById('message').textContent = 'Error: ' + resp.status;
