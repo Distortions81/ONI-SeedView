@@ -29,6 +29,8 @@ const helpMessage = "Controls:\n" +
 	"Mouse wheel or +/- to zoom\n" +
 	"Pinch to zoom on touch"
 
+var errorBorderColor = color.RGBA{R: 244, G: 67, B: 54, A: 255}
+
 func drawTextWithBG(dst *ebiten.Image, text string, x, y int) {
 	lines := strings.Split(text, "\n")
 	width := 0
@@ -644,6 +646,7 @@ type Game struct {
 	magnify           bool
 	asteroidID        int
 	asteroidSpecified bool
+	statusError       bool
 }
 
 type label struct {
@@ -1372,12 +1375,21 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		if msg == "Fetching..." {
 			scale = 2.0
 		}
-		x := g.width/2 - int(float64(len(msg)*LabelCharWidth)*scale/2)
-		y := g.height / 2
-		if scale == 1.0 {
-			drawTextWithBG(screen, msg, x, y)
+		w, h := textDimensions(msg)
+		x := g.width/2 - int(float64(w)*scale/2)
+		y := g.height/2 - int(float64(h)*scale/2)
+		if g.statusError {
+			if scale == 1.0 {
+				drawTextWithBGBorder(screen, msg, x, y, errorBorderColor)
+			} else {
+				drawTextWithBGBorderScale(screen, msg, x, y, errorBorderColor, scale)
+			}
 		} else {
-			drawTextWithBGScale(screen, msg, x, y, scale)
+			if scale == 1.0 {
+				drawTextWithBG(screen, msg, x, y)
+			} else {
+				drawTextWithBGScale(screen, msg, x, y, scale)
+			}
 		}
 		g.lastDraw = time.Now()
 		return
@@ -1871,6 +1883,7 @@ func main() {
 		minZoom:           MinZoom,
 		loading:           true,
 		status:            "Fetching...",
+		statusError:       false,
 		coord:             *coord,
 		asteroidID:        asteroidIdx,
 		asteroidSpecified: asteroidSpecified,
@@ -1881,7 +1894,8 @@ func main() {
 		mousePrev:         false,
 	}
 	if invalidAsteroid {
-		game.status = "invalid asteroid ID"
+		game.status = fmt.Sprintf("%s\nAsteroid ID: %d\nThis location does not contain Asteroid ID: %d", *coord, asteroidIdx, asteroidIdx)
+		game.statusError = true
 		game.loading = false
 	} else {
 		go func(idx int) {
@@ -1889,6 +1903,7 @@ func main() {
 			cborData, err := fetchSeedCBOR(*coord)
 			if err != nil {
 				game.status = "Error: " + err.Error()
+				game.statusError = false
 				game.needsRedraw = true
 				game.loading = false
 				return
@@ -1896,12 +1911,14 @@ func main() {
 			seed, err := decodeSeed(cborData)
 			if err != nil {
 				game.status = "Error: " + err.Error()
+				game.statusError = false
 				game.needsRedraw = true
 				game.loading = false
 				return
 			}
 			if game.asteroidSpecified && (idx < 0 || idx >= len(seed.Asteroids)) {
-				game.status = "invalid asteroid ID"
+				game.status = fmt.Sprintf("%s\nAsteroid ID: %d\nThis location does not contain Asteroid ID: %d", game.coord, idx, idx)
+				game.statusError = true
 				game.needsRedraw = true
 				game.loading = false
 				return
