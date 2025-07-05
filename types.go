@@ -36,6 +36,7 @@ type BiomePath struct {
 }
 
 type Asteroid struct {
+	ID         string            `json:"id"`
 	SizeX      int               `json:"sizeX"`
 	SizeY      int               `json:"sizeY"`
 	Geysers    []Geyser          `json:"geysers"`

@@ -7,7 +7,7 @@ func coordFromURL() string {
 	return ""
 }
 
-// asteroidFromURL returns -1 on non-web builds.
-func asteroidFromURL() (int, bool) {
-	return -1, false
+// asteroidFromURL returns "" on non-web builds.
+func asteroidFromURL() (string, bool) {
+	return "", false
 }

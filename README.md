@@ -82,8 +82,8 @@ Run the build script to compile the program and copy the necessary runtime files
 ./scripts/build_all.sh
 ```
 
-Open `dist/index.html` in a browser to enter a seed. The page has a dark themed form with Material icons and now includes an optional field to choose the asteroid index. Valid seeds redirect to `view.html` which loads `oni-view.wasm.gz` and decompresses it with [Pako](https://github.com/nodeca/pako).
-You can also provide the seed in the index page URL with `index.html?coord=<seed>` or `index.html#coord=<seed>` (just `#<seed>` works too) and it will forward you to the viewer automatically. You can still specify the seed coordinate directly in the viewer URL using `view.html?coord=<seed>` or `view.html#coord=<seed>`. Add `asteroid=<num>` to select a different asteroid when a seed contains multiple. When an asteroid index is provided the viewer shows it next to the seed as `ast: <num>`. If the number is not valid the viewer now displays a three line error showing the coordinates and asteroid ID and stating `This location does not contain Asteroid ID: <num>`.
+Open `dist/index.html` in a browser to enter a seed. The page has a dark themed form with Material icons and now includes an optional field to choose the asteroid ID. Valid seeds redirect to `view.html` which loads `oni-view.wasm.gz` and decompresses it with [Pako](https://github.com/nodeca/pako).
+You can also provide the seed in the index page URL with `index.html?coord=<seed>` or `index.html#coord=<seed>` (just `#<seed>` works too) and it will forward you to the viewer automatically. You can still specify the seed coordinate directly in the viewer URL using `view.html?coord=<seed>` or `view.html#coord=<seed>`. Add `asteroid=<id>` to select a different asteroid when a seed contains multiple. When an asteroid ID is provided the viewer shows it next to the seed as `ast: <id>`. If the ID is not valid the viewer now displays a three line error showing the coordinates and asteroid ID and stating `This location does not contain Asteroid ID: <id>`.
 
 ## Desktop vs Web and Mobile
 
@@ -95,7 +95,7 @@ the environments are:
   the mouse and keyboard.
 * **WebAssembly** – No command line flags are available. The viewer reads the
   seed from the page URL using `?coord=` or `#coord=` parameters and an optional
-  `asteroid=` number.
+  `asteroid=` ID.
 * **Mobile** – When running on a mobile OS or in a mobile browser the toolbar
   icons are hidden. Item details appear when the crosshair is centered over a
   geyser or POI, or a POI is clicked, and you pan or zoom using touch gestures.
