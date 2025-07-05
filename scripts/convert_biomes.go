@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	files, err := filepath.Glob("biomes/*.png")
+	files, err := filepath.Glob("../biomes/*.png")
 	if err != nil {
 		log.Fatal(err)
 	}
