@@ -136,6 +136,12 @@ gofmt -w *.go
 go test -tags test ./...
 ```
 
+## Versioning
+
+Run `scripts/bump_version.sh` before committing. The script updates the
+`ClientVersion` constant in `const.go` to `v0.0.0-YYMMDDHHMM` using the
+current UTC time so builds display the correct version string.
+
 ## License
 
 The project is released under the MIT License. See [LICENSE](LICENSE) for full details.
