@@ -146,7 +146,7 @@ func loadBiomeTextures() map[string]*ebiten.Image {
 	atlas := image.NewNRGBA(bounds)
 	draw.Draw(atlas, bounds, src, bounds.Min, draw.Src)
 	w, h := atlas.Bounds().Dx(), atlas.Bounds().Dy()
-	cols, rows := 4, 6
+	cols, rows := 26, 1
 	tw, th := w/cols, h/rows
 	textures := make(map[string]*ebiten.Image)
 	for i, name := range biomeOrder {
