@@ -535,6 +535,47 @@ func (g *Game) maxItemScroll() float64 {
 	return max
 }
 
+func (g *Game) updateHover(mx, my int) {
+	prevBiome := g.hoverBiome
+	prevItem := g.hoverItem
+	g.hoverBiome = -1
+	g.hoverItem = -1
+	scale := g.uiScale()
+	if g.legend != nil && len(g.legendBiomes) > 0 {
+		w := int(float64(g.legend.Bounds().Dx()) * scale)
+		if mx >= 0 && mx < w {
+			baseY := int(float64(10+LegendRowSpacing)*scale) - int(g.biomeScroll)
+			rowH := int(float64(LegendRowSpacing) * scale)
+			for i := range g.legendBiomes {
+				ry := baseY + i*rowH
+				if my >= ry && my < ry+rowH {
+					g.hoverBiome = i
+					break
+				}
+			}
+		}
+	}
+	useNumbers := !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+	if useNumbers && g.legendImage != nil {
+		w := int(float64(g.legendImage.Bounds().Dx()) * scale)
+		x0 := g.width - w - 12
+		if mx >= x0 && mx < x0+w {
+			baseY := int(float64(10+LegendRowSpacing)*scale) - int(g.itemScroll)
+			rowH := int(float64(LegendRowSpacing) * scale)
+			for i := range g.legendEntries {
+				ry := baseY + i*rowH
+				if my >= ry && my < ry+rowH {
+					g.hoverItem = i
+					break
+				}
+			}
+		}
+	}
+	if g.hoverBiome != prevBiome || g.hoverItem != prevItem {
+		g.needsRedraw = true
+	}
+}
+
 // Game implements ebiten.Game and displays geysers with their names.
 type Game struct {
 	geysers           []Geyser
@@ -591,6 +632,7 @@ type Game struct {
 	touchStartX       int
 	touchStartY       int
 	touchMoved        bool
+	touchUI           bool
 	showShotMenu      bool
 	screenshotMode    bool
 	ssQuality         int
@@ -920,16 +962,89 @@ iconsLoop:
 		if last, ok := g.touches[id]; ok {
 			dx := x - last.x
 			dy := y - last.y
-			g.camX += float64(dx)
-			g.camY += float64(dy)
-			if abs(dx) > TouchDragThreshold || abs(dy) > TouchDragThreshold {
-				g.touchMoved = true
+			if g.touchUI {
+				if g.showGeyserList {
+					g.geyserScroll -= float64(dy)
+					if g.geyserScroll < 0 {
+						g.geyserScroll = 0
+					}
+					if max := g.maxGeyserScroll(); g.geyserScroll > max {
+						g.geyserScroll = max
+					}
+					g.needsRedraw = true
+				} else {
+					scale := g.uiScale()
+					if g.legend != nil {
+						lw := int(float64(g.legend.Bounds().Dx()) * scale)
+						if g.touchStartX >= 0 && g.touchStartX < lw {
+							g.biomeScroll -= float64(dy)
+							if g.biomeScroll < 0 {
+								g.biomeScroll = 0
+							}
+							if max := g.maxBiomeScroll(); g.biomeScroll > max {
+								g.biomeScroll = max
+							}
+							g.updateHover(x, y)
+						}
+					}
+					useNumbers := !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+					if useNumbers && g.legendImage != nil {
+						lw := int(float64(g.legendImage.Bounds().Dx()) * scale)
+						x0 := g.width - lw - 12
+						if g.touchStartX >= x0 && g.touchStartX < x0+lw {
+							g.itemScroll -= float64(dy)
+							if g.itemScroll < 0 {
+								g.itemScroll = 0
+							}
+							if max := g.maxItemScroll(); g.itemScroll > max {
+								g.itemScroll = max
+							}
+							g.updateHover(x, y)
+						}
+					}
+					g.needsRedraw = true
+				}
+			} else {
+				g.camX += float64(dx)
+				g.camY += float64(dy)
+				if abs(dx) > TouchDragThreshold || abs(dy) > TouchDragThreshold {
+					g.touchMoved = true
+				}
 			}
 		} else {
 			g.touchStartX = x
 			g.touchStartY = y
 			g.touchMoved = false
 			g.touchActive = true
+			g.touchUI = false
+			if g.showGeyserList || g.showShotMenu {
+				g.touchUI = true
+			} else {
+				pt := image.Rect(x, y, x+1, y+1)
+				if g.helpRect().Overlaps(pt) || g.screenshotRect().Overlaps(pt) ||
+					g.magnifyRect().Overlaps(pt) || g.geyserRect().Overlaps(pt) {
+					g.touchUI = true
+				} else {
+					scale := g.uiScale()
+					if g.legend != nil {
+						lw := int(float64(g.legend.Bounds().Dx()) * scale)
+						if x >= 0 && x < lw {
+							g.touchUI = true
+						}
+					}
+					useNumbers := !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+					if !g.touchUI && useNumbers && g.legendImage != nil {
+						lw := int(float64(g.legendImage.Bounds().Dx()) * scale)
+						x0 := g.width - lw - 12
+						if x >= x0 && x < x0+lw {
+							g.touchUI = true
+						}
+					}
+				}
+			}
+			if g.touchUI {
+				g.updateHover(x, y)
+			}
 		}
 		g.touches = map[ebiten.TouchID]touchPoint{id: {x: x, y: y}}
 		g.pinchDist = 0
@@ -965,27 +1080,71 @@ iconsLoop:
 		g.touchActive = false
 		g.touchMoved = false
 	default:
-		if g.mobile && g.touchActive && !g.touchMoved {
-			if _, ix, iy, _, found := g.itemAt(g.touchStartX, g.touchStartY); found {
-				g.camX += float64(g.width/2 - ix)
-				g.camY += float64(g.height/2 - iy)
-				g.clampCamera()
-
-				if max := g.maxBiomeScroll(); g.biomeScroll > max {
+		if g.touchActive && !g.touchMoved {
+			mx, my := g.touchStartX, g.touchStartY
+			pt := image.Rect(mx, my, mx+1, my+1)
+			if g.showGeyserList {
+				if g.geyserCloseRect().Overlaps(pt) {
+					g.showGeyserList = false
+					g.needsRedraw = true
+				}
+			} else if g.showShotMenu {
+				if !g.clickScreenshotMenu(mx, my) {
+					if !g.screenshotMenuRect().Overlaps(pt) && !g.screenshotRect().Overlaps(pt) {
+						g.showShotMenu = false
+						g.needsRedraw = true
+					}
+				}
+			} else if g.screenshotRect().Overlaps(pt) {
+				g.showShotMenu = true
+				g.needsRedraw = true
+			} else if g.magnifyRect().Overlaps(pt) {
+				g.magnify = !g.magnify
+				if max := g.maxBiomeScroll(); max == 0 {
+					g.biomeScroll = 0
+				} else if g.biomeScroll > max {
 					g.biomeScroll = max
 				}
-				if g.biomeScroll < 0 {
-					g.biomeScroll = 0
-				}
-				if max := g.maxItemScroll(); g.itemScroll > max {
+				if max := g.maxItemScroll(); max == 0 {
+					g.itemScroll = 0
+				} else if g.itemScroll > max {
 					g.itemScroll = max
 				}
-				if g.itemScroll < 0 {
-					g.itemScroll = 0
-				}
 				g.needsRedraw = true
+			} else if g.helpRect().Overlaps(pt) {
+				g.showHelp = !g.showHelp
+				g.needsRedraw = true
+			} else if g.geyserRect().Overlaps(pt) {
+				g.camX = oldX
+				g.camY = oldY
+				g.dragging = false
+				g.showGeyserList = true
+				g.needsRedraw = true
+			} else if g.touchUI {
+				g.updateHover(mx, my)
+			} else if g.mobile {
+				if _, ix, iy, _, found := g.itemAt(mx, my); found {
+					g.camX += float64(g.width/2 - ix)
+					g.camY += float64(g.height/2 - iy)
+					g.clampCamera()
+
+					if max := g.maxBiomeScroll(); g.biomeScroll > max {
+						g.biomeScroll = max
+					}
+					if g.biomeScroll < 0 {
+						g.biomeScroll = 0
+					}
+					if max := g.maxItemScroll(); g.itemScroll > max {
+						g.itemScroll = max
+					}
+					if g.itemScroll < 0 {
+						g.itemScroll = 0
+					}
+					g.needsRedraw = true
+				}
 			}
 		}
+		g.touchUI = false
 		g.touches = nil
 		g.pinchDist = 0
 		g.touchActive = false
@@ -1140,45 +1299,8 @@ iconsLoop:
 		}
 	}
 
-	if !g.mobile && !g.screenshotMode {
-		prevBiome := g.hoverBiome
-		prevItem := g.hoverItem
-		g.hoverBiome = -1
-		g.hoverItem = -1
-		scale := g.uiScale()
-		if g.legend != nil && len(g.legendBiomes) > 0 {
-			w := int(float64(g.legend.Bounds().Dx()) * scale)
-			if mx >= 0 && mx < w {
-				baseY := int(float64(10+LegendRowSpacing)*scale) - int(g.biomeScroll)
-				rowH := int(float64(LegendRowSpacing) * scale)
-				for i := range g.legendBiomes {
-					ry := baseY + i*rowH
-					if my >= ry && my < ry+rowH {
-						g.hoverBiome = i
-						break
-					}
-				}
-			}
-		}
-		useNumbers := !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
-		if useNumbers && g.legendImage != nil {
-			w := int(float64(g.legendImage.Bounds().Dx()) * scale)
-			x0 := g.width - w - 12
-			if mx >= x0 && mx < x0+w {
-				baseY := int(float64(10+LegendRowSpacing)*scale) - int(g.itemScroll)
-				rowH := int(float64(LegendRowSpacing) * scale)
-				for i := range g.legendEntries {
-					ry := baseY + i*rowH
-					if my >= ry && my < ry+rowH {
-						g.hoverItem = i
-						break
-					}
-				}
-			}
-		}
-		if g.hoverBiome != prevBiome || g.hoverItem != prevItem {
-			g.needsRedraw = true
-		}
+	if !g.mobile && !g.screenshotMode && !g.touchUsed {
+		g.updateHover(mx, my)
 	}
 
 	if g.dragging {
