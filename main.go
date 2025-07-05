@@ -537,69 +537,71 @@ func (g *Game) maxItemScroll() float64 {
 
 // Game implements ebiten.Game and displays geysers with their names.
 type Game struct {
-	geysers        []Geyser
-	pois           []PointOfInterest
-	biomes         []BiomePath
-	icons          map[string]*ebiten.Image
-	biomeTextures  map[string]*ebiten.Image
-	width          int
-	height         int
-	astWidth       int
-	astHeight      int
-	camX           float64
-	camY           float64
-	zoom           float64
-	minZoom        float64
-	dragging       bool
-	lastX          int
-	lastY          int
-	touches        map[ebiten.TouchID]touchPoint
-	pinchDist      float64
-	needsRedraw    bool
-	screenshotPath string
-	captured       bool
-	legend         *ebiten.Image
-	legendMap      map[string]int
-	legendEntries  []string
-	legendColors   []color.RGBA
-	legendImage    *ebiten.Image
-	legendBiomes   []string
-	hoverBiome     int
-	hoverItem      int
-	showGeyserList bool
-	geyserScroll   float64
-	biomeScroll    float64
-	itemScroll     float64
-	showHelp       bool
-	lastWheel      time.Time
-	loading        bool
-	status         string
-	iconResults    chan loadedIcon
-	coord          string
-	mobile         bool
-	showInfo       bool
-	infoPinned     bool
-	infoText       string
-	infoX          int
-	infoY          int
-	infoIcon       *ebiten.Image
-	lastMouseX     int
-	lastMouseY     int
-	mousePrev      bool
-	touchUsed      bool
-	touchActive    bool
-	touchStartX    int
-	touchStartY    int
-	touchMoved     bool
-	showShotMenu   bool
-	screenshotMode bool
-	ssQuality      int
-	ssSaved        time.Time
-	ssPending      int
-	skipClickTicks int
-	lastDraw       time.Time
-	wasMinimized   bool
-	magnify        bool
+	geysers           []Geyser
+	pois              []PointOfInterest
+	biomes            []BiomePath
+	icons             map[string]*ebiten.Image
+	biomeTextures     map[string]*ebiten.Image
+	width             int
+	height            int
+	astWidth          int
+	astHeight         int
+	camX              float64
+	camY              float64
+	zoom              float64
+	minZoom           float64
+	dragging          bool
+	lastX             int
+	lastY             int
+	touches           map[ebiten.TouchID]touchPoint
+	pinchDist         float64
+	needsRedraw       bool
+	screenshotPath    string
+	captured          bool
+	legend            *ebiten.Image
+	legendMap         map[string]int
+	legendEntries     []string
+	legendColors      []color.RGBA
+	legendImage       *ebiten.Image
+	legendBiomes      []string
+	hoverBiome        int
+	hoverItem         int
+	showGeyserList    bool
+	geyserScroll      float64
+	biomeScroll       float64
+	itemScroll        float64
+	showHelp          bool
+	lastWheel         time.Time
+	loading           bool
+	status            string
+	iconResults       chan loadedIcon
+	coord             string
+	mobile            bool
+	showInfo          bool
+	infoPinned        bool
+	infoText          string
+	infoX             int
+	infoY             int
+	infoIcon          *ebiten.Image
+	lastMouseX        int
+	lastMouseY        int
+	mousePrev         bool
+	touchUsed         bool
+	touchActive       bool
+	touchStartX       int
+	touchStartY       int
+	touchMoved        bool
+	showShotMenu      bool
+	screenshotMode    bool
+	ssQuality         int
+	ssSaved           time.Time
+	ssPending         int
+	skipClickTicks    int
+	lastDraw          time.Time
+	wasMinimized      bool
+	magnify           bool
+	asteroidID        int
+	asteroidSpecified bool
 }
 
 type label struct {
@@ -1435,9 +1437,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 
 		if g.coord != "" && !g.screenshotMode {
+			label := g.coord
+			if g.asteroidSpecified {
+				label += fmt.Sprintf("  ast: %d", g.asteroidID)
+			}
 			scale := g.uiScale()
-			x := g.width/2 - int(float64(len(g.coord)*LabelCharWidth)*scale/2)
-			drawTextWithBGScale(screen, g.coord, x, 10, scale)
+			x := g.width/2 - int(float64(len(label)*LabelCharWidth)*scale/2)
+			drawTextWithBGScale(screen, label, x, 10, scale)
 		}
 
 		if g.legend == nil {
@@ -1720,29 +1726,33 @@ func main() {
 	screenshot := flag.String("screenshot", "", "path to save a PNG screenshot and exit")
 	flag.Parse()
 	asteroidIdx := 0
+	asteroidSpecified := false
 	if runtime.GOARCH == "wasm" {
 		if c := coordFromURL(); c != "" {
 			*coord = c
 		}
 		if a := asteroidFromURL(); a >= 0 {
 			asteroidIdx = a
+			asteroidSpecified = true
 		}
 	}
 
 	game := &Game{
-		icons:      make(map[string]*ebiten.Image),
-		width:      DefaultWidth,
-		height:     DefaultHeight,
-		zoom:       1.0,
-		minZoom:    MinZoom,
-		loading:    true,
-		status:     "Fetching...",
-		coord:      *coord,
-		mobile:     isMobile(),
-		ssQuality:  1,
-		hoverBiome: -1,
-		hoverItem:  -1,
-		mousePrev:  false,
+		icons:             make(map[string]*ebiten.Image),
+		width:             DefaultWidth,
+		height:            DefaultHeight,
+		zoom:              1.0,
+		minZoom:           MinZoom,
+		loading:           true,
+		status:            "Fetching...",
+		coord:             *coord,
+		asteroidID:        asteroidIdx,
+		asteroidSpecified: asteroidSpecified,
+		mobile:            isMobile(),
+		ssQuality:         1,
+		hoverBiome:        -1,
+		hoverItem:         -1,
+		mousePrev:         false,
 	}
 	go func(idx int) {
 		fmt.Println("Fetching:", *coord)
