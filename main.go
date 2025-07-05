@@ -740,7 +740,6 @@ type Game struct {
 
 	textures      bool
 	vsync         bool
-	touchControls bool
 	showItemNames bool
 	showLegend    bool
 	useNumbers    bool
@@ -2029,9 +2028,8 @@ func main() {
 		asteroidID:        asteroidIDVal,
 		asteroidSpecified: asteroidSpecified,
 		mobile:            isMobile(),
-		textures:          true,
+		textures:          !isMobile(),
 		vsync:             true,
-		touchControls:     isMobile(),
 		showItemNames:     true,
 		showLegend:        true,
 		useNumbers:        true,
