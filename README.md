@@ -141,9 +141,10 @@ go test -tags test ./...
 
 ## Versioning
 
-Run `scripts/bump_version.sh` before committing. The script updates the
-`ClientVersion` constant in `const.go` to `v0.0.0-YYMMDDHHMM` using the
-current UTC time so builds display the correct version string.
+Run `scripts/bump_version.sh` before committing. The script only updates the
+timestamp portion of the `ClientVersion` constant in `const.go` and leaves the
+`MAJOR.MINOR.PATCH` numbers unchanged. Update those numbers manually when
+appropriate and never decrease them so version history moves forward.
 
 ## License
 
