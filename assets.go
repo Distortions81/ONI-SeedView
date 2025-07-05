@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
-	"image/jpeg"
 	"image/png"
 	"io"
 	"path"
@@ -19,7 +18,7 @@ import (
 
 // embed all image assets so no runtime fetching is needed
 //
-//go:embed assets/*.png icons/*.png biomes/*.jpg
+//go:embed assets/*.png icons/*.png biomes/*.png
 var assetFS embed.FS
 
 func openAsset(name string) (io.ReadCloser, error) {
@@ -87,8 +86,6 @@ func loadImageFile(name string) (*ebiten.Image, error) {
 	switch ext {
 	case ".png":
 		src, err = png.Decode(f)
-	case ".jpg", ".jpeg":
-		src, err = jpeg.Decode(f)
 	default:
 		return nil, fmt.Errorf("unsupported image format: %s", ext)
 	}
@@ -133,7 +130,7 @@ func loadImage(cache map[string]*ebiten.Image, name string) (*ebiten.Image, erro
 func loadBiomeTextures() map[string]*ebiten.Image {
 	textures := make(map[string]*ebiten.Image)
 	for _, name := range biomeOrder {
-		img, err := loadImageFile("../biomes/" + name + ".jpg")
+		img, err := loadImageFile("../biomes/" + name + ".png")
 		if err != nil {
 			fmt.Println("load biome", name, ":", err)
 			continue
