@@ -83,7 +83,7 @@ Run the build script to compile the program and copy the necessary runtime files
 ```
 
 Open `dist/index.html` in a browser to enter a seed. The page has a dark themed form with Material icons and now includes an optional field to choose the asteroid index. Valid seeds redirect to `view.html` which loads `oni-view.wasm.gz` and decompresses it with [Pako](https://github.com/nodeca/pako).
-You can also provide the seed in the index page URL with `index.html?coord=<seed>` or `index.html#coord=<seed>` (just `#<seed>` works too) and it will forward you to the viewer automatically. You can still specify the seed coordinate directly in the viewer URL using `view.html?coord=<seed>` or `view.html#coord=<seed>`. Add `asteroid=<num>` to select a different asteroid when a seed contains multiple. When an asteroid index is provided the viewer shows it next to the seed as `ast: <num>`. If the number is not valid the viewer simply displays "invalid asteroid ID" instead of loading the map.
+You can also provide the seed in the index page URL with `index.html?coord=<seed>` or `index.html#coord=<seed>` (just `#<seed>` works too) and it will forward you to the viewer automatically. You can still specify the seed coordinate directly in the viewer URL using `view.html?coord=<seed>` or `view.html#coord=<seed>`. Add `asteroid=<num>` to select a different asteroid when a seed contains multiple. When an asteroid index is provided the viewer shows it next to the seed as `ast: <num>`. If the number is not valid the viewer now displays a three line error showing the coordinates and asteroid ID and stating `This location does not contain Asteroid ID: <num>`.
 
 ## Desktop vs Web and Mobile
 
