@@ -37,7 +37,13 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
 ## Getting Started
 
 1. **Install Go** – Go 1.24 or newer is required to build the program.
-2. **Download the image assets** – Icons used by the viewer are stored in the [`oni-seed-browser`](https://github.com/MapsNotIncluded/oni-seed-browser) repository. Run the helper script to clone the repo and copy the assets:
+2. **Install system packages** – Building with Ebiten needs X11 and OpenGL headers. For cross-compiling Windows binaries `mingw-w64` is also required:
+
+   ```bash
+   sudo apt-get install xorg-dev libgl1-mesa-dev mingw-w64
+   ```
+
+3. **Download the image assets** – Icons used by the viewer are stored in the [`oni-seed-browser`](https://github.com/MapsNotIncluded/oni-seed-browser) repository. Run the helper script to clone the repo and copy the assets:
 
    ```bash
    ./scripts/download_assets.sh
@@ -45,7 +51,7 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
 
    The script converts `.webp` icons to `.png` using `dwebp`. After it completes the PNG files will be placed in the `assets/` directory. Install the `webp` package if needed.
 
-3. **Build and run** – Execute the program with a seed coordinate. The window defaults to 1280×720 but can be resized.
+4. **Build and run** – Execute the program with a seed coordinate. The window defaults to 1280×720 but can be resized.
 
    ```bash
    go run . -coord SNDST-A-7-0-0-0
