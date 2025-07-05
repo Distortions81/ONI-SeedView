@@ -166,7 +166,7 @@ func loadBiomeTextures() map[string]*ebiten.Image {
 		}
 		col := i % cols
 		row := i / cols
-		r := image.Rect(col*tw, row*th, (col+1)*tw, (row+1)*th)
+		r := image.Rect(col*tw+1, row*th+1, (col+1)*tw-1, (row+1)*th-1)
 		sub := atlas.SubImage(r).(*image.NRGBA)
 		textures[name] = ebiten.NewImageFromImage(sub)
 	}
