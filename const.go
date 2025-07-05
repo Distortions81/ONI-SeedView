@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	ClientVersion    = "v0.0.0-2507052225"
+	ClientVersion    = "v0.0.0-2507052233"
 	BaseURL          = "https://ingest.mapsnotincluded.org/coordinate/"
 	AcceptCBORHeader = "application/cbor"
 	PanSpeed         = 15
@@ -97,9 +97,9 @@ var biomeOrder = []string{
 }
 
 var (
-	buttonActiveColor   = color.RGBA{0, 60, 60, 255}
-	buttonInactiveColor = color.RGBA{0, 40, 40, 255}
-	buttonBorderColor   = color.RGBA{0, 255, 255, 255}
-	frameColor          = color.RGBA{0, 30, 30, 200}
+	buttonActiveColor   = color.RGBA{0, 200, 0, 255}
+	buttonInactiveColor = color.RGBA{40, 40, 40, 255}
+	buttonBorderColor   = color.RGBA{255, 255, 255, 255}
+	frameColor          = color.RGBA{0, 0, 0, 255}
 	bottomTrayColor     = color.RGBA{0, 0, 0, 180}
 )
