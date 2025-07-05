@@ -16,9 +16,7 @@ func coordFromURL() string {
 		return ""
 	}
 	search := loc.Get("search").String()
-	if strings.HasPrefix(search, "?") {
-		search = search[1:]
-	}
+	search = strings.TrimPrefix(search, "?")
 	for _, part := range strings.Split(search, "&") {
 		if strings.HasPrefix(part, "coord=") {
 			return strings.TrimPrefix(part, "coord=")
@@ -28,9 +26,7 @@ func coordFromURL() string {
 		}
 	}
 	hash := loc.Get("hash").String()
-	if strings.HasPrefix(hash, "#") {
-		hash = hash[1:]
-	}
+	hash = strings.TrimPrefix(hash, "#")
 	if strings.HasPrefix(hash, "coord=") {
 		return strings.TrimPrefix(hash, "coord=")
 	}

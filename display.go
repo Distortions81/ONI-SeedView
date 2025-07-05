@@ -149,14 +149,6 @@ func displayPOI(id string) string {
 	return id
 }
 
-func fullGeyserName(id string) string {
-	return displayGeyser(id)
-}
-
-func fullPOIName(id string) string {
-	return displayPOI(id)
-}
-
 // formatLabel splits long names so they wrap every two words.
 // It returns the formatted text and the length of the longest line.
 func formatLabel(name string) (string, int) {
@@ -191,9 +183,7 @@ func formatLabel(name string) (string, int) {
 
 func formatNum(n float64) string {
 	s := fmt.Sprintf("%.2f", n)
-	if strings.HasSuffix(s, ".00") {
-		s = strings.TrimSuffix(s, ".00")
-	}
+	s = strings.TrimSuffix(s, ".00")
 	return s
 }
 

@@ -72,8 +72,6 @@ func resolveAssetName(name string) string {
 	return name
 }
 
-var missingImage = ebiten.NewImage(1, 1)
-
 func loadImageFile(name string) (*ebiten.Image, error) {
 	resolved := resolveAssetName(name)
 	f, err := openAsset(resolved)
@@ -109,22 +107,6 @@ func loadImageFile(name string) (*ebiten.Image, error) {
 		}
 	}
 	return ebiten.NewImageFromImage(dst), nil
-}
-
-func loadImage(cache map[string]*ebiten.Image, name string) (*ebiten.Image, error) {
-	if img, ok := cache[name]; ok {
-		if img == missingImage {
-			return nil, fmt.Errorf("missing")
-		}
-		return img, nil
-	}
-	img, err := loadImageFile(name)
-	if err != nil {
-		cache[name] = missingImage
-		return nil, err
-	}
-	cache[name] = img
-	return img, nil
 }
 
 func loadBiomeTextures() map[string]*ebiten.Image {

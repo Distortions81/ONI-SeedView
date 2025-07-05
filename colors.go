@@ -9,15 +9,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-func colorFromARGB(hex uint32) color.RGBA {
-	return color.RGBA{
-		R: uint8(hex >> 16),
-		G: uint8(hex >> 8),
-		B: uint8(hex),
-		A: uint8(hex >> 24),
-	}
-}
-
 func darkenColor(c color.RGBA, factor float64) color.RGBA {
 	return color.RGBA{
 		R: uint8(float64(c.R) * factor),
@@ -53,7 +44,7 @@ var biomeColors = map[string]color.RGBA{
 }
 
 func init() {
-	for c, _ := range biomeColors {
+	for c := range biomeColors {
 		biomeColors[c] = darkenColor(biomeColors[c], 0.8)
 	}
 }
