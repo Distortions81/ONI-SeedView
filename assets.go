@@ -142,10 +142,32 @@ func loadImage(cache map[string]*ebiten.Image, name string) (*ebiten.Image, erro
 }
 
 func loadBiomeTextures() map[string]*ebiten.Image {
-	atlas, err := loadImageFile("../icons/textures.png")
+	f, err := openAsset("../icons/textures.png")
 	if err != nil {
 		fmt.Println("load atlas:", err)
 		return nil
+	}
+	defer f.Close()
+	src, err := png.Decode(f)
+	if err != nil {
+		fmt.Println("decode atlas:", err)
+		return nil
+	}
+	bounds := src.Bounds()
+	atlas := image.NewNRGBA(bounds)
+	draw.Draw(atlas, bounds, src, bounds.Min, draw.Src)
+	for i := 0; i < len(atlas.Pix); i += 4 {
+		r := atlas.Pix[i]
+		g := atlas.Pix[i+1]
+		b := atlas.Pix[i+2]
+		a := atlas.Pix[i+3]
+		lum := uint8((299*int(r) + 587*int(g) + 114*int(b)) / 1000)
+		atlas.Pix[i] = lum
+		atlas.Pix[i+1] = lum
+		atlas.Pix[i+2] = lum
+		if a < 64 {
+			atlas.Pix[i+3] = 0
+		}
 	}
 	w, h := atlas.Bounds().Dx(), atlas.Bounds().Dy()
 	cols, rows := 4, 6
@@ -158,8 +180,8 @@ func loadBiomeTextures() map[string]*ebiten.Image {
 		col := i % cols
 		row := i / cols
 		r := image.Rect(col*tw, row*th, (col+1)*tw, (row+1)*th)
-		sub := atlas.SubImage(r).(*ebiten.Image)
-		textures[name] = sub
+		sub := atlas.SubImage(r).(*image.NRGBA)
+		textures[name] = ebiten.NewImageFromImage(sub)
 	}
 	return textures
 }
