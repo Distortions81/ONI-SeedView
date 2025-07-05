@@ -16,14 +16,14 @@ import (
 
 func (g *Game) screenshotRect() image.Rectangle {
 	size := g.iconSize()
-	x := g.width - size*3 - HelpMargin*3
+	x := g.width - size*4 - HelpMargin*4
 	y := g.height - size - HelpMargin
 	return image.Rect(x, y, x+size, y+size)
 }
 
 func (g *Game) screenshotMenuRect() image.Rectangle {
 	labels := append([]string{ScreenshotMenuTitle}, ScreenshotQualities...)
-	labels = append(labels, ScreenshotSaveLabel)
+	labels = append(labels, ScreenshotBWLabel, ScreenshotSaveLabel)
 	maxW := 0
 	for _, s := range labels {
 		if len(s) > maxW {
@@ -31,7 +31,7 @@ func (g *Game) screenshotMenuRect() image.Rectangle {
 		}
 	}
 	w := maxW*LabelCharWidth + 4
-	h := (len(labels)+1)*ScreenshotMenuSpacing + 4
+	h := (len(labels)+2)*ScreenshotMenuSpacing + 4
 	x := g.screenshotRect().Min.X - w - 10
 	if x < 0 {
 		x = 0
@@ -54,19 +54,27 @@ func (g *Game) drawScreenshotMenu(dst *ebiten.Image) {
 	} else if time.Since(g.ssSaved) < 2*time.Second {
 		label = ScreenshotSavedLabel
 	}
-	items := append(append([]string(nil), ScreenshotQualities...), label)
+	items := append([]string(nil), ScreenshotQualities...)
+	items = append(items, ScreenshotBWLabel, label)
 	y := rect.Min.Y + 6 + ScreenshotMenuSpacing
 	for i, it := range items {
 		btn := image.Rect(rect.Min.X+4, y-4, rect.Max.X-4, y-4+22)
 		selected := i == g.ssQuality
-		if i == len(ScreenshotQualities) && g.ssPending > 0 {
-			drawButton(dst, btn, true)
-		} else {
+		switch i {
+		case len(ScreenshotQualities):
+			drawButton(dst, btn, g.noColor)
+		case len(ScreenshotQualities) + 1:
+			if g.ssPending > 0 {
+				drawButton(dst, btn, true)
+			} else {
+				drawButton(dst, btn, false)
+			}
+		default:
 			drawButton(dst, btn, selected)
 		}
 		ebitenutil.DebugPrintAt(dst, it, btn.Min.X+6, btn.Min.Y+4)
 		y += ScreenshotMenuSpacing
-		if i == len(ScreenshotQualities)-1 {
+		if i == len(ScreenshotQualities)-1 || i == len(ScreenshotQualities) {
 			y += ScreenshotMenuSpacing
 		}
 	}
@@ -77,7 +85,8 @@ func (g *Game) clickScreenshotMenu(mx, my int) bool {
 	if !rect.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		return false
 	}
-	items := append(append([]string(nil), ScreenshotQualities...), ScreenshotSaveLabel)
+	items := append([]string(nil), ScreenshotQualities...)
+	items = append(items, ScreenshotBWLabel, ScreenshotSaveLabel)
 	y := rect.Min.Y + 6 + ScreenshotMenuSpacing
 	for i := range items {
 		r := image.Rect(rect.Min.X+4, y-4, rect.Max.X-4, y-4+22)
@@ -86,6 +95,8 @@ func (g *Game) clickScreenshotMenu(mx, my int) bool {
 			case 0, 1, 2:
 				g.ssQuality = i
 			case len(ScreenshotQualities):
+				g.noColor = !g.noColor
+			case len(ScreenshotQualities) + 1:
 				if g.ssPending == 0 {
 					g.ssPending = 2
 				}
@@ -94,7 +105,7 @@ func (g *Game) clickScreenshotMenu(mx, my int) bool {
 			return true
 		}
 		y += ScreenshotMenuSpacing
-		if i == len(ScreenshotQualities)-1 {
+		if i == len(ScreenshotQualities)-1 || i == len(ScreenshotQualities) {
 			y += ScreenshotMenuSpacing
 		}
 	}
