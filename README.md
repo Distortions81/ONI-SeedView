@@ -25,6 +25,7 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
   useful for lining up precise screenshots.
 * A water-drop icon opens a scrollable list of all geysers
   present on the map.
+* Biome and item legend panels scroll when they extend past the window height.
 * Icons load asynchronously so the map is usable immediately.
 * The screen refreshes automatically when the window is restored
   and once a second to prevent blank displays.
