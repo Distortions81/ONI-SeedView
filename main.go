@@ -1164,7 +1164,19 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 	if g.needsRedraw {
 		screen.Fill(color.RGBA{30, 30, 30, 255})
-		if clr, ok := biomeColors["Space"]; ok {
+		if tex := g.biomeTextures["Space"]; tex != nil {
+			clr := color.RGBA{255, 255, 255, 255}
+			if c, ok := biomeColors["Space"]; ok {
+				clr = c
+			}
+			rect := [][]Point{{
+				{0, 0},
+				{g.astWidth, 0},
+				{g.astWidth, g.astHeight},
+				{0, g.astHeight},
+			}}
+			drawBiomeTextured(screen, rect, tex, clr, g.camX, g.camY, g.zoom)
+		} else if clr, ok := biomeColors["Space"]; ok {
 			vector.DrawFilledRect(screen, float32(g.camX), float32(g.camY),
 				float32(float64(g.astWidth)*2*g.zoom),
 				float32(float64(g.astHeight)*2*g.zoom), clr, false)
