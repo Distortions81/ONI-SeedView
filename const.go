@@ -47,6 +47,7 @@ const (
 	ScreenshotSaveLabel   = "Save Screenshot"
 	ScreenshotTakingLabel = "Taking Screenshot..."
 	ScreenshotSavedLabel  = "Saved!"
+	ScreenshotBWLabel     = "Black and White"
 	GeyserRowSpacing      = 60
 	OptionsMenuSpacing    = 26
 	OptionsMenuTitle      = "Options:"

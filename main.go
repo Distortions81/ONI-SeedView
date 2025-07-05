@@ -43,6 +43,24 @@ const (
 
 var errorBorderColor = color.RGBA{R: 244, G: 67, B: 54, A: 255}
 
+var grayColorM = func() ebiten.ColorM {
+	var m ebiten.ColorM
+	const r = 0.299
+	const g = 0.587
+	const b = 0.114
+	m.SetElement(0, 0, r)
+	m.SetElement(0, 1, g)
+	m.SetElement(0, 2, b)
+	m.SetElement(1, 0, r)
+	m.SetElement(1, 1, g)
+	m.SetElement(1, 2, b)
+	m.SetElement(2, 0, r)
+	m.SetElement(2, 1, g)
+	m.SetElement(2, 2, b)
+	m.SetElement(3, 3, 1)
+	return m
+}()
+
 func drawTextWithBG(dst *ebiten.Image, text string, x, y int) {
 	lines := strings.Split(text, "\n")
 	width := 0
@@ -856,6 +874,9 @@ type Game struct {
 	halfRes       bool
 	autoLowRes    bool
 	lowFPSStart   time.Time
+
+	noColor   bool
+	grayImage *ebiten.Image
 }
 
 type label struct {
@@ -953,7 +974,7 @@ func (g *Game) helpRect() image.Rectangle {
 
 func (g *Game) geyserRect() image.Rectangle {
 	size := g.iconSize()
-	x := g.width - size*4 - HelpMargin*4
+	x := g.width - size*5 - HelpMargin*5
 	y := g.height - size - HelpMargin
 	return image.Rect(x, y, x+size, y+size)
 }
@@ -2020,6 +2041,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				switch g.hoverIcon {
 				case hoverScreenshot:
 					g.drawTooltip(screen, "Screenshot", sr, scale)
+				case hoverPrint:
+					g.drawTooltip(screen, "Print", pr, scale)
 				case hoverMagnify:
 					lbl := "Enlarge UI"
 					if g.magnify {
@@ -2187,6 +2210,17 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		g.needsRedraw = false
 		g.lastDraw = time.Now()
+		if g.noColor {
+			if g.grayImage == nil || g.grayImage.Bounds().Dx() != g.width || g.grayImage.Bounds().Dy() != g.height {
+				g.grayImage = ebiten.NewImage(g.width, g.height)
+			}
+			g.grayImage.Clear()
+			g.grayImage.DrawImage(screen, nil)
+			screen.Clear()
+			op := &ebiten.DrawImageOptions{}
+			op.ColorM = grayColorM
+			screen.DrawImage(g.grayImage, op)
+		}
 	}
 	if g.screenshotPath != "" && !g.captured {
 		b := screen.Bounds()
