@@ -30,6 +30,17 @@ const helpMessage = "Controls:\n" +
 	"Mouse wheel or +/- to zoom\n" +
 	"Pinch to zoom on touch"
 
+type hoverIcon int
+
+const (
+	hoverNone hoverIcon = iota
+	hoverOptions
+	hoverGeysers
+	hoverScreenshot
+	hoverHelp
+	hoverMagnify
+)
+
 var errorBorderColor = color.RGBA{R: 244, G: 67, B: 54, A: 255}
 
 func drawTextWithBG(dst *ebiten.Image, text string, x, y int) {
@@ -668,6 +679,33 @@ func (g *Game) updateHover(mx, my int) {
 	}
 }
 
+func (g *Game) updateIconHover(mx, my int) {
+	prev := g.hoverIcon
+	g.hoverIcon = hoverNone
+	if mx == -1 || my == -1 {
+		if prev != g.hoverIcon {
+			g.needsRedraw = true
+		}
+		return
+	}
+	pt := image.Rect(mx, my, mx+1, my+1)
+	switch {
+	case g.optionsRect().Overlaps(pt):
+		g.hoverIcon = hoverOptions
+	case g.geyserRect().Overlaps(pt):
+		g.hoverIcon = hoverGeysers
+	case g.screenshotRect().Overlaps(pt):
+		g.hoverIcon = hoverScreenshot
+	case g.helpRect().Overlaps(pt):
+		g.hoverIcon = hoverHelp
+	case g.magnifyRect().Overlaps(pt):
+		g.hoverIcon = hoverMagnify
+	}
+	if prev != g.hoverIcon {
+		g.needsRedraw = true
+	}
+}
+
 // Game implements ebiten.Game and displays geysers with their names.
 type Game struct {
 	geysers           []Geyser
@@ -718,6 +756,7 @@ type Game struct {
 	infoIcon          *ebiten.Image
 	lastMouseX        int
 	lastMouseY        int
+	hoverIcon         hoverIcon
 	touchUsed         bool
 	touchActive       bool
 	touchStartX       int
@@ -800,6 +839,13 @@ func drawPlusMinus(dst *ebiten.Image, rect image.Rectangle, minus bool) {
 	if !minus {
 		vector.StrokeLine(dst, cx, cy-length/2, cx, cy+length/2, thickness, color.RGBA{255, 255, 255, 255}, true)
 	}
+}
+
+func drawTooltip(dst *ebiten.Image, text string, rect image.Rectangle, scale float64) {
+	w, h := textDimensions(text)
+	x := rect.Min.X + rect.Dx()/2 - int(float64(w)*scale/2)
+	y := rect.Min.Y - int(float64(h)*scale) - 4
+	drawTextWithBGScale(dst, text, x, y, scale)
 }
 
 func (g *Game) magnifyRect() image.Rectangle {
@@ -1463,6 +1509,10 @@ iconsLoop:
 
 	if !g.mobile && !g.screenshotMode && !g.touchUsed {
 		g.updateHover(mx, my)
+		g.updateIconHover(mx, my)
+	} else if g.hoverIcon != hoverNone {
+		g.hoverIcon = hoverNone
+		g.needsRedraw = true
 	}
 
 	if g.dragging {
@@ -1859,6 +1909,26 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				h := float64(icon.Bounds().Dy()) * sc
 				op.GeoM.Translate(float64(gr.Min.X)+(float64(size)-w)/2, float64(gr.Min.Y)+(float64(size)-h)/2)
 				screen.DrawImage(icon, op)
+			}
+
+			if g.hoverIcon != hoverNone {
+				scale := g.uiScale()
+				switch g.hoverIcon {
+				case hoverScreenshot:
+					drawTooltip(screen, "Screenshot", sr, scale)
+				case hoverMagnify:
+					lbl := "Enlarge UI"
+					if g.magnify {
+						lbl = "Shrink UI"
+					}
+					drawTooltip(screen, lbl, mr, scale)
+				case hoverHelp:
+					drawTooltip(screen, "Help", hr, scale)
+				case hoverOptions:
+					drawTooltip(screen, "Options", or, scale)
+				case hoverGeysers:
+					drawTooltip(screen, "Geyser List", gr, scale)
+				}
 			}
 		}
 
