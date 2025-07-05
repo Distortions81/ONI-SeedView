@@ -2,66 +2,108 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Oni View Web</title>
+  <title>Oni Seed Viewer</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <style>
-    #loading {
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      left: 0;
+    body {
+      margin: 0;
+      height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-direction: column;
-      font-family: sans-serif;
+      background: #121212;
+      color: #eee;
+      font-family: Roboto, sans-serif;
     }
 
-    .spinner {
-      width: 48px;
-      height: 48px;
-      border: 6px solid #ccc;
-      border-top-color: #333;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 8px;
+    .card {
+      text-align: center;
+      background: #1e1e1e;
+      padding: 2em;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     }
 
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
+    label {
+      display: block;
+      margin-bottom: 0.5em;
+      font-size: 1.2em;
+    }
+
+    input[type="text"] {
+      width: 16em;
+      padding: 0.5em;
+      border: none;
+      border-radius: 4px;
+      background: #222;
+      color: #fff;
+    }
+
+    input[type="text"]:focus {
+      outline: 2px solid #2196f3;
+    }
+
+    button {
+      margin-top: 1em;
+      padding: 0.5em 1em;
+      border: none;
+      border-radius: 4px;
+      background: #2196f3;
+      color: #fff;
+      font-size: 1em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25em;
+    }
+
+    button:hover {
+      background: #42a5f5;
+    }
+
+    button .material-icons {
+      font-size: 1.2em;
+    }
+
+    #message {
+      margin-top: 1em;
+      color: #f44336;
+      height: 1.2em;
     }
   </style>
-  <script src="wasm_exec.js"></script>
-  <script src="https://unpkg.com/pako@2.1.0/dist/pako.min.js"></script>
-  <script>
-    if (!WebAssembly.instantiateStreaming) {
-      WebAssembly.instantiateStreaming = async (resp, importObject) => {
-        const source = await (await resp).arrayBuffer();
-        return await WebAssembly.instantiate(source, importObject);
-      };
-    }
-    const go = new Go();
-    fetch("oni-view.wasm.gz")
-      .then((resp) => resp.arrayBuffer())
-      .then((buf) => {
-        const decompressed = pako.ungzip(new Uint8Array(buf)).buffer;
-        return WebAssembly.instantiate(decompressed, go.importObject);
-      })
-      .then((result) => {
-        document.getElementById("loading").remove();
-        go.run(result.instance);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-  </script>
 </head>
 <body>
-  <div id="loading">
-    <div class="spinner"></div>
-    <div>Loading...</div>
+  <div class="card">
+    <form id="seedForm">
+      <label for="seedInput">Enter Seed</label>
+      <input id="seedInput" type="text" required />
+      <button type="submit"><span class="material-icons">search</span>View</button>
+    </form>
+    <div id="message"></div>
   </div>
+  <script>
+  const baseURL = "https://ingest.mapsnotincluded.org/coordinate/";
+  document.getElementById('seedForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const seed = document.getElementById('seedInput').value.trim();
+    if (!seed) return;
+    document.getElementById('message').textContent = 'Checking…';
+    try {
+      const resp = await fetch(baseURL + encodeURIComponent(seed));
+      if (resp.ok) {
+        if (resp.body && typeof resp.body.cancel === 'function') {
+          resp.body.cancel();
+        }
+        window.location.href = 'view.html?coord=' + encodeURIComponent(seed);
+      } else if (resp.status === 404) {
+        document.getElementById('message').textContent = 'Seed not found';
+      } else {
+        document.getElementById('message').textContent = 'Error: ' + resp.status;
+      }
+    } catch (err) {
+      document.getElementById('message').textContent = 'Request failed';
+    }
+  });
+  </script>
 </body>
 </html>
