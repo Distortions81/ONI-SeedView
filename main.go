@@ -1118,6 +1118,16 @@ iconsLoop:
 			g.needsRedraw = true
 		} else if justPressed && g.magnifyRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.magnify = !g.magnify
+			if max := g.maxBiomeScroll(); max == 0 {
+				g.biomeScroll = 0
+			} else if g.biomeScroll > max {
+				g.biomeScroll = max
+			}
+			if max := g.maxItemScroll(); max == 0 {
+				g.itemScroll = 0
+			} else if g.itemScroll > max {
+				g.itemScroll = max
+			}
 			g.needsRedraw = true
 		} else if justPressed && g.geyserRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.camX = oldX
