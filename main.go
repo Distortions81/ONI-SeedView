@@ -1719,9 +1719,13 @@ func main() {
 	out := flag.String("out", "", "optional path to save JSON")
 	screenshot := flag.String("screenshot", "", "path to save a PNG screenshot and exit")
 	flag.Parse()
+	asteroidIdx := 0
 	if runtime.GOARCH == "wasm" {
 		if c := coordFromURL(); c != "" {
 			*coord = c
+		}
+		if a := asteroidFromURL(); a >= 0 {
+			asteroidIdx = a
 		}
 	}
 
@@ -1740,7 +1744,7 @@ func main() {
 		hoverItem:  -1,
 		mousePrev:  false,
 	}
-	go func() {
+	go func(idx int) {
 		fmt.Println("Fetching:", *coord)
 		cborData, err := fetchSeedCBOR(*coord)
 		if err != nil {
@@ -1760,7 +1764,11 @@ func main() {
 			jsonData, _ := json.MarshalIndent(seed, "", "  ")
 			_ = saveToFile(*out, jsonData)
 		}
-		ast := seed.Asteroids[0]
+		astIdxSel := 0
+		if idx >= 0 && idx < len(seed.Asteroids) {
+			astIdxSel = idx
+		}
+		ast := seed.Asteroids[astIdxSel]
 		bps := parseBiomePaths(ast.BiomePaths)
 		game.geysers = ast.Geysers
 		game.pois = ast.POIs

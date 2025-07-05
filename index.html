@@ -115,9 +115,22 @@
     return '';
   }
 
+  function asteroidFromURL() {
+    const search = window.location.search.slice(1);
+    for (const part of search.split('&')) {
+      if (part.startsWith('asteroid=')) return decodeURIComponent(part.slice(9));
+    }
+    const hash = window.location.hash.slice(1);
+    if (hash.startsWith('asteroid=')) return decodeURIComponent(hash.slice(9));
+    return '';
+  }
+
   const urlSeed = seedFromURL();
+  const urlAsteroid = asteroidFromURL();
   if (urlSeed) {
-    window.location.href = 'view.html?coord=' + encodeURIComponent(urlSeed);
+    let dest = 'view.html?coord=' + encodeURIComponent(urlSeed);
+    if (urlAsteroid) dest += '&asteroid=' + encodeURIComponent(urlAsteroid);
+    window.location.href = dest;
   }
 
   document.getElementById('seedForm').addEventListener('submit', async (e) => {
