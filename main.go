@@ -484,10 +484,7 @@ func (g *Game) drawGeyserList(dst *ebiten.Image) {
 	vector.DrawFilledRect(dst, 0, 0, float32(g.width), float32(g.height), color.RGBA{0, 0, 0, 255}, false)
 	scale := g.uiScale()
 	cr := g.geyserCloseRect()
-	vector.DrawFilledRect(dst, float32(cr.Min.X), float32(cr.Min.Y), float32(cr.Dx()), float32(cr.Dy()), color.RGBA{0, 0, 0, 200}, false)
-	vector.StrokeRect(dst, float32(cr.Min.X)+0.5, float32(cr.Min.Y)+0.5, float32(cr.Dx())-1, float32(cr.Dy())-1, 2, color.RGBA{255, 255, 255, 255}, false)
-	vector.StrokeLine(dst, float32(cr.Min.X+4), float32(cr.Min.Y+4), float32(cr.Max.X-4), float32(cr.Max.Y-4), 2, color.RGBA{255, 255, 255, 255}, false)
-	vector.StrokeLine(dst, float32(cr.Min.X+4), float32(cr.Max.Y-4), float32(cr.Max.X-4), float32(cr.Min.Y+4), 2, color.RGBA{255, 255, 255, 255}, false)
+	drawCloseButton(dst, cr)
 
 	spacing := int(10 * scale)
 	type item struct {

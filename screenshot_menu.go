@@ -6,12 +6,11 @@ import (
 	"bytes"
 	"fmt"
 	"image"
-	"image/color"
 	"image/png"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/vector"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 func (g *Game) screenshotRect() image.Rectangle {
@@ -45,27 +44,26 @@ func (g *Game) screenshotMenuRect() image.Rectangle {
 
 func (g *Game) drawScreenshotMenu(dst *ebiten.Image) {
 	rect := g.screenshotMenuRect()
-	vector.DrawFilledRect(dst, float32(rect.Min.X), float32(rect.Min.Y), float32(rect.Dx()), float32(rect.Dy()), colorRGBA(0, 0, 0, 200), false)
-	drawTextWithBG(dst, ScreenshotMenuTitle, rect.Min.X+2, rect.Min.Y+2)
+	drawFrame(dst, rect)
+	ebitenutil.DebugPrintAt(dst, ScreenshotMenuTitle, rect.Min.X+6, rect.Min.Y+6)
+
 	label := ScreenshotSaveLabel
-	border := colorRGBA(255, 255, 255, 255)
 	if g.ssPending > 0 {
 		label = ScreenshotTakingLabel
-		border = colorRGBA(255, 0, 0, 255)
 	} else if time.Since(g.ssSaved) < 2*time.Second {
 		label = ScreenshotSavedLabel
 	}
 	items := append(append([]string(nil), ScreenshotQualities...), label)
-	y := rect.Min.Y + 2 + ScreenshotMenuSpacing
+	y := rect.Min.Y + 6 + ScreenshotMenuSpacing
 	for i, it := range items {
+		btn := image.Rect(rect.Min.X+4, y-4, rect.Max.X-4, y-4+22)
 		selected := i == g.ssQuality
 		if i == len(ScreenshotQualities) && g.ssPending > 0 {
-			drawTextWithBGBorder(dst, it, rect.Min.X+2, y, border)
-		} else if selected {
-			drawTextWithBGBorder(dst, it, rect.Min.X+2, y, colorRGBA(255, 255, 255, 255))
+			drawButton(dst, btn, true)
 		} else {
-			drawTextWithBG(dst, it, rect.Min.X+2, y)
+			drawButton(dst, btn, selected)
 		}
+		ebitenutil.DebugPrintAt(dst, it, btn.Min.X+6, btn.Min.Y+4)
 		y += ScreenshotMenuSpacing
 		if i == len(ScreenshotQualities)-1 {
 			y += ScreenshotMenuSpacing
@@ -79,9 +77,9 @@ func (g *Game) clickScreenshotMenu(mx, my int) bool {
 		return false
 	}
 	items := append(append([]string(nil), ScreenshotQualities...), ScreenshotSaveLabel)
-	y := rect.Min.Y + 2 + ScreenshotMenuSpacing
+	y := rect.Min.Y + 6 + ScreenshotMenuSpacing
 	for i := range items {
-		r := image.Rect(rect.Min.X, y-2, rect.Min.X+rect.Dx(), y-2+16+4)
+		r := image.Rect(rect.Min.X+4, y-4, rect.Max.X-4, y-4+22)
 		if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			switch i {
 			case 0, 1, 2:
