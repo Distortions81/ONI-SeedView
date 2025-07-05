@@ -5,7 +5,6 @@ package main
 import (
 	"image"
 	"image/color"
-	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
@@ -49,21 +48,6 @@ func (g *Game) optionsMenuRect() image.Rectangle {
 		y = 0
 	}
 	return image.Rect(x, y, x+w, y+h)
-}
-
-func drawGear(dst *ebiten.Image, rect image.Rectangle) {
-	cx := float32(rect.Min.X + rect.Dx()/2)
-	cy := float32(rect.Min.Y + rect.Dy()/2)
-	r := float32(rect.Dx()) * 0.3
-	for i := 0; i < 8; i++ {
-		a := float64(i) * math.Pi / 4
-		x1 := cx + r*float32(math.Cos(a))*1.3
-		y1 := cy + r*float32(math.Sin(a))*1.3
-		x2 := cx + r*float32(math.Cos(a))*1.7
-		y2 := cy + r*float32(math.Sin(a))*1.7
-		vector.StrokeLine(dst, x1, y1, x2, y2, float32(rect.Dx())/10, color.RGBA{255, 255, 255, 255}, true)
-	}
-	vector.StrokeCircle(dst, cx, cy, r, float32(rect.Dx())/8, color.RGBA{255, 255, 255, 255}, true)
 }
 
 func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
