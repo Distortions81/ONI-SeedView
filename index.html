@@ -3,18 +3,84 @@
 <head>
   <meta charset="utf-8">
   <title>Oni Seed Viewer</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <style>
-    body { font-family: sans-serif; padding: 2em; }
-    #message { margin-top: 1em; color: red; }
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #121212;
+      color: #eee;
+      font-family: Roboto, sans-serif;
+    }
+
+    .card {
+      text-align: center;
+      background: #1e1e1e;
+      padding: 2em;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5em;
+      font-size: 1.2em;
+    }
+
+    input[type="text"] {
+      width: 16em;
+      padding: 0.5em;
+      border: none;
+      border-radius: 4px;
+      background: #222;
+      color: #fff;
+    }
+
+    input[type="text"]:focus {
+      outline: 2px solid #2196f3;
+    }
+
+    button {
+      margin-top: 1em;
+      padding: 0.5em 1em;
+      border: none;
+      border-radius: 4px;
+      background: #2196f3;
+      color: #fff;
+      font-size: 1em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25em;
+    }
+
+    button:hover {
+      background: #42a5f5;
+    }
+
+    button .material-icons {
+      font-size: 1.2em;
+    }
+
+    #message {
+      margin-top: 1em;
+      color: #f44336;
+      height: 1.2em;
+    }
   </style>
 </head>
 <body>
-  <form id="seedForm">
-    <label for="seedInput">Enter Seed:</label>
-    <input id="seedInput" type="text" required />
-    <button type="submit">View</button>
-  </form>
-  <div id="message"></div>
+  <div class="card">
+    <form id="seedForm">
+      <label for="seedInput">Enter Seed</label>
+      <input id="seedInput" type="text" required />
+      <button type="submit"><span class="material-icons">search</span>View</button>
+    </form>
+    <div id="message"></div>
+  </div>
   <script>
   const baseURL = "https://ingest.mapsnotincluded.org/coordinate/";
   document.getElementById('seedForm').addEventListener('submit', async (e) => {
@@ -24,13 +90,13 @@
     document.getElementById('message').textContent = 'Checking…';
     try {
       const resp = await fetch(baseURL + encodeURIComponent(seed));
-      if (resp.status === 404) {
-        document.getElementById('message').textContent = 'Seed not found';
-      } else if (resp.ok) {
-        if (resp.body && 'cancel' in resp.body) {
+      if (resp.ok) {
+        if (resp.body && typeof resp.body.cancel === 'function') {
           resp.body.cancel();
         }
         window.location.href = 'view.html?coord=' + encodeURIComponent(seed);
+      } else if (resp.status === 404) {
+        document.getElementById('message').textContent = 'Seed not found';
       } else {
         document.getElementById('message').textContent = 'Error: ' + resp.status;
       }

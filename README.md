@@ -82,7 +82,7 @@ Run the build script to compile the program and copy the necessary runtime files
 ./scripts/build_all.sh
 ```
 
-Open `dist/index.html` in a browser to enter a seed. Valid seeds redirect to `view.html` which loads `oni-view.wasm.gz` and decompresses it with [Pako](https://github.com/nodeca/pako).
+Open `dist/index.html` in a browser to enter a seed. The page has a dark themed form with Material icons. Valid seeds redirect to `view.html` which loads `oni-view.wasm.gz` and decompresses it with [Pako](https://github.com/nodeca/pako).
 You can still specify the seed coordinate directly in the viewer URL using `view.html?coord=<seed>` or `view.html#coord=<seed>`.
 
 ## Desktop vs Web and Mobile

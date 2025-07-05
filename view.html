@@ -3,7 +3,16 @@
 <head>
   <meta charset="utf-8">
   <title>Oni View Web</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: #121212;
+      color: #eee;
+      font-family: Roboto, sans-serif;
+    }
+
     #loading {
       position: absolute;
       top: 0;
@@ -14,17 +23,21 @@
       align-items: center;
       justify-content: center;
       flex-direction: column;
-      font-family: sans-serif;
     }
 
     .spinner {
       width: 48px;
       height: 48px;
-      border: 6px solid #ccc;
-      border-top-color: #333;
+      border: 6px solid #444;
+      border-top-color: #2196f3;
       border-radius: 50%;
       animation: spin 1s linear infinite;
       margin-bottom: 8px;
+    }
+
+    #loading div:last-child {
+      font-size: 1.1em;
+      color: #ccc;
     }
 
     @keyframes spin {
