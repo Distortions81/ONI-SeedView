@@ -1769,7 +1769,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			ocx := float32(or.Min.X + size/2)
 			ocy := float32(or.Min.Y + size/2)
 			vector.DrawFilledCircle(screen, ocx, ocy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
-			drawGear(screen, or)
+			if gear, ok := g.icons["../icons/gear.png"]; ok && gear != nil {
+				op := &ebiten.DrawImageOptions{Filter: ebiten.FilterLinear}
+				sc := float64(size) / math.Max(float64(gear.Bounds().Dx()), float64(gear.Bounds().Dy()))
+				op.GeoM.Scale(sc, sc)
+				w := float64(gear.Bounds().Dx()) * sc
+				h := float64(gear.Bounds().Dy()) * sc
+				op.GeoM.Translate(float64(or.Min.X)+(float64(size)-w)/2, float64(or.Min.Y)+(float64(size)-h)/2)
+				screen.DrawImage(gear, op)
+			}
 			if g.showOptions {
 				g.drawOptionsMenu(screen)
 			}
@@ -2099,7 +2107,7 @@ func main() {
 		game.camY = (float64(game.height) - float64(game.astHeight)*2*game.zoom) / 2
 		game.clampCamera()
 		game.biomeTextures = loadBiomeTextures()
-		names := []string{"../icons/camera.png", "../icons/help.png", "geyser_water.png"}
+		names := []string{"../icons/camera.png", "../icons/help.png", "../icons/gear.png", "geyser_water.png"}
 		set := make(map[string]struct{})
 		for _, gy := range ast.Geysers {
 			if n := iconForGeyser(gy.ID); n != "" {
