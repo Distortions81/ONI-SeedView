@@ -2,12 +2,13 @@
 package main
 
 import (
+	"image/color"
 	"math"
 	"time"
 )
 
 const (
-	ClientVersion    = "v0.0.0-2507052141"
+	ClientVersion    = "v0.0.0-2507052152"
 	BaseURL          = "https://ingest.mapsnotincluded.org/coordinate/"
 	AcceptCBORHeader = "application/cbor"
 	PanSpeed         = 15
@@ -94,3 +95,10 @@ var biomeOrder = []string{
 	"OilField",
 	"MagmaCore",
 }
+
+var (
+	buttonActiveColor   = color.RGBA{0, 180, 180, 255}
+	buttonInactiveColor = color.RGBA{40, 40, 40, 255}
+	buttonBorderColor   = color.RGBA{200, 200, 200, 255}
+	frameColor          = color.RGBA{0, 0, 0, 200}
+)
