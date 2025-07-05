@@ -1626,7 +1626,7 @@ func main() {
 		status:     "Fetching...",
 		coord:      *coord,
 		mobile:     isMobile(),
-		ssQuality:  2,
+		ssQuality:  1,
 		hoverBiome: -1,
 		hoverItem:  -1,
 	}

@@ -23,8 +23,8 @@ const (
 	// on-screen size is consistent across all items.
 	BaseIconPixels        = 96
 	LegendZoomExponent    = 10
-	DefaultWidth          = 800
-	DefaultHeight         = 800
+	DefaultWidth          = 1200
+	DefaultHeight         = 1200
 	InitialZoom           = 1.0
 	LabelCharWidth        = 6
 	NumberLegendXOffset   = 150
@@ -60,9 +60,9 @@ const (
 
 var LegendZoomThreshold = math.Pow(WheelZoomFactor, LegendZoomExponent)
 
-var ScreenshotQualities = []string{"Low (2K)", "Medium (4K)", "High (8K)"}
+var ScreenshotQualities = []string{"Low (2K)", "Medium (4K)", "High (6K)"}
 
-var ScreenshotScales = []float64{4.0, 8.0, 16.0}
+var ScreenshotScales = []float64{4.0, 8.0, 10.0}
 
 var biomeOrder = []string{
 	"Sandstone",
