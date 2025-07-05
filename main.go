@@ -252,6 +252,48 @@ func drawBiome(dst *ebiten.Image, polys [][]Point, clr color.Color, camX, camY, 
 	dst.DrawTriangles(vs, is, whitePixel, op)
 }
 
+func drawBiomeTextured(dst *ebiten.Image, polys [][]Point, tex *ebiten.Image, clr color.Color, camX, camY, zoom float64) {
+	if len(polys) == 0 || tex == nil {
+		return
+	}
+	var p vector.Path
+	for _, pts := range polys {
+		if len(pts) == 0 {
+			continue
+		}
+		p.MoveTo(float32(pts[0].X*2), float32(pts[0].Y*2))
+		for _, pt := range pts[1:] {
+			p.LineTo(float32(pt.X*2), float32(pt.Y*2))
+		}
+		p.Close()
+	}
+	vs, is := p.AppendVerticesAndIndicesForFilling(nil, nil)
+	r, g, b, a := clr.RGBA()
+	texW, texH := tex.Bounds().Dx(), tex.Bounds().Dy()
+	for i := range vs {
+		worldX := float64(vs[i].DstX) / 2
+		worldY := float64(vs[i].DstY) / 2
+		x := float64(vs[i].DstX)*zoom + camX
+		y := float64(vs[i].DstY)*zoom + camY
+		vs[i].DstX = float32(x)
+		vs[i].DstY = float32(y)
+		vs[i].SrcX = float32(worldX*BiomeTextureScale) * float32(texW)
+		vs[i].SrcY = float32(worldY*BiomeTextureScale) * float32(texH)
+		vs[i].ColorR = float32(r) / 0xffff
+		vs[i].ColorG = float32(g) / 0xffff
+		vs[i].ColorB = float32(b) / 0xffff
+		vs[i].ColorA = float32(a) / 0xffff
+	}
+	op := &ebiten.DrawTrianglesOptions{
+		AntiAlias:      true,
+		ColorScaleMode: ebiten.ColorScaleModePremultipliedAlpha,
+		FillRule:       ebiten.FillRuleEvenOdd,
+		Address:        ebiten.AddressRepeat,
+		Filter:         ebiten.FilterLinear,
+	}
+	dst.DrawTriangles(vs, is, tex, op)
+}
+
 func drawBiomeOutline(dst *ebiten.Image, polys [][]Point, camX, camY, zoom float64, clr color.Color) {
 	for _, pts := range polys {
 		if len(pts) < 2 {
@@ -1132,7 +1174,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if g.hoverBiome >= 0 && !highlight {
 				texClr = color.RGBA{100, 100, 100, texClr.A}
 			}
-			drawBiome(screen, bp.Polygons, texClr, g.camX, g.camY, g.zoom)
+			if tex := g.biomeTextures[bp.Name]; tex != nil {
+				drawBiomeTextured(screen, bp.Polygons, tex, texClr, g.camX, g.camY, g.zoom)
+			} else {
+				drawBiome(screen, bp.Polygons, texClr, g.camX, g.camY, g.zoom)
+			}
 			outlineClr := color.RGBA{255, 255, 255, 128}
 			drawBiomeOutline(screen, bp.Polygons, g.camX, g.camY, g.zoom, outlineClr)
 		}
