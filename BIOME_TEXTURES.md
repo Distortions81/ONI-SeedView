@@ -1,8 +1,8 @@
 # Biome Texture Mapping
 
-The texture atlas `icons/textures.png` contains 26 horizontal blocks. The first
-22 columns map to the biomes listed below using the same order as defined in
-`biomeColors` (see `colors.go`). Each block is 256×256 pixels.
+Each biome texture is loaded from the `biomes` directory using the same name as
+the biome. The table below lists these textures along with the color defined in
+`biomeColors` (see `colors.go`). Every texture is 256×256 pixels.
 
 | Column | Biome               | Hex Color |
 |------:|--------------------|-----------|
