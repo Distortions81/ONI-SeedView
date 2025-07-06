@@ -38,8 +38,9 @@ func (g *Game) optionsMenuSize() (int, int) {
 			maxW = len(s)
 		}
 	}
-	w := maxW*LabelCharWidth + 4
-	h := (len(labels)+1)*OptionsMenuSpacing + 4
+	scale := fontScale()
+	w := int(float64(maxW*LabelCharWidth)*scale) + 4
+	h := int(float64((len(labels)+1)*OptionsMenuSpacing)*scale) + 4
 	return w, h
 }
 
