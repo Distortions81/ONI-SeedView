@@ -4,7 +4,6 @@ package main
 
 import (
 	_ "embed"
-	"log"
 
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
@@ -30,13 +29,13 @@ func loadFont(size float64) font.Face {
 		var err error
 		fontParsed, err = opentype.Parse(notoTTF)
 		if err != nil {
-			log.Fatalf("failed to parse font: %v", err)
+			panic("failed to parse font: " + err.Error())
 		}
 	}
 	const dpi = 72
 	face, err := opentype.NewFace(fontParsed, &opentype.FaceOptions{Size: size, DPI: dpi, Hinting: font.HintingFull})
 	if err != nil {
-		log.Fatalf("failed to create font face: %v", err)
+		panic("failed to create font face: " + err.Error())
 	}
 	return face
 }
