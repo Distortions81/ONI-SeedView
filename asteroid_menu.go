@@ -86,8 +86,8 @@ func drawCheck(dst *ebiten.Image, rect image.Rectangle) {
 	y1 := float32(rect.Min.Y) + float32(rect.Dy())*0.8
 	x2 := float32(rect.Min.X) + float32(rect.Dx())*0.8
 	y2 := float32(rect.Min.Y) + float32(rect.Dy())*0.2
-	vector.StrokeLine(dst, x0, y0, x1, y1, thickness, colorWhite, true)
-	vector.StrokeLine(dst, x1, y1, x2, y2, thickness, colorWhite, true)
+	vector.StrokeLine(dst, x0, y0, x1, y1, thickness, color.White, true)
+	vector.StrokeLine(dst, x1, y1, x2, y2, thickness, color.White, true)
 }
 
 func (g *Game) asteroidMenuSize() (int, int) {
@@ -245,5 +245,3 @@ func (g *Game) centerAndFit() {
 	g.camY = (float64(g.height) - float64(g.astHeight)*2*g.zoom) / 2
 	g.clampCamera()
 }
-
-var colorWhite = color.RGBA{255, 255, 255, 255}

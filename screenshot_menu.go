@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"golang.org/x/image/bmp"
 	"image"
-	"image/color"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -191,8 +190,4 @@ func (g *Game) captureScreenshot(w, h int, zoom float64) *image.RGBA {
 	g.showShotMenu = menu
 	g.needsRedraw = true
 	return rgba
-}
-
-func colorRGBA(r, g0, b, a uint8) color.RGBA {
-	return color.RGBA{R: r, G: g0, B: b, A: a}
 }
