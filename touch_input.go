@@ -42,7 +42,7 @@ func (g *Game) handleTouchGestures(oldX, oldY float64) {
 						g.touchUI = true
 					}
 				}
-				useNumbers := g.useNumbers && g.showItemNames && g.zoom < LegendZoomThreshold && !g.screenshotMode
+				useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
 				if !g.touchUI && useNumbers && g.legendImage != nil {
 					lw := g.legendImage.Bounds().Dx()
 					x0 := g.width - lw - 12
@@ -80,7 +80,7 @@ func (g *Game) handleTouchGestures(oldX, oldY float64) {
 							g.updateHover(x, y)
 						}
 					}
-					useNumbers := g.useNumbers && g.showItemNames && g.zoom < LegendZoomThreshold && !g.screenshotMode
+					useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
 					if useNumbers && g.legendImage != nil {
 						lw := g.legendImage.Bounds().Dx()
 						x0 := g.width - lw - 12
@@ -124,7 +124,7 @@ func (g *Game) handleTouchGestures(oldX, oldY float64) {
 							g.touchUI = true
 						}
 					}
-					useNumbers := g.useNumbers && g.showItemNames && g.zoom < LegendZoomThreshold && !g.screenshotMode
+					useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
 					if !g.touchUI && useNumbers && g.legendImage != nil {
 						lw := g.legendImage.Bounds().Dx()
 						x0 := g.width - lw - 12

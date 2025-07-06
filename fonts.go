@@ -14,7 +14,7 @@ var notoTTF []byte
 
 const (
 	baseFontSize       = 12.0
-	screenshotFontSize = 14.0
+	screenshotFontSize = 18.0
 )
 
 var (
