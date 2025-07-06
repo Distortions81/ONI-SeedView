@@ -6,11 +6,8 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"image/png"
 	"math"
-	"os"
 	"strconv"
-	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"

@@ -9,7 +9,6 @@ import (
 	"image/png"
 	"math"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
