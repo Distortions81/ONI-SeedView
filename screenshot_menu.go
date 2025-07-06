@@ -5,9 +5,9 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"github.com/nfnt/bmp"
 	"image"
 	"image/color"
-	"image/png"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -153,8 +153,8 @@ func (g *Game) saveScreenshot() {
 	img := g.captureScreenshot(width, height, scale)
 	g.noColor = oldBW
 	var buf bytes.Buffer
-	_ = png.Encode(&buf, img)
-	name := fmt.Sprintf("%s-%s.png", g.coord, time.Now().Format("20060102-150405"))
+	_ = bmp.Encode(&buf, img)
+	name := fmt.Sprintf("%s-%s.bmp", g.coord, time.Now().Format("20060102-150405"))
 	_ = saveImageData(name, buf.Bytes())
 }
 

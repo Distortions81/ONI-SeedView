@@ -109,13 +109,13 @@ the environments are:
 ## Saving Screenshots
 
 Click the camera icon to open the screenshot menu. Choose a quality level
-(2K–8K) and the current view is written to a PNG named after the seed.
+(2K–8K) and the current view is written to a BMP named after the seed.
 After clicking **Save Screenshot** the button briefly shows *Taking Screenshot...*
 with a red outline before the menu closes automatically.
 You can also generate a screenshot non-interactively:
 
 ```bash
-go run . -coord SNDST-A-7-0-0-0 -screenshot myshot.png
+go run . -coord SNDST-A-7-0-0-0 -screenshot myshot.bmp
 ```
 
 ## Repository Layout

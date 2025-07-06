@@ -34,7 +34,7 @@ const (
 	// LegendScrollExtraRows controls how many additional rows the legend
 	// panels can scroll beyond the bottom of the screen.
 	LegendScrollExtraRows = 3
-	ScreenshotFile        = "screenshot.png"
+	ScreenshotFile        = "screenshot.bmp"
 	HelpIconSize          = 24
 	HelpMargin            = 10
 	CrosshairSize         = 10
