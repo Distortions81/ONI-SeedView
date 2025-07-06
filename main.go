@@ -1147,11 +1147,13 @@ iconsLoop:
 	}
 
 	if g.autoLowRes && !g.halfRes && g.ssPending == 0 && !g.screenshotMode {
-		if ebiten.ActualFPS() < 30 {
+		if ebiten.ActualFPS() < 15 {
 			if g.lowFPSStart.IsZero() {
 				g.lowFPSStart = time.Now()
 			} else if time.Since(g.lowFPSStart) > 2*time.Second {
 				g.halfRes = true
+				g.textures = false
+				g.linearFilter = false
 				g.lowFPSStart = time.Time{}
 			}
 		} else {
@@ -2314,7 +2316,7 @@ func main() {
 		asteroidID:        asteroidIDVal,
 		asteroidSpecified: asteroidSpecified,
 		mobile:            isMobile(),
-		textures:          !isMobile(),
+		textures:          true,
 		vsync:             true,
 		showItemNames:     true,
 		showLegend:        true,

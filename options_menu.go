@@ -97,7 +97,7 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 
 	drawToggle("Smart Rendering", g.smartRender)
 	drawToggle("Half Resolution", g.halfRes)
-	drawToggle("Auto Low-Res", g.autoLowRes)
+	drawToggle("Auto Low-Quality", g.autoLowRes)
 	drawToggle("Linear Filtering", g.linearFilter)
 
 	fps := fmt.Sprintf("FPS: %.1f", ebiten.ActualFPS())
