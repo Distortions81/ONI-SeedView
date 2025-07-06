@@ -159,25 +159,26 @@ func (g *Game) drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image,
 		iconH = InfoIconSize
 	}
 	gap := 4
-	w := txtW + iconW + gap + 4
+	w := txtW + iconW + gap + 8
 	h := txtH
 	if iconH > txtH {
 		h = iconH
 	}
-	h += 4
+	h += 8
 	img := ebiten.NewImage(w, h)
-	vector.DrawFilledRect(img, 0, 0, float32(w), float32(h), color.RGBA{0, 30, 30, InfoPanelAlpha}, false)
+	vector.DrawFilledRect(img, 0, 0, float32(w), float32(h), color.RGBA{0, 0, 0, InfoPanelAlpha}, false)
+	vector.StrokeRect(img, 0.5, 0.5, float32(w)-1, float32(h)-1, 1, buttonBorderColor, false)
 	if icon != nil {
 		opIcon := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 		scaleIcon := float64(InfoIconSize) / math.Max(float64(icon.Bounds().Dx()), float64(icon.Bounds().Dy()))
 		opIcon.GeoM.Scale(scaleIcon, scaleIcon)
-		opIcon.GeoM.Translate(2, float64(h-iconH)/2)
+		opIcon.GeoM.Translate(4, float64(h-iconH)/2)
 		img.DrawImage(icon, opIcon)
 	}
-	drawText(img, text, iconW+gap+2, 2)
+	drawText(img, text, iconW+gap+4, 4)
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(scale, scale)
-	op.GeoM.Translate(float64(x-2), float64(y-2))
+	op.GeoM.Translate(float64(x-4), float64(y-4))
 	dst.DrawImage(img, op)
 }
 
@@ -229,12 +230,12 @@ func infoPanelSize(text string, icon *ebiten.Image) (int, int) {
 		iconH = InfoIconSize
 	}
 	gap := 4
-	w := txtW + iconW + gap + 4
+	w := txtW + iconW + gap + 8
 	h := txtH
 	if iconH > txtH {
 		h = iconH
 	}
-	h += 4
+	h += 8
 	return w, h
 }
 
