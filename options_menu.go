@@ -39,9 +39,8 @@ func (g *Game) optionsMenuSize() (int, int) {
 			maxW = w
 		}
 	}
-	scale := fontScale()
-	w := int(float64(maxW)*scale) + 4
-	h := int(float64((len(labels)+1)*OptionsMenuSpacing)*scale) + 4
+	w := maxW + 4
+	h := (len(labels)+1)*menuSpacing() + 4
 	return w, h
 }
 
@@ -68,13 +67,17 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	img := ebiten.NewImage(w, h)
 	drawFrame(img, image.Rect(0, 0, w, h))
 	drawText(img, OptionsMenuTitle, 6, 6)
-	y := 6 + OptionsMenuSpacing
+	y := 6 + menuSpacing()
 
 	drawToggle := func(label string, enabled bool) {
-		btn := image.Rect(4, y-4, w-4, y-4+22)
+		btn := image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
 		drawButton(img, btn, enabled)
-		drawText(img, label, btn.Min.X+6, btn.Min.Y+4)
-		y += OptionsMenuSpacing
+		lh := menuButtonHeight() - 5
+		if notoFont != nil {
+			lh = notoFont.Metrics().Height.Ceil()
+		}
+		drawText(img, label, btn.Min.X+6, btn.Min.Y+(menuButtonHeight()-lh)/2)
+		y += menuSpacing()
 	}
 
 	drawToggle("Show Item Names", g.showItemNames)
@@ -85,25 +88,25 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	drawText(img, label, 6, y)
 	tw, _ := textDimensions(label)
 	bx := 6 + tw + 6
-	minus := image.Rect(bx, y-4, bx+20, y-4+22)
-	plus := image.Rect(bx+24, y-4, bx+44, y-4+22)
+	minus := image.Rect(bx, y-4, bx+20, y-4+menuButtonHeight())
+	plus := image.Rect(bx+24, y-4, bx+44, y-4+menuButtonHeight())
 	drawButton(img, minus, false)
 	drawPlusMinus(img, minus, true)
 	drawButton(img, plus, false)
 	drawPlusMinus(img, plus, false)
-	y += OptionsMenuSpacing
+	y += menuSpacing()
 
 	label = "Icon Size"
 	drawText(img, label, 6, y)
 	tw, _ = textDimensions(label)
 	bx = 6 + tw + 6
-	minus = image.Rect(bx, y-4, bx+20, y-4+22)
-	plus = image.Rect(bx+24, y-4, bx+44, y-4+22)
+	minus = image.Rect(bx, y-4, bx+20, y-4+menuButtonHeight())
+	plus = image.Rect(bx+24, y-4, bx+44, y-4+menuButtonHeight())
 	drawButton(img, minus, false)
 	drawPlusMinus(img, minus, true)
 	drawButton(img, plus, false)
 	drawPlusMinus(img, plus, false)
-	y += OptionsMenuSpacing
+	y += menuSpacing()
 
 	drawToggle("Textures", g.textures)
 	drawToggle("Vsync", g.vsync)
@@ -112,10 +115,10 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 
 	fps := fmt.Sprintf("FPS: %.1f", ebiten.ActualFPS())
 	drawText(img, fps, 6, y)
-	y += OptionsMenuSpacing
+	y += menuSpacing()
 
 	drawText(img, "Version: "+ClientVersion, 6, y)
-	y += OptionsMenuSpacing
+	y += menuSpacing()
 
 	btn := image.Rect(4, y-4, w-4, y-4+22)
 	drawButton(img, btn, true)
@@ -138,40 +141,40 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	mx = x
 	my = y
 	w, _ := g.optionsMenuSize()
-	y = 6 + OptionsMenuSpacing
+	y = 6 + menuSpacing()
 
 	// Show Item Names
-	r := image.Rect(4, y-4, w-4, y-4+22)
+	r := image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.showItemNames = !g.showItemNames
 		g.needsRedraw = true
 		return true
 	}
-	y += OptionsMenuSpacing
+	y += menuSpacing()
 
 	// Show Legends
-	r = image.Rect(4, y-4, w-4, y-4+22)
+	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.showLegend = !g.showLegend
 		g.needsRedraw = true
 		return true
 	}
-	y += OptionsMenuSpacing
+	y += menuSpacing()
 
 	// Use Item Numbers
-	r = image.Rect(4, y-4, w-4, y-4+22)
+	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.useNumbers = !g.useNumbers
 		g.needsRedraw = true
 		return true
 	}
-	y += OptionsMenuSpacing
+	y += menuSpacing()
 
 	// Font Size buttons
 	labelW, _ := textDimensions("Font Size")
 	bx := 6 + labelW + 6
-	minus := image.Rect(bx, y-4, bx+20, y-4+22)
-	plus := image.Rect(bx+24, y-4, bx+44, y-4+22)
+	minus := image.Rect(bx, y-4, bx+20, y-4+menuButtonHeight())
+	plus := image.Rect(bx+24, y-4, bx+44, y-4+menuButtonHeight())
 	if minus.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		decreaseFontSize()
 		if max := g.maxBiomeScroll(); max == 0 {
@@ -202,13 +205,13 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 		g.needsRedraw = true
 		return true
 	}
-	y += OptionsMenuSpacing
+	y += menuSpacing()
 
 	// Icon Size buttons
 	labelW, _ = textDimensions("Icon Size")
 	bx = 6 + labelW + 6
-	minus = image.Rect(bx, y-4, bx+20, y-4+22)
-	plus = image.Rect(bx+24, y-4, bx+44, y-4+22)
+	minus = image.Rect(bx, y-4, bx+20, y-4+menuButtonHeight())
+	plus = image.Rect(bx+24, y-4, bx+44, y-4+menuButtonHeight())
 	if minus.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		if g.iconScale > 0.25 {
 			g.iconScale -= 0.25
@@ -221,53 +224,53 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 		g.needsRedraw = true
 		return true
 	}
-	y += OptionsMenuSpacing
+	y += menuSpacing()
 
 	// Textures
-	r = image.Rect(4, y-4, w-4, y-4+22)
+	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.textures = !g.textures
 		g.needsRedraw = true
 		return true
 	}
-	y += OptionsMenuSpacing
+	y += menuSpacing()
 
 	// Vsync
-	r = image.Rect(4, y-4, w-4, y-4+22)
+	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.vsync = !g.vsync
 		ebiten.SetVsyncEnabled(g.vsync)
 		g.needsRedraw = true
 		return true
 	}
-	y += OptionsMenuSpacing
+	y += menuSpacing()
 
 	// Power Saver
-	r = image.Rect(4, y-4, w-4, y-4+22)
+	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.smartRender = !g.smartRender
 		g.needsRedraw = true
 		return true
 	}
-	y += OptionsMenuSpacing
+	y += menuSpacing()
 
 	// Linear Filtering
-	r = image.Rect(4, y-4, w-4, y-4+22)
+	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.linearFilter = !g.linearFilter
 		g.needsRedraw = true
 		return true
 	}
-	y += OptionsMenuSpacing
+	y += menuSpacing()
 
 	// FPS (not clickable)
-	y += OptionsMenuSpacing
+	y += menuSpacing()
 
 	// Version (not clickable)
-	y += OptionsMenuSpacing
+	y += menuSpacing()
 
 	// Close
-	r = image.Rect(4, y-4, w-4, y-4+22)
+	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.showOptions = false
 		g.needsRedraw = true

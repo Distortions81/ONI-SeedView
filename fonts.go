@@ -67,6 +67,20 @@ func rowSpacing() int {
 	return int(float64(LegendRowSpacing) * fontScale())
 }
 
+func menuButtonHeight() int {
+	if notoFont != nil {
+		return notoFont.Metrics().Height.Ceil() + 5
+	}
+	return int(float64(22) * fontScale())
+}
+
+func menuSpacing() int {
+	if notoFont != nil {
+		return menuButtonHeight() + 4
+	}
+	return int(float64(26) * fontScale())
+}
+
 func init() {
 	setFontSize(fontSize)
 }

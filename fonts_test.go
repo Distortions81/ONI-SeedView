@@ -30,3 +30,7 @@ func fontScale() float64 { return fontSize / baseFontSize }
 func rowSpacing() int { return int(float64(LegendRowSpacing) * fontScale()) }
 
 func registerFontChange(fn func()) { fontChange = append(fontChange, fn) }
+
+func menuButtonHeight() int { return int(float64(22) * fontScale()) }
+
+func menuSpacing() int { return int(float64(26) * fontScale()) }
