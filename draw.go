@@ -108,7 +108,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					op.GeoM.Translate(left, top)
 					screen.DrawImage(img, op)
 					if hover {
-						vector.StrokeRect(screen, float32(left)+0.5, float32(top)+0.5, float32(math.Round(w))-1, float32(math.Round(h))-1, 2, dotClr, false)
+						s := vectorScale()
+						vector.StrokeRect(screen, float32(left)+0.5, float32(top)+0.5, float32(math.Round(w))-1, float32(math.Round(h))-1, 2*s, dotClr, false)
 					}
 					if useNumbers {
 						formatted = strconv.Itoa(g.legendMap["g"+name])
@@ -124,7 +125,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 			vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, dotClr, true)
 			if hover {
-				vector.StrokeRect(screen, float32(x-3), float32(y-3), 6, 6, 2, dotClr, false)
+				vector.StrokeRect(screen, float32(x-3), float32(y-3), 6, 6, 2*vectorScale(), dotClr, false)
 			}
 			if useNumbers {
 				formatted = strconv.Itoa(g.legendMap["g"+name])
@@ -167,7 +168,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					op.GeoM.Translate(x-w/2, y-h/2)
 					screen.DrawImage(img, op)
 					if hover {
-						vector.StrokeRect(screen, float32(x-w/2), float32(y-h/2), float32(w), float32(h), 2, dotClr, false)
+						vector.StrokeRect(screen, float32(x-w/2), float32(y-h/2), float32(w), float32(h), 2*vectorScale(), dotClr, false)
 					}
 					if useNumbers {
 						formatted = strconv.Itoa(g.legendMap["p"+name])
@@ -181,7 +182,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 			vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, dotClr, true)
 			if hover {
-				vector.StrokeRect(screen, float32(x-3), float32(y-3), 6, 6, 2, dotClr, false)
+				vector.StrokeRect(screen, float32(x-3), float32(y-3), 6, 6, 2*vectorScale(), dotClr, false)
 			}
 			if useNumbers {
 				formatted = strconv.Itoa(g.legendMap["p"+name])
@@ -227,7 +228,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				y0 := math.Round((10 + spacing + spacing*float64(g.selectedBiome)) - g.biomeScroll)
 				h := math.Round(spacing)
 				w := math.Round(float64(g.legend.Bounds().Dx()))
-				vector.StrokeRect(screen, 0.5, float32(y0)-4, float32(w)-1, float32(h)-1, 2, highlightColor, false)
+				vector.StrokeRect(screen, 0.5, float32(y0)-4, float32(w)-1, float32(h)-1, 2*vectorScale(), highlightColor, false)
 			}
 			if useNumbers && !g.screenshotMode {
 				g.drawNumberLegend(screen)
@@ -251,7 +252,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				op.GeoM.Translate(float64(sr.Min.X)+(float64(size)-w)/2, float64(sr.Min.Y)+(float64(size)-h)/2)
 				screen.DrawImage(cam, op)
 			}
-			vector.StrokeCircle(screen, scx, scy, float32(size)/2, 1, buttonBorderColor, true)
+			vector.StrokeCircle(screen, scx, scy, float32(size)/2, 1*vectorScale(), buttonBorderColor, true)
 
 			hr := g.helpRect()
 			cx := float32(hr.Min.X + size/2)
@@ -266,7 +267,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				op.GeoM.Translate(float64(hr.Min.X)+(float64(size)-w)/2, float64(hr.Min.Y)+(float64(size)-h)/2)
 				screen.DrawImage(helpImg, op)
 			}
-			vector.StrokeCircle(screen, cx, cy, float32(size)/2, 1, buttonBorderColor, true)
+			vector.StrokeCircle(screen, cx, cy, float32(size)/2, 1*vectorScale(), buttonBorderColor, true)
 
 			or := g.optionsRect()
 			ocx := float32(or.Min.X + size/2)
@@ -281,7 +282,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				op.GeoM.Translate(float64(or.Min.X)+(float64(size)-w)/2, float64(or.Min.Y)+(float64(size)-h)/2)
 				screen.DrawImage(gear, op)
 			}
-			vector.StrokeCircle(screen, ocx, ocy, float32(size)/2, 1, buttonBorderColor, true)
+			vector.StrokeCircle(screen, ocx, ocy, float32(size)/2, 1*vectorScale(), buttonBorderColor, true)
 
 			gr := g.geyserRect()
 			gcx := float32(gr.Min.X + size/2)
@@ -296,7 +297,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				op.GeoM.Translate(float64(gr.Min.X)+(float64(size)-w)/2, float64(gr.Min.Y)+(float64(size)-h)/2)
 				screen.DrawImage(icon, op)
 			}
-			vector.StrokeCircle(screen, gcx, gcy, float32(size)/2, 1, buttonBorderColor, true)
+			vector.StrokeCircle(screen, gcx, gcy, float32(size)/2, 1*vectorScale(), buttonBorderColor, true)
 
 			if g.hoverIcon != hoverNone {
 				switch g.hoverIcon {
@@ -337,7 +338,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					top := math.Round(y - h/2)
 					op.GeoM.Translate(left, top)
 					screen.DrawImage(img, op)
-					vector.StrokeRect(screen, float32(left)+0.5, float32(top)+0.5, float32(math.Round(w))-1, float32(math.Round(h))-1, 2, dotClr, false)
+					vector.StrokeRect(screen, float32(left)+0.5, float32(top)+0.5, float32(math.Round(w))-1, float32(math.Round(h))-1, 2*vectorScale(), dotClr, false)
 					if useNumbers {
 						formatted = strconv.Itoa(g.legendMap["g"+name])
 					}
@@ -349,7 +350,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 
 			vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, dotClr, true)
-			vector.StrokeRect(screen, float32(x-3), float32(y-3), 6, 6, 2, dotClr, false)
+			vector.StrokeRect(screen, float32(x-3), float32(y-3), 6, 6, 2*vectorScale(), dotClr, false)
 			if useNumbers {
 				formatted = strconv.Itoa(g.legendMap["g"+name])
 			}
@@ -382,7 +383,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					top := math.Round(y - h/2)
 					op.GeoM.Translate(left, top)
 					screen.DrawImage(img, op)
-					vector.StrokeRect(screen, float32(left)+0.5, float32(top)+0.5, float32(math.Round(w))-1, float32(math.Round(h))-1, 2, dotClr, false)
+					vector.StrokeRect(screen, float32(left)+0.5, float32(top)+0.5, float32(math.Round(w))-1, float32(math.Round(h))-1, 2*vectorScale(), dotClr, false)
 					if useNumbers {
 						formatted = strconv.Itoa(g.legendMap["p"+name])
 					}
@@ -394,7 +395,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 
 			vector.DrawFilledRect(screen, float32(x-2), float32(y-2), 4, 4, dotClr, true)
-			vector.StrokeRect(screen, float32(x-3), float32(y-1), 6, 6, 2, dotClr, false)
+			vector.StrokeRect(screen, float32(x-3), float32(y-1), 6, 6, 2*vectorScale(), dotClr, false)
 			if useNumbers {
 				formatted = strconv.Itoa(g.legendMap["p"+name])
 			}

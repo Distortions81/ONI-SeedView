@@ -27,8 +27,9 @@ func drawButton(dst *ebiten.Image, rect image.Rectangle, active bool) {
 func drawCloseButton(dst *ebiten.Image, rect image.Rectangle) {
 	drawButton(dst, rect, false)
 	pad := float32(rect.Dx()) * 0.25
-	vector.StrokeLine(dst, float32(rect.Min.X)+pad, float32(rect.Min.Y)+pad, float32(rect.Max.X)-pad, float32(rect.Max.Y)-pad, 2, buttonBorderColor, true)
-	vector.StrokeLine(dst, float32(rect.Min.X)+pad, float32(rect.Max.Y)-pad, float32(rect.Max.X)-pad, float32(rect.Min.Y)+pad, 2, buttonBorderColor, true)
+	s := vectorScale()
+	vector.StrokeLine(dst, float32(rect.Min.X)+pad, float32(rect.Min.Y)+pad, float32(rect.Max.X)-pad, float32(rect.Max.Y)-pad, 2*s, buttonBorderColor, true)
+	vector.StrokeLine(dst, float32(rect.Min.X)+pad, float32(rect.Max.Y)-pad, float32(rect.Max.X)-pad, float32(rect.Min.Y)+pad, 2*s, buttonBorderColor, true)
 }
 
 // drawRoundedRect fills and strokes a rectangle with a corner radius.
@@ -60,12 +61,13 @@ func drawRoundedRect(dst *ebiten.Image, rect image.Rectangle, radius float32, fi
 	op := &ebiten.DrawTrianglesOptions{AntiAlias: true, ColorScaleMode: ebiten.ColorScaleModePremultipliedAlpha}
 	dst.DrawTriangles(vs, is, whitePixel, op)
 
-	vector.StrokeLine(dst, x0+r, y0, x0+w-r, y0, 1, border, true)
-	vector.StrokeLine(dst, x0+w, y0+r, x0+w, y0+h-r, 1, border, true)
-	vector.StrokeLine(dst, x0+r, y0+h, x0+w-r, y0+h, 1, border, true)
-	vector.StrokeLine(dst, x0, y0+r, x0, y0+h-r, 1, border, true)
-	vector.StrokeLine(dst, x0+r, y0, x0, y0+r, 1, border, true)
-	vector.StrokeLine(dst, x0+w-r, y0, x0+w, y0+r, 1, border, true)
-	vector.StrokeLine(dst, x0, y0+h-r, x0+r, y0+h, 1, border, true)
-	vector.StrokeLine(dst, x0+w, y0+h-r, x0+w-r, y0+h, 1, border, true)
+	s := vectorScale()
+	vector.StrokeLine(dst, x0+r, y0, x0+w-r, y0, 1*s, border, true)
+	vector.StrokeLine(dst, x0+w, y0+r, x0+w, y0+h-r, 1*s, border, true)
+	vector.StrokeLine(dst, x0+r, y0+h, x0+w-r, y0+h, 1*s, border, true)
+	vector.StrokeLine(dst, x0, y0+r, x0, y0+h-r, 1*s, border, true)
+	vector.StrokeLine(dst, x0+r, y0, x0, y0+r, 1*s, border, true)
+	vector.StrokeLine(dst, x0+w-r, y0, x0+w, y0+r, 1*s, border, true)
+	vector.StrokeLine(dst, x0, y0+h-r, x0+r, y0+h, 1*s, border, true)
+	vector.StrokeLine(dst, x0+w, y0+h-r, x0+w-r, y0+h, 1*s, border, true)
 }
