@@ -1771,13 +1771,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		g.lastDraw = time.Now()
 		return
 	}
-	if g.showAstMenu {
-		screen.Fill(color.Black)
-		g.drawAsteroidMenu(screen)
-		g.needsRedraw = false
-		g.lastDraw = time.Now()
-		return
-	}
 	if g.loading || (len(g.biomes) == 0 && g.status != "") {
 		screen.Fill(color.RGBA{30, 30, 30, 255})
 		msg := g.status
@@ -2265,6 +2258,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 		if g.showOptions {
 			g.drawOptionsMenu(screen)
+		}
+		if g.showAstMenu {
+			g.drawAsteroidMenu(screen)
 		}
 		if g.showHelp && !g.screenshotMode {
 			scale := g.uiScale()
