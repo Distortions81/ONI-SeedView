@@ -2355,6 +2355,12 @@ func main() {
 			_ = saveToFile(*out, jsonData)
 		}
 		ast := seed.Asteroids[astIdxSel]
+		game.invalidateLegends()
+		game.legendMap = nil
+		game.legendEntries = nil
+		game.legendColors = nil
+		game.selectedItem = -1
+		game.itemScroll = 0
 		game.asteroidID = ast.ID
 		bps := parseBiomePaths(ast.BiomePaths)
 		game.geysers = ast.Geysers
