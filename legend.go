@@ -126,8 +126,6 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 	op.GeoM.Scale(scale, scale)
 	op.GeoM.Translate(math.Round(x), math.Round(y))
 	dst.DrawImage(g.legendImage, op)
-	lh := float64(g.legendImage.Bounds().Dy()) * scale
-	strokeFrame(dst, image.Rect(int(math.Round(x)), int(math.Round(y)), int(math.Round(x+w)), int(math.Round(y+lh))))
 	if g.selectedItem >= 0 {
 		spacing := float64(rowSpacing())
 		hy := y + (10+spacing*float64(g.selectedItem+1))*scale

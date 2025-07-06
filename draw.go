@@ -4,7 +4,6 @@ package main
 
 import (
 	"fmt"
-	"image"
 	"image/color"
 	"math"
 	"strconv"
@@ -226,8 +225,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				aName = "Unknown"
 			}
 			astName := fmt.Sprintf("Asteroid: %s", aName)
-			rect := g.asteroidInfoRect()
-			drawFrame(screen, rect)
 
 			w, _ := textDimensions(astName)
 			x := g.width/2 - int(float64(w)*scale/2)
@@ -249,10 +246,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			opLegend.GeoM.Scale(scale, scale)
 			opLegend.GeoM.Translate(0, -g.biomeScroll)
 			screen.DrawImage(g.legend, opLegend)
-			lw := int(math.Round(float64(g.legend.Bounds().Dx()) * scale))
-			lh := int(math.Round(float64(g.legend.Bounds().Dy()) * scale))
-			ly := int(math.Round(-g.biomeScroll))
-			strokeFrame(screen, image.Rect(0, ly, lw, ly+lh))
 			if g.selectedBiome >= 0 {
 				spacing := float64(rowSpacing())
 				y0 := math.Round((10+spacing+spacing*float64(g.selectedBiome))*scale - g.biomeScroll)
@@ -268,13 +261,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		if !g.screenshotMode {
 			tray := g.bottomTrayRect()
 			vector.DrawFilledRect(screen, float32(tray.Min.X), float32(tray.Min.Y), float32(tray.Dx()), float32(tray.Dy()), bottomTrayColor, false)
-			vector.StrokeRect(screen, float32(tray.Min.X)+0.5, float32(tray.Min.Y)+0.5, float32(tray.Dx())-1, float32(tray.Dy())-1, 1, buttonBorderColor, false)
 			size := g.iconSize()
 			sr := g.screenshotRect()
 			scx := float32(sr.Min.X + size/2)
 			scy := float32(sr.Min.Y + size/2)
 			vector.DrawFilledCircle(screen, scx, scy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
-			vector.StrokeCircle(screen, scx, scy, float32(size)/2, 1, buttonBorderColor, true)
 			if cam, ok := g.icons["../icons/camera.png"]; ok && cam != nil {
 				op := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 				scale := float64(size) / math.Max(float64(cam.Bounds().Dx()), float64(cam.Bounds().Dy()))
@@ -284,12 +275,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				op.GeoM.Translate(float64(sr.Min.X)+(float64(size)-w)/2, float64(sr.Min.Y)+(float64(size)-h)/2)
 				screen.DrawImage(cam, op)
 			}
+			vector.StrokeCircle(screen, scx, scy, float32(size)/2, 1, buttonBorderColor, true)
 
 			hr := g.helpRect()
 			cx := float32(hr.Min.X + size/2)
 			cy := float32(hr.Min.Y + size/2)
 			vector.DrawFilledCircle(screen, cx, cy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
-			vector.StrokeCircle(screen, cx, cy, float32(size)/2, 1, buttonBorderColor, true)
 			if helpImg, ok := g.icons["../icons/help.png"]; ok && helpImg != nil {
 				op := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 				sc := float64(size) / math.Max(float64(helpImg.Bounds().Dx()), float64(helpImg.Bounds().Dy()))
@@ -299,12 +290,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				op.GeoM.Translate(float64(hr.Min.X)+(float64(size)-w)/2, float64(hr.Min.Y)+(float64(size)-h)/2)
 				screen.DrawImage(helpImg, op)
 			}
+			vector.StrokeCircle(screen, cx, cy, float32(size)/2, 1, buttonBorderColor, true)
 
 			or := g.optionsRect()
 			ocx := float32(or.Min.X + size/2)
 			ocy := float32(or.Min.Y + size/2)
 			vector.DrawFilledCircle(screen, ocx, ocy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
-			vector.StrokeCircle(screen, ocx, ocy, float32(size)/2, 1, buttonBorderColor, true)
 			if gear, ok := g.icons["../icons/gear.png"]; ok && gear != nil {
 				op := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 				sc := float64(size) / math.Max(float64(gear.Bounds().Dx()), float64(gear.Bounds().Dy()))
@@ -314,12 +305,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				op.GeoM.Translate(float64(or.Min.X)+(float64(size)-w)/2, float64(or.Min.Y)+(float64(size)-h)/2)
 				screen.DrawImage(gear, op)
 			}
+			vector.StrokeCircle(screen, ocx, ocy, float32(size)/2, 1, buttonBorderColor, true)
 
 			gr := g.geyserRect()
 			gcx := float32(gr.Min.X + size/2)
 			gcy := float32(gr.Min.Y + size/2)
 			vector.DrawFilledCircle(screen, gcx, gcy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
-			vector.StrokeCircle(screen, gcx, gcy, float32(size)/2, 1, buttonBorderColor, true)
 			if icon, ok := g.icons["geyser_water.png"]; ok && icon != nil {
 				op := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 				sc := float64(size) / math.Max(float64(icon.Bounds().Dx()), float64(icon.Bounds().Dy()))
@@ -329,6 +320,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				op.GeoM.Translate(float64(gr.Min.X)+(float64(size)-w)/2, float64(gr.Min.Y)+(float64(size)-h)/2)
 				screen.DrawImage(icon, op)
 			}
+			vector.StrokeCircle(screen, gcx, gcy, float32(size)/2, 1, buttonBorderColor, true)
 
 			if g.hoverIcon != hoverNone {
 				scale := g.uiScale()

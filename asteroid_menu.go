@@ -52,7 +52,6 @@ func (g *Game) asteroidInfoRect() image.Rectangle {
 }
 
 func drawDownArrow(dst *ebiten.Image, rect image.Rectangle, up bool) {
-	drawFrame(dst, rect)
 
 	cx := float32(rect.Min.X + rect.Dx()/2)
 	cy := float32(rect.Min.Y + rect.Dy()/2)

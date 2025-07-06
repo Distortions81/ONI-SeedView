@@ -99,9 +99,9 @@ var biomeOrder = []string{
 }
 
 var (
-	buttonActiveColor   = color.RGBA{0, 96, 96, 255}
-	buttonInactiveColor = color.RGBA{40, 40, 40, 255}
-	buttonBorderColor   = color.RGBA{255, 255, 255, 255}
-	frameColor          = color.RGBA{0, 0, 0, 255}
-	bottomTrayColor     = color.RGBA{0, 0, 0, 180}
+	buttonActiveColor   = color.RGBA{0, 96, 96, 128}
+	buttonInactiveColor = color.RGBA{40, 40, 40, 128}
+	buttonBorderColor   = color.RGBA{255, 255, 255, 128}
+	frameColor          = color.RGBA{0, 0, 0, 128}
+	bottomTrayColor     = color.RGBA{0, 0, 0, 255}
 )
