@@ -40,17 +40,7 @@
       color: #ccc;
     }
 
-    progress {
-      width: 200px;
-      height: 8px;
-      margin-top: 8px;
-    }
-
-    #speed {
-      margin-top: 4px;
-      font-size: 0.9em;
-      color: #ccc;
-    }
+    /* progress bar removed */
 
     @keyframes spin {
       to {
@@ -71,28 +61,17 @@
     const brotli = await brotliPromise;
     fetch("oni-view.wasm.br")
       .then(async (resp) => {
-        const total = parseInt(resp.headers.get("content-length") || "0", 10);
         let buf;
         if (resp.body && resp.body.getReader) {
           const reader = resp.body.getReader();
           const chunks = [];
           let received = 0;
-          const start = performance.now();
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
             chunks.push(value);
             received += value.length;
-            if (total) {
-              const percent = (received / total) * 100;
-              document.getElementById("progress").value = percent;
-              document.getElementById("speed").textContent = percent.toFixed(0) + "%";
-            }
           }
-          if (total) {
-            document.getElementById("progress").value = 100;
-          }
-          document.getElementById("speed").textContent = "Loading application.";
           buf = new Uint8Array(received);
           let pos = 0;
           for (const chunk of chunks) {
@@ -102,10 +81,6 @@
           buf = buf.buffer;
         } else {
           buf = await resp.arrayBuffer();
-          if (total) {
-            document.getElementById("progress").value = 100;
-          }
-          document.getElementById("speed").textContent = "Loading application.";
         }
         const decompressed = brotli.decompress(new Uint8Array(buf)).buffer;
         return WebAssembly.instantiate(decompressed, go.importObject);
@@ -123,8 +98,6 @@
   <div id="loading">
     <div class="spinner"></div>
     <div>Loading...</div>
-    <progress id="progress" max="100" value="0"></progress>
-    <div id="speed"></div>
   </div>
 </body>
 </html>
