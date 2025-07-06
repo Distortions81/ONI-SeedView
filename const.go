@@ -102,6 +102,6 @@ var (
 	buttonActiveColor   = color.RGBA{0, 96, 96, 255}
 	buttonInactiveColor = color.RGBA{40, 40, 40, 255}
 	buttonBorderColor   = color.RGBA{255, 255, 255, 255}
-	frameColor          = color.RGBA{0, 0, 0, 128}
-	bottomTrayColor     = color.RGBA{0, 0, 0, 128}
+	frameColor          = color.RGBA{0, 0, 0, 192}
+	bottomTrayColor     = color.RGBA{0, 0, 0, 192}
 )
