@@ -130,7 +130,8 @@ go run . -coord SNDST-A-7-0-0-0 -screenshot myshot.png
 ```
 assets/     # Embedded image files used by the viewer
 scripts/    # Helper scripts for building, asset download and headless execution
-main.go     # Program entry point and rendering logic
+main.go     # Program entry point and startup logic
+loop.go     # Update, draw and layout methods
 display.go  # Icon selection and drawing helpers
 parse.go    # Functions for decoding biome path strings
 colors.go   # Color definitions for different biomes
