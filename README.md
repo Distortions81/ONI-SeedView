@@ -31,6 +31,7 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
 * Click the down-arrow next to the asteroid name to choose another asteroid.
 * A geyser icon opens a scrollable list of all geysers
   present on the map.
+* Newly loaded asteroids automatically center and zoom to fit the view.
 * Biome and item legend panels scroll when they extend past the window height,
   with extra space so items near the bottom can clear the icons.
 * Icons load asynchronously so the map is usable immediately.

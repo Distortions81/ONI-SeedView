@@ -849,6 +849,7 @@ type Game struct {
 	asteroidID        string
 	asteroidSpecified bool
 	statusError       bool
+	fitOnLoad         bool
 
 	textures      bool
 	vsync         bool
@@ -1102,6 +1103,12 @@ func (g *Game) startIconLoader(names []string) {
 
 func (g *Game) Update() error {
 	const panSpeed = PanSpeed
+
+	if g.fitOnLoad {
+		g.centerAndFit()
+		g.needsRedraw = true
+		g.fitOnLoad = false
+	}
 
 	if !g.smartRender {
 		g.needsRedraw = true
@@ -2390,7 +2397,7 @@ func main() {
 		game.astWidth = ast.SizeX
 		game.astHeight = ast.SizeY
 		game.legend, game.legendBiomes = buildLegendImage(bps)
-		game.centerAndFit()
+		game.fitOnLoad = true
 		game.biomeTextures = loadBiomeTextures()
 		names := []string{"../icons/camera.png", "../icons/help.png", "../icons/gear.png", "geyser_water.png"}
 		set := make(map[string]struct{})

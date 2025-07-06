@@ -218,7 +218,7 @@ func (g *Game) loadAsteroid(ast Asteroid) {
 	g.astWidth = ast.SizeX
 	g.astHeight = ast.SizeY
 	g.legend, g.legendBiomes = buildLegendImage(bps)
-	g.centerAndFit()
+	g.fitOnLoad = true
 	g.biomeTextures = loadBiomeTextures()
 	names := []string{"../icons/camera.png", "../icons/help.png", "../icons/gear.png", "geyser_water.png"}
 	set := make(map[string]struct{})
