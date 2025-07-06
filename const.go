@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	ClientVersion    = "v0.0.5-2507060107"
+	ClientVersion    = "v0.0.5-2507060127"
 	BaseURL          = "https://ingest.mapsnotincluded.org/coordinate/"
 	AcceptCBORHeader = "application/cbor"
 	PanSpeed         = 15
@@ -52,6 +52,8 @@ const (
 	GeyserRowSpacing      = 60
 	OptionsMenuSpacing    = 26
 	OptionsMenuTitle      = "Options:"
+	AsteroidMenuSpacing   = 26
+	AsteroidMenuTitle     = "Asteroids:"
 
 	// BiomeTextureScale controls the repetition of biome textures.
 	// Smaller values result in more repetitions.
