@@ -19,8 +19,9 @@ func (g *Game) asteroidArrowRect() image.Rectangle {
 	text := "Asteroid: " + name
 	w, _ := textDimensions(text)
 	x := g.width/2 + w/2 + 4
-	size := 12
-	y := 30 + 8 - size/2
+	size := int(float64(12) * fontScale())
+	baseline := seedBaseline() + notoFont.Metrics().Height.Ceil() + 4
+	y := baseline + notoFont.Metrics().Descent.Ceil() + 4 - size/2
 	return image.Rect(x, y, x+size, y+size)
 }
 
@@ -33,7 +34,7 @@ func (g *Game) asteroidInfoRect() image.Rectangle {
 	}
 	sw, sh := textDimensions(g.coord)
 	sx := g.width/2 - sw/2
-	seedRect := image.Rect(sx-2, 8, sx+sw+2, 8+sh+4)
+	seedRect := image.Rect(sx-2, seedBaseline()-2, sx+sw+2, seedBaseline()-2+sh+4)
 
 	name := g.asteroidID
 	if name == "" {
@@ -42,7 +43,8 @@ func (g *Game) asteroidInfoRect() image.Rectangle {
 	astText := "Asteroid: " + name
 	aw, ah := textDimensions(astText)
 	ax := g.width/2 - aw/2
-	astRect := image.Rect(ax-2, 28, ax+aw+2, 28+ah+4)
+	astBase := seedBaseline() + notoFont.Metrics().Height.Ceil() + 4
+	astRect := image.Rect(ax-2, astBase-2, ax+aw+2, astBase-2+ah+4)
 
 	rect := seedRect.Union(astRect)
 	rect = rect.Union(g.asteroidArrowRect())
