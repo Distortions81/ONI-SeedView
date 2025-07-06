@@ -22,10 +22,14 @@ func (g *Game) drawUI(screen *ebiten.Image) {
 		crossClr := color.RGBA{255, 255, 255, 30}
 		vector.StrokeLine(screen, float32(cx-CrosshairSize), float32(cy), float32(cx+CrosshairSize), float32(cy), 1, crossClr, true)
 		vector.StrokeLine(screen, float32(cx), float32(cy-CrosshairSize), float32(cx), float32(cy+CrosshairSize), 1, crossClr, true)
-		worldX := int(math.Round(((float64(cx) - g.camX) / g.zoom) / 2))
-		worldY := int(math.Round(((float64(cy) - g.camY) / g.zoom) / 2))
-		coords := fmt.Sprintf("X: %d Y: %d", worldX, worldY)
-		drawTextWithBGScale(screen, coords, 5, g.height-20, 1, false)
+		if g.showItemNames {
+			worldX := int(math.Round(((float64(cx) - g.camX) / g.zoom) / 2))
+			worldY := int(math.Round(((float64(cy) - g.camY) / g.zoom) / 2))
+			coords := fmt.Sprintf("X: %d Y: %d", worldX, worldY)
+			lh := notoFont.Metrics().Height.Ceil()
+			y := g.height - lh - 8
+			drawTextWithBGScale(screen, coords, 5, y, 1, false)
+		}
 	}
 
 	if g.showInfo {

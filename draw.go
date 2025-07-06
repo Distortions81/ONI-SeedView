@@ -47,7 +47,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		labels := []label{}
 		var highlightGeysers []Geyser
 		var highlightPOIs []PointOfInterest
-		useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
+		useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode && g.showItemNames
 		if g.legendMap == nil {
 			g.initObjectLegend()
 		}
@@ -195,7 +195,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 		}
 
-		if g.coord != "" && !g.screenshotMode {
+		if g.coord != "" && !g.screenshotMode && g.showItemNames {
 			label := g.coord
 			aName := g.asteroidID
 			if aName == "" {
@@ -313,13 +313,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			x := math.Round((float64(gy.X) * 2 * g.zoom) + g.camX)
 			y := math.Round((float64(gy.Y) * 2 * g.zoom) + g.camY)
 
-				name := displayGeyser(gy.ID)
-				formatted, _ := formatLabel(name)
-				dotClr := highlightColor
-				labelClr := dotClr
-				if !useNumbers {
-					labelClr = color.RGBA{}
-				}
+			name := displayGeyser(gy.ID)
+			formatted, _ := formatLabel(name)
+			dotClr := highlightColor
+			labelClr := dotClr
+			if !useNumbers {
+				labelClr = color.RGBA{}
+			}
 
 			if iconName := iconForGeyser(gy.ID); iconName != "" {
 				if img, ok := g.icons[iconName]; ok && img != nil {
@@ -337,7 +337,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					if useNumbers {
 						formatted = strconv.Itoa(g.legendMap["g"+name])
 					}
-					highlightLabels = append(highlightLabels, label{formatted, int(x), int(y+h/2) + 2, labelClr})
+					if g.showItemNames {
+						highlightLabels = append(highlightLabels, label{formatted, int(x), int(y+h/2) + 2, labelClr})
+					}
 					continue
 				}
 			}
@@ -347,20 +349,22 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if useNumbers {
 				formatted = strconv.Itoa(g.legendMap["g"+name])
 			}
-			highlightLabels = append(highlightLabels, label{formatted, int(x), int(y) + 4, labelClr})
+			if g.showItemNames {
+				highlightLabels = append(highlightLabels, label{formatted, int(x), int(y) + 4, labelClr})
+			}
 		}
 
 		for _, poi := range highlightPOIs {
 			x := math.Round((float64(poi.X) * 2 * g.zoom) + g.camX)
 			y := math.Round((float64(poi.Y) * 2 * g.zoom) + g.camY)
 
-				name := displayPOI(poi.ID)
-				formatted, _ := formatLabel(name)
-				dotClr := highlightColor
-				labelClr := dotClr
-				if !useNumbers {
-					labelClr = color.RGBA{}
-				}
+			name := displayPOI(poi.ID)
+			formatted, _ := formatLabel(name)
+			dotClr := highlightColor
+			labelClr := dotClr
+			if !useNumbers {
+				labelClr = color.RGBA{}
+			}
 
 			if iconName := iconForPOI(poi.ID); iconName != "" {
 				if img, ok := g.icons[iconName]; ok && img != nil {
@@ -378,7 +382,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					if useNumbers {
 						formatted = strconv.Itoa(g.legendMap["p"+name])
 					}
-					highlightLabels = append(highlightLabels, label{formatted, int(x), int(y+h/2) + 2, labelClr})
+					if g.showItemNames {
+						highlightLabels = append(highlightLabels, label{formatted, int(x), int(y+h/2) + 2, labelClr})
+					}
 					continue
 				}
 			}
@@ -388,7 +394,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if useNumbers {
 				formatted = strconv.Itoa(g.legendMap["p"+name])
 			}
-			highlightLabels = append(highlightLabels, label{formatted, int(x), int(y) + 4, labelClr})
+			if g.showItemNames {
+				highlightLabels = append(highlightLabels, label{formatted, int(x), int(y) + 4, labelClr})
+			}
 		}
 
 		if len(highlightLabels) > 0 {
