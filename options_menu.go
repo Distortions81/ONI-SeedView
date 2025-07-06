@@ -7,7 +7,6 @@ import (
 	"image"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 func (g *Game) optionsRect() image.Rectangle {
@@ -67,13 +66,13 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	w, h := g.optionsMenuSize()
 	img := ebiten.NewImage(w, h)
 	drawFrame(img, image.Rect(0, 0, w, h))
-	ebitenutil.DebugPrintAt(img, OptionsMenuTitle, 6, 6)
+	drawText(img, OptionsMenuTitle, 6, 6)
 	y := 6 + OptionsMenuSpacing
 
 	drawToggle := func(label string, enabled bool) {
 		btn := image.Rect(4, y-4, w-4, y-4+22)
 		drawButton(img, btn, enabled)
-		ebitenutil.DebugPrintAt(img, label, btn.Min.X+6, btn.Min.Y+4)
+		drawText(img, label, btn.Min.X+6, btn.Min.Y+4)
 		y += OptionsMenuSpacing
 	}
 
@@ -85,7 +84,7 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	drawToggle("Magnify Text", g.magnify)
 
 	label := "Icon Size"
-	ebitenutil.DebugPrintAt(img, label, 6, y)
+	drawText(img, label, 6, y)
 	tw, _ := textDimensions(label)
 	bx := 6 + tw + 6
 	minus := image.Rect(bx, y-4, bx+20, y-4+22)
@@ -101,15 +100,15 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	drawToggle("Linear Filtering", g.linearFilter)
 
 	fps := fmt.Sprintf("FPS: %.1f", ebiten.ActualFPS())
-	ebitenutil.DebugPrintAt(img, fps, 6, y)
+	drawText(img, fps, 6, y)
 	y += OptionsMenuSpacing
 
-	ebitenutil.DebugPrintAt(img, "Version: "+ClientVersion, 6, y)
+	drawText(img, "Version: "+ClientVersion, 6, y)
 	y += OptionsMenuSpacing
 
 	btn := image.Rect(4, y-4, w-4, y-4+22)
 	drawButton(img, btn, true)
-	ebitenutil.DebugPrintAt(img, "Close", btn.Min.X+6, btn.Min.Y+4)
+	drawText(img, "Close", btn.Min.X+6, btn.Min.Y+4)
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(scale, scale)
