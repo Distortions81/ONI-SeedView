@@ -33,9 +33,8 @@ func (g *Game) screenshotMenuSize() (int, int) {
 			maxW = w
 		}
 	}
-	scale := fontScale()
-	w := int(float64(maxW)*scale) + 4
-	h := int(float64((itemCount+1)*ScreenshotMenuSpacing)*scale) + 4
+	w := maxW + 4
+	h := (itemCount+1)*menuSpacing() + 4
 	return w, h
 }
 
@@ -71,9 +70,9 @@ func (g *Game) drawScreenshotMenu(dst *ebiten.Image) {
 	}
 	items := append([]string(nil), ScreenshotQualities...)
 	items = append(items, ScreenshotBWLabel, label, ScreenshotCloseLabel)
-	y := 6 + ScreenshotMenuSpacing
+	y := 6 + menuSpacing()
 	for i, it := range items {
-		btn := image.Rect(4, y-4, w-4, y-4+22)
+		btn := image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
 		selected := i == g.ssQuality
 		switch i {
 		case len(ScreenshotQualities):
@@ -89,10 +88,14 @@ func (g *Game) drawScreenshotMenu(dst *ebiten.Image) {
 		default:
 			drawButton(img, btn, selected)
 		}
-		drawText(img, it, btn.Min.X+6, btn.Min.Y+4)
-		y += ScreenshotMenuSpacing
+		lh := menuButtonHeight() - 5
+		if notoFont != nil {
+			lh = notoFont.Metrics().Height.Ceil()
+		}
+		drawText(img, it, btn.Min.X+6, btn.Min.Y+(menuButtonHeight()-lh)/2)
+		y += menuSpacing()
 		if i == len(ScreenshotQualities)-1 || i == len(ScreenshotQualities) {
-			y += ScreenshotMenuSpacing
+			y += menuSpacing()
 		}
 	}
 	op := &ebiten.DrawImageOptions{}
@@ -113,10 +116,10 @@ func (g *Game) clickScreenshotMenu(mx, my int) bool {
 	my = y
 	items := append([]string(nil), ScreenshotQualities...)
 	items = append(items, ScreenshotBWLabel, ScreenshotSaveLabel, ScreenshotCloseLabel)
-	y = 6 + ScreenshotMenuSpacing
+	y = 6 + menuSpacing()
 	w, _ := g.screenshotMenuSize()
 	for i := range items {
-		r := image.Rect(4, y-4, w-4, y-4+22)
+		r := image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
 		if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			switch i {
 			case 0, 1, 2:
@@ -133,9 +136,9 @@ func (g *Game) clickScreenshotMenu(mx, my int) bool {
 			g.needsRedraw = true
 			return true
 		}
-		y += ScreenshotMenuSpacing
+		y += menuSpacing()
 		if i == len(ScreenshotQualities)-1 || i == len(ScreenshotQualities) {
-			y += ScreenshotMenuSpacing
+			y += menuSpacing()
 		}
 	}
 	return false
