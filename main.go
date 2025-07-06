@@ -38,6 +38,7 @@ func init() {
 		{"Camera icon", "open screenshot menu"},
 		{"Geyser-icon", "list all geysers"},
 		{"Question mark", "toggle this help"},
+		{"X button", "close this help"},
 		{"Gear icon", "open options"},
 	}
 	width := 0
@@ -904,7 +905,8 @@ type Game struct {
 	linearFilter  bool
 	halfRes       bool
 	autoLowRes    bool
-	lowFPSStart   time.Time
+	lowFPSAccum   time.Duration
+	lastFPSTick   time.Time
 
 	noColor   bool
 	ssNoColor bool
@@ -1020,6 +1022,12 @@ func (g *Game) helpMenuRect() image.Rectangle {
 		y = 0
 	}
 	return image.Rect(x, y, x+w, y+h)
+}
+
+func (g *Game) helpCloseRect() image.Rectangle {
+	size := g.iconSize()
+	r := g.helpMenuRect()
+	return image.Rect(r.Max.X-size-2, r.Min.Y+2, r.Max.X-2, r.Min.Y+size+2)
 }
 
 func (g *Game) geyserRect() image.Rectangle {
@@ -1187,21 +1195,32 @@ iconsLoop:
 		g.skipClickTicks--
 	}
 
+	now := time.Now()
+	if g.lastFPSTick.IsZero() {
+		g.lastFPSTick = now
+	}
+	delta := now.Sub(g.lastFPSTick)
+	if delta > 200*time.Millisecond {
+		delta = 200 * time.Millisecond
+	}
+	g.lastFPSTick = now
+
 	if g.autoLowRes && !g.halfRes && g.ssPending == 0 && !g.screenshotMode {
 		if ebiten.ActualFPS() < 15 {
-			if g.lowFPSStart.IsZero() {
-				g.lowFPSStart = time.Now()
-			} else if time.Since(g.lowFPSStart) > 2*time.Second {
+			g.lowFPSAccum += delta
+			if g.lowFPSAccum > 2*time.Second {
 				g.textures = false
 				g.linearFilter = false
 				g.vsync = false
 				ebiten.SetVsyncEnabled(g.vsync)
 				g.needsRedraw = true
-				g.lowFPSStart = time.Time{}
+				g.lowFPSAccum = 0
 			}
 		} else {
-			g.lowFPSStart = time.Time{}
+			g.lowFPSAccum = 0
 		}
+	} else {
+		g.lowFPSAccum = 0
 	}
 
 	if g.showGeyserList {
@@ -1514,7 +1533,7 @@ iconsLoop:
 			} else if g.helpRect().Overlaps(pt) {
 				g.showHelp = !g.showHelp
 				g.needsRedraw = true
-			} else if g.showHelp {
+			} else if g.showHelp && g.helpCloseRect().Overlaps(pt) {
 				g.showHelp = false
 				g.needsRedraw = true
 			} else if g.geyserRect().Overlaps(pt) {
@@ -1654,13 +1673,11 @@ iconsLoop:
 			g.touchUsed = false
 		}
 		g.lastMouseX, g.lastMouseY = mx, my
-		if g.showHelp {
-			if !g.helpRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-				g.showHelp = false
-				g.needsRedraw = true
-			}
-		} else if justPressed && g.helpRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-			g.showHelp = true
+		if justPressed && g.helpRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+			g.showHelp = !g.showHelp
+			g.needsRedraw = true
+		} else if g.showHelp && justPressed && g.helpCloseRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+			g.showHelp = false
 			g.needsRedraw = true
 		} else if g.showShotMenu {
 			if justPressed {
@@ -2266,6 +2283,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			scale := g.uiScale()
 			rect := g.helpMenuRect()
 			drawTextWithBGScale(screen, helpMessage, rect.Min.X, rect.Min.Y, scale)
+			cr := g.helpCloseRect()
+			drawCloseButton(screen, cr)
 		}
 
 		g.needsRedraw = false
