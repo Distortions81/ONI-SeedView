@@ -2337,7 +2337,7 @@ func main() {
 		selectedItem:      -1,
 	}
 	go func(id string) {
-		fmt.Println("Fetching:", *coord)
+		//fmt.Println("Fetching:", *coord)
 		cborData, err := fetchSeedCBOR(*coord)
 		if err != nil {
 			game.status = "Error: " + err.Error()
