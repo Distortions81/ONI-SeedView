@@ -24,10 +24,8 @@ func (g *Game) optionsMenuSize() (int, int) {
 		"Show Item Names",
 		"Show Legends",
 		"Use Item Numbers",
-		"Magnify Text",
 		"Icon Size [-] [+]",
 		"Smart Rendering",
-		"Half Resolution",
 		"Linear Filtering",
 		"FPS: 60.0",
 		"Version: " + ClientVersion,
@@ -81,7 +79,6 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	drawToggle("Show Item Names", g.showItemNames)
 	drawToggle("Show Legends", g.showLegend)
 	drawToggle("Use Item Numbers", g.useNumbers)
-	drawToggle("Magnify Text", g.magnify)
 
 	label := "Icon Size"
 	drawText(img, label, 6, y)
@@ -96,7 +93,6 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	y += OptionsMenuSpacing
 
 	drawToggle("Smart Rendering", g.smartRender)
-	drawToggle("Half Resolution", g.halfRes)
 	drawToggle("Linear Filtering", g.linearFilter)
 
 	fps := fmt.Sprintf("FPS: %.1f", ebiten.ActualFPS())
@@ -175,25 +171,6 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	}
 	y += OptionsMenuSpacing
 
-	// Magnify Text
-	r = image.Rect(4, y-4, w-4, y-4+22)
-	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-		g.magnify = !g.magnify
-		if max := g.maxBiomeScroll(); max == 0 {
-			g.biomeScroll = 0
-		} else if g.biomeScroll > max {
-			g.biomeScroll = max
-		}
-		if max := g.maxItemScroll(); max == 0 {
-			g.itemScroll = 0
-		} else if g.itemScroll > max {
-			g.itemScroll = max
-		}
-		g.needsRedraw = true
-		return true
-	}
-	y += OptionsMenuSpacing
-
 	// Icon Size buttons
 	labelW, _ := textDimensions("Icon Size")
 	bx := 6 + labelW + 6
@@ -217,15 +194,6 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	r = image.Rect(4, y-4, w-4, y-4+22)
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.smartRender = !g.smartRender
-		g.needsRedraw = true
-		return true
-	}
-	y += OptionsMenuSpacing
-
-	// Half Resolution
-	r = image.Rect(4, y-4, w-4, y-4+22)
-	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-		g.halfRes = !g.halfRes
 		g.needsRedraw = true
 		return true
 	}

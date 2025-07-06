@@ -901,7 +901,6 @@ type Game struct {
 	skipClickTicks    int
 	lastDraw          time.Time
 	wasMinimized      bool
-	magnify           bool
 	asteroidID        string
 	asteroidSpecified bool
 	statusError       bool
@@ -914,7 +913,6 @@ type Game struct {
 	iconScale     float64
 	smartRender   bool
 	linearFilter  bool
-	halfRes       bool
 
 	noColor   bool
 	ssNoColor bool
@@ -955,11 +953,7 @@ func (g *Game) uiScale() float64 {
 		}
 		return 1.0
 	}
-	scale := 1.0
-	if g.magnify {
-		scale = 2.0
-	}
-	return scale
+	return 1.0
 }
 
 func (g *Game) iconSize() int {
@@ -2284,10 +2278,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	screenW := outsideWidth
 	screenH := outsideHeight
-	if g.halfRes && !g.screenshotMode {
-		screenW /= 2
-		screenH /= 2
-	}
 
 	if g.width != screenW || g.height != screenH {
 		// Keep the world position at the center of the screen fixed so
@@ -2365,7 +2355,6 @@ func main() {
 		iconScale:         1.0,
 		smartRender:       true,
 		linearFilter:      true,
-		halfRes:           false,
 		ssQuality:         1,
 		hoverBiome:        -1,
 		hoverItem:         -1,
