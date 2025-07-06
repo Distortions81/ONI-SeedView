@@ -915,9 +915,6 @@ type Game struct {
 	smartRender   bool
 	linearFilter  bool
 	halfRes       bool
-	autoLowRes    bool
-	lowFPSAccum   time.Duration
-	lastFPSTick   time.Time
 
 	noColor   bool
 	ssNoColor bool
@@ -1208,34 +1205,6 @@ iconsLoop:
 		g.needsRedraw = true
 	} else if g.skipClickTicks > 0 {
 		g.skipClickTicks--
-	}
-
-	now := time.Now()
-	if g.lastFPSTick.IsZero() {
-		g.lastFPSTick = now
-	}
-	delta := now.Sub(g.lastFPSTick)
-	if delta > 200*time.Millisecond {
-		delta = 200 * time.Millisecond
-	}
-	g.lastFPSTick = now
-
-	if g.autoLowRes && !g.halfRes && g.ssPending == 0 && !g.screenshotMode {
-		if ebiten.ActualFPS() < 15 {
-			g.lowFPSAccum += delta
-			if g.lowFPSAccum > 2*time.Second {
-				g.textures = false
-				g.linearFilter = false
-				g.vsync = false
-				ebiten.SetVsyncEnabled(g.vsync)
-				g.needsRedraw = true
-				g.lowFPSAccum = 0
-			}
-		} else {
-			g.lowFPSAccum = 0
-		}
-	} else {
-		g.lowFPSAccum = 0
 	}
 
 	if g.showGeyserList {
@@ -2397,7 +2366,6 @@ func main() {
 		smartRender:       true,
 		linearFilter:      true,
 		halfRes:           false,
-		autoLowRes:        true,
 		ssQuality:         1,
 		hoverBiome:        -1,
 		hoverItem:         -1,
