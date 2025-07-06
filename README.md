@@ -147,12 +147,6 @@ gofmt -w *.go
 go test -tags test ./...
 ```
 
-## Versioning
-
-Run `scripts/bump_version.sh` before committing. The script only updates the
-timestamp portion of the `ClientVersion` constant in `const.go` and leaves the
-`MAJOR.MINOR.PATCH` numbers unchanged. Update those numbers manually when
-appropriate and never decrease them so version history moves forward.
 
 ## License
 
