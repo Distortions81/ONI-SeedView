@@ -50,7 +50,6 @@ const (
 	ScreenshotCloseLabel  = "Close"
 	GeyserRowSpacing      = 60
 	OptionsMenuTitle      = "Options:"
-	AsteroidMenuSpacing   = 26
 	AsteroidMenuTitle     = "Asteroids:"
 
 	// BiomeTextureScale controls the repetition of biome textures.

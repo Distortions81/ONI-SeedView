@@ -102,7 +102,7 @@ func (g *Game) asteroidMenuSize() (int, int) {
 	// longer names don't butt up against the right edge of the menu.
 	// Include an extra character width of padding for clarity.
 	w := maxW + 28 + LabelCharWidth
-	h := (len(g.asteroids)+1)*AsteroidMenuSpacing + 4
+	h := (len(g.asteroids)+1)*menuSpacing() + 4
 	return w, h
 }
 
@@ -149,16 +149,16 @@ func (g *Game) drawAsteroidMenu(dst *ebiten.Image) {
 	img := ebiten.NewImage(w, h)
 	drawFrame(img, image.Rect(0, 0, w, h))
 	drawText(img, AsteroidMenuTitle, 6, 6, false)
-	y := 6 + AsteroidMenuSpacing - int(g.asteroidScroll)
+	y := 6 + menuSpacing() - int(g.asteroidScroll)
 	for _, a := range g.asteroids {
-		btn := image.Rect(4, y-4, w-4, y-4+22)
+		btn := image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
 		drawButton(img, btn, a.ID == g.asteroidID)
 		if a.ID == g.asteroidID {
 			ck := image.Rect(btn.Min.X+4, btn.Min.Y+4, btn.Min.X+16, btn.Min.Y+16)
 			drawCheck(img, ck)
 		}
 		drawText(img, a.ID, btn.Min.X+20, btn.Min.Y+4, false)
-		y += AsteroidMenuSpacing
+		y += menuSpacing()
 	}
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(rect.Min.X), float64(rect.Min.Y))
@@ -175,9 +175,9 @@ func (g *Game) clickAsteroidMenu(mx, my int) bool {
 	mx = x
 	my = y
 	w, _ := g.asteroidMenuSize()
-	yPos := 6 + AsteroidMenuSpacing
+	yPos := 6 + menuSpacing()
 	for i, a := range g.asteroids {
-		r := image.Rect(4, yPos-4, w-4, yPos-4+22)
+		r := image.Rect(4, yPos-4, w-4, yPos-4+menuButtonHeight())
 		if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.showAstMenu = false
 			g.asteroidScroll = 0
@@ -188,7 +188,7 @@ func (g *Game) clickAsteroidMenu(mx, my int) bool {
 			_ = i
 			return true
 		}
-		yPos += AsteroidMenuSpacing
+		yPos += menuSpacing()
 	}
 	return true
 }
