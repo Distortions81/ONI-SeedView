@@ -982,7 +982,7 @@ func (g *Game) helpRect() image.Rectangle {
 
 func (g *Game) geyserRect() image.Rectangle {
 	size := g.iconSize()
-	x := g.width - size*5 - HelpMargin*5
+	x := g.width - size*4 - HelpMargin*4
 	y := g.height - size - HelpMargin
 	return image.Rect(x, y, x+size, y+size)
 }

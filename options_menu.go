@@ -12,7 +12,7 @@ import (
 
 func (g *Game) optionsRect() image.Rectangle {
 	size := g.iconSize()
-	x := g.width - size*6 - HelpMargin*6
+	x := g.width - size*5 - HelpMargin*5
 	y := g.height - size - HelpMargin
 	return image.Rect(x, y, x+size, y+size)
 }
