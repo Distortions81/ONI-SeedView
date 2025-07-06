@@ -1752,11 +1752,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	if g.loading || (len(g.biomes) == 0 && g.status != "") {
 		screen.Fill(color.RGBA{30, 30, 30, 255})
 		msg := g.status
-		if msg == "" {
-			msg = "Fetching..."
-		}
 		scale := 1.0
-		if msg == "Fetching..." {
+		if msg == "" {
+			msg = "Fetching asteroid data..."
 			scale = 2.0
 		}
 		w, h := textDimensions(msg)
