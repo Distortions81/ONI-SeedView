@@ -38,6 +38,7 @@ func init() {
 		{"Camera icon", "open screenshot menu"},
 		{"Geyser-icon", "list all geysers"},
 		{"Question mark", "toggle this help"},
+		{"X button", "close this help"},
 		{"Gear icon", "open options"},
 	}
 	width := 0
@@ -1023,6 +1024,12 @@ func (g *Game) helpMenuRect() image.Rectangle {
 	return image.Rect(x, y, x+w, y+h)
 }
 
+func (g *Game) helpCloseRect() image.Rectangle {
+	size := g.iconSize()
+	r := g.helpMenuRect()
+	return image.Rect(r.Max.X-size-2, r.Min.Y+2, r.Max.X-2, r.Min.Y+size+2)
+}
+
 func (g *Game) geyserRect() image.Rectangle {
 	size := g.iconSize()
 	x := g.width - size*3 - HelpMargin*3
@@ -1526,7 +1533,7 @@ iconsLoop:
 			} else if g.helpRect().Overlaps(pt) {
 				g.showHelp = !g.showHelp
 				g.needsRedraw = true
-			} else if g.showHelp {
+			} else if g.showHelp && g.helpCloseRect().Overlaps(pt) {
 				g.showHelp = false
 				g.needsRedraw = true
 			} else if g.geyserRect().Overlaps(pt) {
@@ -1666,13 +1673,11 @@ iconsLoop:
 			g.touchUsed = false
 		}
 		g.lastMouseX, g.lastMouseY = mx, my
-		if g.showHelp {
-			if !g.helpRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-				g.showHelp = false
-				g.needsRedraw = true
-			}
-		} else if justPressed && g.helpRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-			g.showHelp = true
+		if justPressed && g.helpRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+			g.showHelp = !g.showHelp
+			g.needsRedraw = true
+		} else if g.showHelp && justPressed && g.helpCloseRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+			g.showHelp = false
 			g.needsRedraw = true
 		} else if g.showShotMenu {
 			if justPressed {
@@ -2278,6 +2283,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			scale := g.uiScale()
 			rect := g.helpMenuRect()
 			drawTextWithBGScale(screen, helpMessage, rect.Min.X, rect.Min.Y, scale)
+			cr := g.helpCloseRect()
+			drawCloseButton(screen, cr)
 		}
 
 		g.needsRedraw = false
