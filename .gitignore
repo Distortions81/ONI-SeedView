@@ -1,6 +1,2 @@
-# downloaded assets
-assets/*
-!assets/.gitkeep
-dist/
-
-NotoSansMono.ttf
+build/
+*.bmp

@@ -6,9 +6,10 @@ set -euo pipefail
 
 sudo apt-get update
 sudo apt-get install -y git curl build-essential pkg-config \
-    libasound2-dev libx11-dev libxext-dev libxrandr-dev libxinerama-dev \
+    libasound2-dev libx11-dev libxft-dev x11proto-dev \
+    libxext-dev libxrandr-dev libxinerama-dev \
     libxcursor-dev libxi-dev libxrender-dev libxxf86vm-dev \
-    libgl1-mesa-dev libgl1-mesa-glx xorg-dev
+    libgl1-mesa-dev libgl1 xorg-dev xvfb webp binaryen brotli
 
 # Install Go 1.24.3 if not already available.
 if ! go version 2>/dev/null | grep -q "go1.24.3"; then

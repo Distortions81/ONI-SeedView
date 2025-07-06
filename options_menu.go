@@ -17,12 +17,13 @@ func (g *Game) optionsRect() image.Rectangle {
 }
 
 func (g *Game) optionsMenuSize() (int, int) {
+	fontLabel := fmt.Sprintf("Font Size [-] [+] %.0fpt", fontSize)
 	labels := []string{
 		OptionsMenuTitle,
 		"Show Item Names",
 		"Show Legends",
 		"Use Item Numbers",
-		"Font Size [-] [+]",
+		fontLabel,
 		"Icon Size [-] [+]",
 		"Textures",
 		"Vsync",
@@ -46,10 +47,7 @@ func (g *Game) optionsMenuSize() (int, int) {
 
 func (g *Game) optionsMenuRect() image.Rectangle {
 	w, h := g.optionsMenuSize()
-	scale := g.uiScale()
-	w = int(float64(w) * scale)
-	h = int(float64(h) * scale)
-	x := g.optionsRect().Min.X - w - int(10*scale)
+	x := g.optionsRect().Min.X - w - 10
 	if x < 0 {
 		x = 0
 	}
@@ -61,12 +59,11 @@ func (g *Game) optionsMenuRect() image.Rectangle {
 }
 
 func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
-	scale := g.uiScale()
 	rect := g.optionsMenuRect()
 	w, h := g.optionsMenuSize()
 	img := ebiten.NewImage(w, h)
 	drawFrame(img, image.Rect(0, 0, w, h))
-	drawText(img, OptionsMenuTitle, 6, 6)
+	drawText(img, OptionsMenuTitle, 6, 6, false)
 	y := 6 + menuSpacing()
 
 	drawToggle := func(label string, enabled bool) {
@@ -76,7 +73,7 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 		if notoFont != nil {
 			lh = notoFont.Metrics().Height.Ceil()
 		}
-		drawText(img, label, btn.Min.X+6, btn.Min.Y+(menuButtonHeight()-lh)/2)
+		drawText(img, label, btn.Min.X+6, btn.Min.Y+(menuButtonHeight()-lh)/2, false)
 		y += menuSpacing()
 	}
 
@@ -85,7 +82,7 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	drawToggle("Use Item Numbers", g.useNumbers)
 
 	label := "Font Size"
-	drawText(img, label, 6, y)
+	drawText(img, label, 6, y, false)
 	tw, _ := textDimensions(label)
 	bx := 6 + tw + 6
 	minus := image.Rect(bx, y-4, bx+20, y-4+menuButtonHeight())
@@ -94,10 +91,12 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	drawPlusMinus(img, minus, true)
 	drawButton(img, plus, false)
 	drawPlusMinus(img, plus, false)
+	sizeStr := fmt.Sprintf("%.0fpt", fontSize)
+	drawText(img, sizeStr, plus.Max.X+6, y, false)
 	y += menuSpacing()
 
 	label = "Icon Size"
-	drawText(img, label, 6, y)
+	drawText(img, label, 6, y, false)
 	tw, _ = textDimensions(label)
 	bx = 6 + tw + 6
 	minus = image.Rect(bx, y-4, bx+20, y-4+menuButtonHeight())
@@ -114,18 +113,21 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	drawToggle("Linear Filtering", g.linearFilter)
 
 	fps := fmt.Sprintf("FPS: %.1f", ebiten.ActualFPS())
-	drawText(img, fps, 6, y)
+	drawText(img, fps, 6, y, false)
 	y += menuSpacing()
 
-	drawText(img, "Version: "+ClientVersion, 6, y)
+	drawText(img, "Version: "+ClientVersion, 6, y, false)
 	y += menuSpacing()
 
-	btn := image.Rect(4, y-4, w-4, y-4+22)
+	btn := image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
 	drawButton(img, btn, true)
-	drawText(img, "Close", btn.Min.X+6, btn.Min.Y+4)
+	lh := menuButtonHeight() - 5
+	if notoFont != nil {
+		lh = notoFont.Metrics().Height.Ceil()
+	}
+	drawText(img, "Close", btn.Min.X+6, btn.Min.Y+(menuButtonHeight()-lh)/2, false)
 
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(scale, scale)
 	op.GeoM.Translate(float64(rect.Min.X), float64(rect.Min.Y))
 	dst.DrawImage(img, op)
 }
@@ -135,9 +137,8 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	if !rect.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		return false
 	}
-	scale := g.uiScale()
-	x := int(float64(mx-rect.Min.X) / scale)
-	y := int(float64(my-rect.Min.Y) / scale)
+	x := mx - rect.Min.X
+	y := my - rect.Min.Y
 	mx = x
 	my = y
 	w, _ := g.optionsMenuSize()

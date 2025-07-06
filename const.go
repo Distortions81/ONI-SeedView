@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	ClientVersion    = "v0.0.7-2507060514"
+	ClientVersion    = "v0.0.7-2507061643"
 	BaseURL          = "https://ingest.mapsnotincluded.org/coordinate/"
 	AcceptCBORHeader = "application/cbor"
 	PanSpeed         = 15
@@ -34,7 +34,7 @@ const (
 	// LegendScrollExtraRows controls how many additional rows the legend
 	// panels can scroll beyond the bottom of the screen.
 	LegendScrollExtraRows = 3
-	ScreenshotFile        = "screenshot.png"
+	ScreenshotFile        = "screenshot.bmp"
 	HelpIconSize          = 24
 	HelpMargin            = 10
 	CrosshairSize         = 10
@@ -50,7 +50,6 @@ const (
 	ScreenshotCloseLabel  = "Close"
 	GeyserRowSpacing      = 60
 	OptionsMenuTitle      = "Options:"
-	AsteroidMenuSpacing   = 26
 	AsteroidMenuTitle     = "Asteroids:"
 
 	// BiomeTextureScale controls the repetition of biome textures.
@@ -64,7 +63,7 @@ const (
 	// WebAssetBase specifies the path used to fetch image assets
 	// when running in WebAssembly. The assets should be served
 	// relative to the page URL.
-	WebAssetBase = "assets/"
+	WebAssetBase = "objects/"
 )
 
 var LegendZoomThreshold = math.Pow(WheelZoomFactor, LegendZoomExponent)
@@ -101,7 +100,11 @@ var biomeOrder = []string{
 var (
 	buttonActiveColor   = color.RGBA{0, 96, 96, 255}
 	buttonInactiveColor = color.RGBA{40, 40, 40, 255}
-	buttonBorderColor   = color.RGBA{255, 255, 255, 255}
-	frameColor          = color.RGBA{0, 0, 0, 255}
-	bottomTrayColor     = color.RGBA{0, 0, 0, 180}
+	buttonBorderColor   = color.White
+	frameColor          = color.RGBA{0, 0, 0, 192}
+	bottomTrayColor     = frameColor
+	highlightColor      = color.RGBA{255, 0, 0, 255}
+	legendBGColor       = color.RGBA{0, 0, 0, 77}
+	overlayColor        = color.RGBA{0, 0, 0, 180}
+	backgroundColor     = color.RGBA{30, 30, 30, 255}
 )

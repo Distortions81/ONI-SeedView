@@ -10,10 +10,9 @@ This repository contains a small ebiten viewer written in Go.
   ```
 - Image assets are committed to the repo and embedded at build time, so no
   download step is required.
-- Run `scripts/bump_version.sh` before committing to update the timestamp in
-  the `ClientVersion` constant found in `const.go`. The script preserves the
-  existing `MAJOR.MINOR.PATCH` numbers. Increase these version numbers
-  manually when releasing new features or fixes and **never** decrease them.
+- Run `./install_deps.sh` and related scripts **only** when you need the packages they install. These helpers speed up environment setup when you require tools like Go, Xvfb or the `webp` utilities.
+- If you install additional packages while working, add them to
+  `scripts/install_deps.sh` so they are included in the setup process.
 
 Additional tasks to keep the project healthy:
  - Keep `README.md` up to date when features or build steps change.

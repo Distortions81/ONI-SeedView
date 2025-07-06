@@ -11,13 +11,6 @@ import (
 // drawFrame draws a simple framed rectangle with the global frame color.
 func drawFrame(dst *ebiten.Image, rect image.Rectangle) {
 	vector.DrawFilledRect(dst, float32(rect.Min.X), float32(rect.Min.Y), float32(rect.Dx()), float32(rect.Dy()), frameColor, false)
-	vector.StrokeRect(dst, float32(rect.Min.X)+0.5, float32(rect.Min.Y)+0.5, float32(rect.Dx())-1, float32(rect.Dy())-1, 1, buttonBorderColor, false)
-}
-
-// strokeFrame draws only the border using the global frame color without
-// filling the rectangle.
-func strokeFrame(dst *ebiten.Image, rect image.Rectangle) {
-	vector.StrokeRect(dst, float32(rect.Min.X)+0.5, float32(rect.Min.Y)+0.5, float32(rect.Dx())-1, float32(rect.Dy())-1, 1, buttonBorderColor, false)
 }
 
 // drawButton draws a rounded button. When active, the cyan color is used.

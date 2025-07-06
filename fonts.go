@@ -4,16 +4,18 @@ package main
 
 import (
 	_ "embed"
-	"log"
 
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 )
 
-//go:embed NotoSansMono.ttf
+//go:embed data/NotoSansMono.ttf
 var notoTTF []byte
 
-const baseFontSize = 12.0
+const (
+	baseFontSize       = 11.0
+	screenshotFontSize = 32.0
+)
 
 var (
 	notoFont   font.Face
@@ -27,13 +29,13 @@ func loadFont(size float64) font.Face {
 		var err error
 		fontParsed, err = opentype.Parse(notoTTF)
 		if err != nil {
-			log.Fatalf("failed to parse font: %v", err)
+			panic("failed to parse font: " + err.Error())
 		}
 	}
 	const dpi = 72
 	face, err := opentype.NewFace(fontParsed, &opentype.FaceOptions{Size: size, DPI: dpi, Hinting: font.HintingFull})
 	if err != nil {
-		log.Fatalf("failed to create font face: %v", err)
+		panic("failed to create font face: " + err.Error())
 	}
 	return face
 }
@@ -46,11 +48,11 @@ func setFontSize(size float64) {
 	}
 }
 
-func increaseFontSize() { setFontSize(fontSize + 2) }
+func increaseFontSize() { setFontSize(fontSize + 3) }
 
 func decreaseFontSize() {
 	if fontSize > 6 {
-		setFontSize(fontSize - 2)
+		setFontSize(fontSize - 3)
 	}
 }
 
@@ -79,6 +81,10 @@ func menuSpacing() int {
 		return menuButtonHeight() + 4
 	}
 	return int(float64(26) * fontScale())
+}
+
+func seedBaseline() int {
+	return 10
 }
 
 func init() {

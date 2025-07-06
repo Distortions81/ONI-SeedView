@@ -18,14 +18,14 @@ import (
 
 // embed all image assets so no runtime fetching is needed
 //
-//go:embed assets/*.png icons/*.png biomes/*.png
+//go:embed objects/*.png icons/*.png biomes/*.png
 var assetFS embed.FS
 
 func openAsset(name string) (io.ReadCloser, error) {
 	n := path.Clean(name)
 	n = strings.TrimPrefix(n, "../")
-	if !strings.HasPrefix(n, "assets/") && !strings.HasPrefix(n, "icons/") && !strings.HasPrefix(n, "biomes/") {
-		n = path.Join("assets", n)
+	if !strings.HasPrefix(n, "objects/") && !strings.HasPrefix(n, "icons/") && !strings.HasPrefix(n, "biomes/") {
+		n = path.Join("objects", n)
 	}
 	return assetFS.Open(n)
 }
