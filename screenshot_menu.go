@@ -32,8 +32,9 @@ func (g *Game) screenshotMenuSize() (int, int) {
 			maxW = len(s)
 		}
 	}
-	w := maxW*LabelCharWidth + 4
-	h := (itemCount+1)*ScreenshotMenuSpacing + 4
+	scale := fontScale()
+	w := int(float64(maxW*LabelCharWidth)*scale) + 4
+	h := int(float64((itemCount+1)*ScreenshotMenuSpacing)*scale) + 4
 	return w, h
 }
 
