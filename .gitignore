@@ -1,6 +1,6 @@
 # downloaded assets
-assets/*
-!assets/.gitkeep
-dist/
+objects/*
+!objects/.gitkeep
+build/
 
-NotoSansMono.ttf
+data/NotoSansMono.ttf
