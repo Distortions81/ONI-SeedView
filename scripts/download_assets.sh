@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(dirname "$0")/.."
-ASSET_DIR="$REPO_ROOT/assets"
+ASSET_DIR="$REPO_ROOT/objects"
 TEMP_DIR=$(mktemp -d)
 
 if [ -n "$(ls -A "$ASSET_DIR" 2>/dev/null | grep -v '.gitkeep' || true)" ]; then

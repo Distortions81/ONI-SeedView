@@ -56,7 +56,7 @@ type nameTables struct {
 
 var names nameTables
 
-//go:embed names.json
+//go:embed data/names.json
 var namesData []byte
 
 func init() {

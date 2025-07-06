@@ -64,7 +64,7 @@ const (
 	// WebAssetBase specifies the path used to fetch image assets
 	// when running in WebAssembly. The assets should be served
 	// relative to the page URL.
-	WebAssetBase = "assets/"
+	WebAssetBase = "objects/"
 )
 
 var LegendZoomThreshold = math.Pow(WheelZoomFactor, LegendZoomExponent)
