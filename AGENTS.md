@@ -3,10 +3,10 @@ This repository contains a small ebiten viewer written in Go.
 ## Development
 - Binary files can not be committed due to current limitations, don't do this or you will not be able to commit changes.
 - Format Go code with `gofmt -w` before committing.
-- Run tests with the `test` build tag so the ebiten game code is excluded:
+- Run tests normally:
   ```bash
   gofmt -w *.go
-  go test -tags test ./...
+  go test ./...
   ```
 - Image assets are committed to the repo and embedded at build time, so no
   download step is required.
