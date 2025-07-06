@@ -30,7 +30,7 @@ func init() {
 		{"Mouse wheel or +/-", "zoom in and out"},
 		{"Drag with the mouse/touch", "pan"},
 		{"Pinch with two fingers", "zoom on touch"},
-		{"Click or tap geysers/POIs", "show details"},
+		{"Click or tap geysers/POIs", "center and show details"},
 		{"Tap legend entries", "highlight items"},
 		{"Camera icon", "open screenshot menu"},
 		{"Geyser-icon", "list all geysers"},
@@ -137,6 +137,20 @@ func drawTextWithBGBorderScale(dst *ebiten.Image, text string, x, y int, border 
 	dst.DrawImage(img, op)
 }
 
+func drawTextScale(dst *ebiten.Image, text string, x, y int, scale float64) {
+	if scale == 1.0 {
+		drawText(dst, text, x, y)
+		return
+	}
+	w, h := textDimensions(text)
+	img := ebiten.NewImage(w, h)
+	drawText(img, text, 0, 0)
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(scale, scale)
+	op.GeoM.Translate(float64(x), float64(y))
+	dst.DrawImage(img, op)
+}
+
 func (g *Game) drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int, scale float64) {
 	txtW, txtH := textDimensions(text)
 	iconW, iconH := 0, 0
@@ -145,25 +159,26 @@ func (g *Game) drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image,
 		iconH = InfoIconSize
 	}
 	gap := 4
-	w := txtW + iconW + gap + 4
+	w := txtW + iconW + gap + 8
 	h := txtH
 	if iconH > txtH {
 		h = iconH
 	}
-	h += 4
+	h += 8
 	img := ebiten.NewImage(w, h)
-	vector.DrawFilledRect(img, 0, 0, float32(w), float32(h), color.RGBA{0, 30, 30, InfoPanelAlpha}, false)
+	vector.DrawFilledRect(img, 0, 0, float32(w), float32(h), color.RGBA{0, 0, 0, InfoPanelAlpha}, false)
+	vector.StrokeRect(img, 0.5, 0.5, float32(w)-1, float32(h)-1, 1, buttonBorderColor, false)
 	if icon != nil {
 		opIcon := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 		scaleIcon := float64(InfoIconSize) / math.Max(float64(icon.Bounds().Dx()), float64(icon.Bounds().Dy()))
 		opIcon.GeoM.Scale(scaleIcon, scaleIcon)
-		opIcon.GeoM.Translate(2, float64(h-iconH)/2)
+		opIcon.GeoM.Translate(4, float64(h-iconH)/2)
 		img.DrawImage(icon, opIcon)
 	}
-	drawText(img, text, iconW+gap+2, 2)
+	drawText(img, text, iconW+gap+4, 4)
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(scale, scale)
-	op.GeoM.Translate(float64(x-2), float64(y-2))
+	op.GeoM.Translate(float64(x-4), float64(y-4))
 	dst.DrawImage(img, op)
 }
 
@@ -215,12 +230,12 @@ func infoPanelSize(text string, icon *ebiten.Image) (int, int) {
 		iconH = InfoIconSize
 	}
 	gap := 4
-	w := txtW + iconW + gap + 4
+	w := txtW + iconW + gap + 8
 	h := txtH
 	if iconH > txtH {
 		h = iconH
 	}
-	h += 4
+	h += 8
 	return w, h
 }
 
@@ -361,7 +376,7 @@ func buildLegendImage(biomes []BiomePath) (*ebiten.Image, []string) {
 	height := spacing*(len(names)+2) + 7
 
 	img := ebiten.NewImage(width, height)
-	img.Fill(color.RGBA{0, 30, 30, 77})
+	img.Fill(color.RGBA{0, 0, 0, 77})
 
 	y := 10
 	drawTextWithBG(img, "Biomes", 5, y)
@@ -433,7 +448,7 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 		width := maxW + 10
 		height := spacing*(len(g.legendEntries)+2) + 7
 		img := ebiten.NewImage(width, height)
-		img.Fill(color.RGBA{0, 30, 30, 77})
+		img.Fill(color.RGBA{0, 0, 0, 77})
 		y := 10
 		drawTextWithBG(img, "Items", 5, y)
 		y += spacing
@@ -456,6 +471,8 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 	op.GeoM.Scale(scale, scale)
 	op.GeoM.Translate(math.Round(x), math.Round(y))
 	dst.DrawImage(g.legendImage, op)
+	lh := float64(g.legendImage.Bounds().Dy()) * scale
+	strokeFrame(dst, image.Rect(int(math.Round(x)), int(math.Round(y)), int(math.Round(x+w)), int(math.Round(y+lh))))
 	if g.selectedItem >= 0 {
 		spacing := float64(rowSpacing())
 		hy := y + (10+spacing*float64(g.selectedItem+1))*scale
@@ -833,6 +850,7 @@ type Game struct {
 	asteroidID        string
 	asteroidSpecified bool
 	statusError       bool
+	fitOnLoad         bool
 
 	textures      bool
 	vsync         bool
@@ -1087,6 +1105,12 @@ func (g *Game) startIconLoader(names []string) {
 func (g *Game) Update() error {
 	const panSpeed = PanSpeed
 
+	if g.fitOnLoad {
+		g.centerAndFit()
+		g.needsRedraw = true
+		g.fitOnLoad = false
+	}
+
 	if !g.smartRender {
 		g.needsRedraw = true
 	}
@@ -1165,7 +1189,7 @@ iconsLoop:
 		if mx >= 0 && mx < g.width && my >= 0 && my < g.height {
 			if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 				if !g.clickAsteroidMenu(mx, my) {
-					if !g.asteroidMenuRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) && !g.asteroidArrowRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+					if !g.asteroidMenuRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) && !g.asteroidInfoRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 						g.showAstMenu = false
 						g.needsRedraw = true
 					}
@@ -1176,7 +1200,7 @@ iconsLoop:
 			x, y := ebiten.TouchPosition(id)
 			if x >= 0 && x < g.width && y >= 0 && y < g.height {
 				if !g.clickAsteroidMenu(x, y) {
-					if !g.asteroidMenuRect().Overlaps(image.Rect(x, y, x+1, y+1)) && !g.asteroidArrowRect().Overlaps(image.Rect(x, y, x+1, y+1)) {
+					if !g.asteroidMenuRect().Overlaps(image.Rect(x, y, x+1, y+1)) && !g.asteroidInfoRect().Overlaps(image.Rect(x, y, x+1, y+1)) {
 						g.showAstMenu = false
 						g.needsRedraw = true
 					}
@@ -1417,7 +1441,7 @@ iconsLoop:
 			} else if g.optionsRect().Overlaps(pt) {
 				g.showOptions = true
 				g.needsRedraw = true
-			} else if g.asteroidArrowRect().Overlaps(pt) {
+			} else if g.asteroidInfoRect().Overlaps(pt) {
 				g.showAstMenu = true
 				g.needsRedraw = true
 			} else if g.helpRect().Overlaps(pt) {
@@ -1435,8 +1459,8 @@ iconsLoop:
 			} else if g.touchUI {
 				g.updateHover(mx, my)
 				g.clickLegend(mx, my)
-			} else if g.mobile {
-				if _, ix, iy, _, found := g.itemAt(mx, my); found {
+			} else {
+				if info, ix, iy, icon, found := g.itemAt(mx, my); found {
 					g.camX += float64(g.width/2 - ix)
 					g.camY += float64(g.height/2 - iy)
 					g.clampCamera()
@@ -1453,6 +1477,10 @@ iconsLoop:
 					if g.itemScroll < 0 {
 						g.itemScroll = 0
 					}
+					g.infoText = info
+					g.infoIcon = icon
+					g.showInfo = true
+					g.infoPinned = true
 					g.needsRedraw = true
 				}
 			}
@@ -1593,7 +1621,7 @@ iconsLoop:
 		} else if justPressed && g.optionsRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.showOptions = true
 			g.needsRedraw = true
-		} else if justPressed && g.asteroidArrowRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		} else if justPressed && g.asteroidInfoRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.showAstMenu = true
 			g.needsRedraw = true
 		} else if justPressed && g.clickLegend(mx, my) {
@@ -1604,6 +1632,31 @@ iconsLoop:
 			g.dragging = false
 			g.showGeyserList = true
 			g.needsRedraw = true
+		} else if justPressed {
+			if info, ix, iy, icon, found := g.itemAt(mx, my); found {
+				g.camX += float64(g.width/2 - ix)
+				g.camY += float64(g.height/2 - iy)
+				g.clampCamera()
+
+				if max := g.maxBiomeScroll(); g.biomeScroll > max {
+					g.biomeScroll = max
+				}
+				if g.biomeScroll < 0 {
+					g.biomeScroll = 0
+				}
+				if max := g.maxItemScroll(); g.itemScroll > max {
+					g.itemScroll = max
+				}
+				if g.itemScroll < 0 {
+					g.itemScroll = 0
+				}
+
+				g.infoText = info
+				g.infoIcon = icon
+				g.showInfo = true
+				g.infoPinned = true
+				g.needsRedraw = true
+			}
 		}
 	}
 
@@ -1911,6 +1964,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				aName = "Unknown"
 			}
 			astName := fmt.Sprintf("Asteroid: %s", aName)
+			rect := g.asteroidInfoRect()
+			drawFrame(screen, rect)
+
 			w, _ := textDimensions(astName)
 			x := g.width/2 - int(float64(w)*scale/2)
 			drawTextWithBGScale(screen, astName, x, int(30*scale), scale)
@@ -1931,6 +1987,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			opLegend.GeoM.Scale(scale, scale)
 			opLegend.GeoM.Translate(0, -g.biomeScroll)
 			screen.DrawImage(g.legend, opLegend)
+			lw := int(math.Round(float64(g.legend.Bounds().Dx()) * scale))
+			lh := int(math.Round(float64(g.legend.Bounds().Dy()) * scale))
+			ly := int(math.Round(-g.biomeScroll))
+			strokeFrame(screen, image.Rect(0, ly, lw, ly+lh))
 			if g.selectedBiome >= 0 {
 				spacing := float64(rowSpacing())
 				y0 := math.Round((10+spacing+spacing*float64(g.selectedBiome))*scale - g.biomeScroll)
@@ -2183,7 +2243,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		if g.showHelp && !g.screenshotMode {
 			scale := g.uiScale()
 			rect := g.helpMenuRect()
-			drawTextWithBGScale(screen, helpMessage, rect.Min.X, rect.Min.Y, scale)
+			drawFrame(screen, rect)
+			drawTextScale(screen, helpMessage, rect.Min.X+2, rect.Min.Y+2, scale)
 			cr := g.helpCloseRect()
 			drawCloseButton(screen, cr)
 		}
@@ -2352,6 +2413,12 @@ func main() {
 			_ = saveToFile(*out, jsonData)
 		}
 		ast := seed.Asteroids[astIdxSel]
+		game.invalidateLegends()
+		game.legendMap = nil
+		game.legendEntries = nil
+		game.legendColors = nil
+		game.selectedItem = -1
+		game.itemScroll = 0
 		game.asteroidID = ast.ID
 		bps := parseBiomePaths(ast.BiomePaths)
 		game.geysers = ast.Geysers
@@ -2360,7 +2427,7 @@ func main() {
 		game.astWidth = ast.SizeX
 		game.astHeight = ast.SizeY
 		game.legend, game.legendBiomes = buildLegendImage(bps)
-		game.centerAndFit()
+		game.fitOnLoad = true
 		game.biomeTextures = loadBiomeTextures()
 		names := []string{"../icons/camera.png", "../icons/help.png", "../icons/gear.png", "geyser_water.png"}
 		set := make(map[string]struct{})

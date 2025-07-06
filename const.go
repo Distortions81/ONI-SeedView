@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	ClientVersion    = "v0.0.6-2507060337"
+	ClientVersion    = "v0.0.7-2507060514"
 	BaseURL          = "https://ingest.mapsnotincluded.org/coordinate/"
 	AcceptCBORHeader = "application/cbor"
 	PanSpeed         = 15
@@ -18,7 +18,7 @@ const (
 	KeyZoomFactor   = 1.05
 	WheelZoomFactor = 1.1
 	MinZoom         = 0.25
-	MaxZoom         = 8.0
+	MaxZoom         = 16.0
 	IconScale       = 0.2
 	// BaseIconPixels is the target pixel size used when scaling
 	// geyser and POI icons. Larger icons are scaled down so the

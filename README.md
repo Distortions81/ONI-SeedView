@@ -19,7 +19,8 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
   selecting image quality from low (2K) to high (8K) and includes a
   "Black and White" toggle for printing or color-blind accessibility.
 * Hover over geyser or POI icons to show an information panel.
-  Clicking pins the panel so it stays visible while panning.
+  Clicking or tapping centers the item and pins the panel so it stays visible
+  while panning.
 * Hover over the bottom icons for tooltips describing their actions. Tooltips
   automatically stay within the window bounds.
 * A help icon displays the available controls at any time. An X button closes the overlay.
@@ -31,6 +32,7 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
 * Click the down-arrow next to the asteroid name to choose another asteroid.
 * A geyser icon opens a scrollable list of all geysers
   present on the map.
+* Newly loaded asteroids automatically center and zoom to fit the view.
 * Biome and item legend panels scroll when they extend past the window height,
   with extra space so items near the bottom can clear the icons.
 * Icons load asynchronously so the map is usable immediately.
@@ -43,7 +45,7 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
 - **Mouse wheel or `+`/`-`** – zoom in and out.
 - **Drag with the mouse** – pan.
 - **Pinch gestures** – zoom on touch devices.
-- **Click or tap geysers/POIs** – view details in a popup.
+- **Click or tap geysers/POIs** – center the item and show details in a popup.
 - **Hover or tap legend entries** – highlight and select matching objects.
 - **Camera icon** – open the screenshot menu.
 - **Geyser icon** – show a list of all geysers.
@@ -107,8 +109,9 @@ the environments are:
   `asteroid=` ID.
 * **Mobile** – When running on a mobile OS or in a mobile browser the viewer
   disables item numbers at startup but the toolbar icons remain available.
-  Item details appear when the crosshair is centered over a geyser or POI or a
-  POI is tapped, and you pan or zoom using touch gestures.
+  Item details appear when the crosshair is centered over a geyser or POI or
+  when a POI is tapped, which also centers the item. You pan or zoom using touch
+  gestures.
 
 ## Saving Screenshots
 
