@@ -36,14 +36,14 @@ func (g *Game) handleTouchGestures(oldX, oldY float64) {
 				g.geyserRect().Overlaps(pt) || g.optionsRect().Overlaps(pt) {
 				g.touchUI = true
 			} else {
-				if g.legend != nil {
+				if g.legend != nil && g.showLegend {
 					lw := g.legend.Bounds().Dx()
 					if x >= 0 && x < lw {
 						g.touchUI = true
 					}
 				}
 				useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
-				if !g.touchUI && useNumbers && g.legendImage != nil {
+				if !g.touchUI && useNumbers && g.legendImage != nil && g.showLegend {
 					lw := g.legendImage.Bounds().Dx()
 					x0 := g.width - lw - 12
 					if x >= x0 && x < x0+lw {
@@ -67,7 +67,7 @@ func (g *Game) handleTouchGestures(oldX, oldY float64) {
 				if g.showGeyserList {
 					g.adjustGeyserScroll(-float64(dy))
 				} else {
-					if g.legend != nil {
+					if g.legend != nil && g.showLegend {
 						lw := g.legend.Bounds().Dx()
 						if g.touchStartX >= 0 && g.touchStartX < lw {
 							g.biomeScroll -= float64(dy)
@@ -81,7 +81,7 @@ func (g *Game) handleTouchGestures(oldX, oldY float64) {
 						}
 					}
 					useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
-					if useNumbers && g.legendImage != nil {
+					if useNumbers && g.legendImage != nil && g.showLegend {
 						lw := g.legendImage.Bounds().Dx()
 						x0 := g.width - lw - 12
 						if g.touchStartX >= x0 && g.touchStartX < x0+lw {
@@ -118,14 +118,14 @@ func (g *Game) handleTouchGestures(oldX, oldY float64) {
 					g.geyserRect().Overlaps(pt) || g.optionsRect().Overlaps(pt) {
 					g.touchUI = true
 				} else {
-					if g.legend != nil {
+					if g.legend != nil && g.showLegend {
 						lw := g.legend.Bounds().Dx()
 						if x >= 0 && x < lw {
 							g.touchUI = true
 						}
 					}
 					useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
-					if !g.touchUI && useNumbers && g.legendImage != nil {
+					if !g.touchUI && useNumbers && g.legendImage != nil && g.showLegend {
 						lw := g.legendImage.Bounds().Dx()
 						x0 := g.width - lw - 12
 						if x >= x0 && x < x0+lw {

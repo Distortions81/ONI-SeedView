@@ -93,7 +93,7 @@ func (g *Game) Update() error {
 		} else {
 			handled := false
 			useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
-			if g.legend != nil {
+			if g.legend != nil && g.showLegend {
 				lw := g.legend.Bounds().Dx()
 				lh := g.legend.Bounds().Dy()
 				if lh > g.height && mxTmp >= 0 && mxTmp < lw {
@@ -109,7 +109,7 @@ func (g *Game) Update() error {
 					handled = true
 				}
 			}
-			if !handled && useNumbers && g.legendImage != nil {
+			if !handled && useNumbers && g.legendImage != nil && g.showLegend {
 				lw := g.legendImage.Bounds().Dx()
 				lh := g.legendImage.Bounds().Dy()
 				x0 := g.width - lw - 12
