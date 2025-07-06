@@ -1459,8 +1459,8 @@ iconsLoop:
 			} else if g.touchUI {
 				g.updateHover(mx, my)
 				g.clickLegend(mx, my)
-			} else if g.mobile {
-				if _, ix, iy, _, found := g.itemAt(mx, my); found {
+			} else {
+				if info, ix, iy, icon, found := g.itemAt(mx, my); found {
 					g.camX += float64(g.width/2 - ix)
 					g.camY += float64(g.height/2 - iy)
 					g.clampCamera()
@@ -1477,6 +1477,10 @@ iconsLoop:
 					if g.itemScroll < 0 {
 						g.itemScroll = 0
 					}
+					g.infoText = info
+					g.infoIcon = icon
+					g.showInfo = true
+					g.infoPinned = true
 					g.needsRedraw = true
 				}
 			}
