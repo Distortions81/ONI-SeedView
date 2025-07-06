@@ -29,6 +29,7 @@ func (g *Game) optionsMenuSize() (int, int) {
 		"Vsync",
 		"Power Saver",
 		"Linear Filtering",
+		"High DPI",
 		"FPS: 60.0",
 		"Version: " + ClientVersion,
 		"Close",
@@ -111,6 +112,7 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	drawToggle("Vsync", g.vsync)
 	drawToggle("Power Saver", g.smartRender)
 	drawToggle("Linear Filtering", g.linearFilter)
+	drawToggle("High DPI", g.highDPI)
 
 	fps := fmt.Sprintf("FPS: %.1f", ebiten.ActualFPS())
 	drawText(img, fps, 6, y, false)
@@ -259,6 +261,26 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.linearFilter = !g.linearFilter
+		g.needsRedraw = true
+		return true
+	}
+	y += menuSpacing()
+
+	// High DPI
+	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
+	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		g.highDPI = !g.highDPI
+		g.updateDPIScale()
+		if max := g.maxBiomeScroll(); max == 0 {
+			g.biomeScroll = 0
+		} else if g.biomeScroll > max {
+			g.biomeScroll = max
+		}
+		if max := g.maxItemScroll(); max == 0 {
+			g.itemScroll = 0
+		} else if g.itemScroll > max {
+			g.itemScroll = max
+		}
 		g.needsRedraw = true
 		return true
 	}

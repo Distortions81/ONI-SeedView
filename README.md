@@ -11,6 +11,7 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
 * Touch controls for panning and pinch-to-zoom on supported devices.
 * Mouse wheel and `+`/`-` keys control zoom. The window can be resized at any time.
 * Font size automatically decreases on small screens and increases on large displays.
+* Optional high DPI mode uses the monitor's scale factor for crisp graphics.
 * Textured biomes with a color legend and icons for geysers and points of interest.
 * The empty space around the asteroid now uses a repeating space texture.
 * Biome texture mapping is documented in [BIOME_TEXTURES.md](BIOME_TEXTURES.md).
@@ -19,7 +20,7 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
 * Hover over geyser or POI icons to show an information panel. Clicking or tapping centers the item and pins it in place while panning.
 * Hover over the bottom icons for tooltips describing their actions. Tooltips automatically stay within the window bounds.
 * A help icon displays the available controls at any time. An X button closes the overlay.
-* A gear icon opens an options menu for toggling features like textures, Vsync, power saver mode and linear filtering along with item labels, legends and number labels. You can also adjust font size and icon size and view the current FPS.
+* A gear icon opens an options menu for toggling features like textures, Vsync, power saver mode, linear filtering and high DPI along with item labels, legends and number labels. You can also adjust font size and icon size and view the current FPS.
 * Crosshairs at the center show the current world coordinates, useful for lining up precise screenshots.
 * Click the down-arrow next to the asteroid name to choose another asteroid.
 * A geyser icon opens a scrollable list of all geysers present on the map.
