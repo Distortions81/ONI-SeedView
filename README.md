@@ -24,10 +24,8 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
   automatically stay within the window bounds.
 * A help icon displays the available controls at any time. An X button closes the overlay.
 * A gear icon opens an options menu for toggling textures, Vsync,
-  item labels, legends, number labels, smart rendering, half-resolution
-  mode, and linear filtering. You can also
-  adjust icon size and view the current FPS.
-* A **Magnify Text** option toggles enlarged UI text for accessibility.
+  item labels, legends, number labels, smart rendering and linear filtering.
+  You can also adjust icon size and view the current FPS.
 * Crosshairs at the center show the current world coordinates,
   useful for lining up precise screenshots.
 * Click the down-arrow next to the asteroid name to choose another asteroid.
@@ -51,7 +49,6 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
 - **Geyser icon** – show a list of all geysers.
 - **Question mark** – toggle the help overlay.
 - **X button** – close the help overlay.
-- **Magnify Text** option – enlarge or shrink the UI.
 - **Gear icon** – open the options menu.
 
 ## Getting Started
