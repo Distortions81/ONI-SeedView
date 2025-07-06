@@ -25,7 +25,7 @@ func (g *Game) checkRedrawTriggers() {
 		g.needsRedraw = true
 	}
 	g.wasMinimized = minimized
-	if time.Since(g.lastDraw) >= time.Second {
+	if time.Since(g.lastDraw) >= time.Second*3 {
 		g.needsRedraw = true
 	}
 }

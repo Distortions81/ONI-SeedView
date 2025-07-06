@@ -5,9 +5,10 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"golang.org/x/image/bmp"
 	"image"
 	"time"
+
+	"golang.org/x/image/bmp"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -63,7 +64,7 @@ func (g *Game) drawScreenshotMenu(dst *ebiten.Image) {
 	label := ScreenshotSaveLabel
 	if g.ssPending > 0 {
 		label = ScreenshotTakingLabel
-	} else if time.Since(g.ssSaved) < 2*time.Second {
+	} else if time.Since(g.ssSaved) < 3*time.Second {
 		label = ScreenshotSavedLabel
 	}
 	items := append([]string(nil), ScreenshotQualities...)
