@@ -151,17 +151,9 @@ func (g *Game) drawLoadingScreen(dst *ebiten.Image) bool {
 	x := g.width/2 - int(float64(w)*scale/2)
 	y := g.height/2 - int(float64(h)*scale/2)
 	if g.statusError {
-		if scale == 1.0 {
-			drawTextWithBGBorder(dst, msg, x, y, errorBorderColor)
-		} else {
-			drawTextWithBGBorderScale(dst, msg, x, y, errorBorderColor, scale)
-		}
+		drawTextWithBGBorderScale(dst, msg, x, y, errorBorderColor, scale)
 	} else {
-		if scale == 1.0 {
-			drawTextWithBG(dst, msg, x, y)
-		} else {
-			drawTextWithBGScale(dst, msg, x, y, scale)
-		}
+		drawTextWithBGScale(dst, msg, x, y, scale)
 	}
 	g.lastDraw = time.Now()
 	return true

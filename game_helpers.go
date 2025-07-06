@@ -117,25 +117,9 @@ type loadedIcon struct {
 	img  *ebiten.Image
 }
 
-func (g *Game) uiScale() float64 {
-	if g.mobile {
-		return 1.0
-	}
-	if g.screenshotMode {
-		if g.height > 1700 {
-			return 4.0
-		}
-		if g.height > 850 {
-			return 2.0
-		}
-		return 1.0
-	}
-	return 1.0
-}
+func (g *Game) uiScale() float64 { return 1.0 }
 
-func (g *Game) iconSize() int {
-	return int(float64(HelpIconSize) * g.uiScale())
-}
+func (g *Game) iconSize() int { return HelpIconSize }
 
 func (g *Game) filterMode() ebiten.Filter {
 	if g.linearFilter {
@@ -189,9 +173,6 @@ func helpMenuSize() (int, int) {
 
 func (g *Game) helpMenuRect() image.Rectangle {
 	w, h := helpMenuSize()
-	scale := g.uiScale()
-	w = int(float64(w) * scale)
-	h = int(float64(h) * scale)
 	r := g.helpRect()
 	x := r.Max.X - w
 	if x < 0 {

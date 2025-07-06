@@ -91,11 +91,10 @@ func (g *Game) Update() error {
 			g.adjustGeyserScroll(-float64(wheelY) * 10)
 		} else {
 			handled := false
-			scale := g.uiScale()
 			useNumbers := g.useNumbers && g.showItemNames && g.zoom < LegendZoomThreshold && !g.screenshotMode
 			if g.legend != nil {
-				lw := int(float64(g.legend.Bounds().Dx()) * scale)
-				lh := int(float64(g.legend.Bounds().Dy()) * scale)
+				lw := g.legend.Bounds().Dx()
+				lh := g.legend.Bounds().Dy()
 				if lh > g.height && mxTmp >= 0 && mxTmp < lw {
 					g.biomeScroll -= float64(wheelY) * 10
 					if g.biomeScroll < 0 {
@@ -110,8 +109,8 @@ func (g *Game) Update() error {
 				}
 			}
 			if !handled && useNumbers && g.legendImage != nil {
-				lw := int(float64(g.legendImage.Bounds().Dx()) * scale)
-				lh := int(float64(g.legendImage.Bounds().Dy()) * scale)
+				lw := g.legendImage.Bounds().Dx()
+				lh := g.legendImage.Bounds().Dy()
 				x0 := g.width - lw - 12
 				if lh+10 > g.height && mxTmp >= x0 && mxTmp < x0+lw {
 					g.itemScroll -= float64(wheelY) * 10
