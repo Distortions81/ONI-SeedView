@@ -7,7 +7,6 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
 ## Features
 
 * Fetches seed data in [CBOR](https://en.wikipedia.org/wiki/CBOR) format from the MapsNotIncluded ingest API.
-* Converts the data to JSON and optionally saves it to disk with the `-out` flag.
 * Smooth panning via arrow keys, **WASD** or by dragging with the mouse.
 * Touch controls for panning and pinch-to-zoom on supported devices.
 * Mouse wheel and `+`/`-` keys control zoom. The window can be resized at any time.
@@ -70,12 +69,6 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
    go run . -coord SNDST-A-7-0-0-0
    ```
 
-   To save the decoded seed as JSON use the optional `-out` flag:
-
-   ```bash
-   go run . -coord SNDST-A-7-0-0-0 -out seed.json
-   ```
-
 ## Running Headless
 
 If you need to run the viewer on a machine without a display, install `Xvfb` and use the provided script. The script starts a virtual framebuffer so the window can be created.
@@ -130,14 +123,13 @@ go run . -coord SNDST-A-7-0-0-0 -screenshot myshot.png
 ```
 objects/    # Embedded image files used by the viewer
 scripts/    # Helper scripts for building, asset download and headless execution
-data/       # JSON tables and fonts used at runtime
+data/       # Fonts used at runtime
 main.go     # Program entry point and startup logic
 loop.go     # Update, draw and layout methods
 display.go  # Icon selection and drawing helpers
 parse.go    # Functions for decoding biome path strings
 colors.go   # Color definitions for different biomes
 const.go    # Miscellaneous constants and configuration
-data/names.json  # Mapping tables for translating internal IDs to display names
 ```
 
 Unit tests live alongside the code (`main_test.go`, `zoom_test.go`). Format the

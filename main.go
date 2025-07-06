@@ -3,7 +3,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"runtime"
@@ -14,7 +13,6 @@ import (
 
 func main() {
 	coord := flag.String("coord", "SNDST-A-7-0-0-0", "seed coordinate")
-	out := flag.String("out", "", "optional path to save JSON")
 	screenshot := flag.String("screenshot", "", "path to save a PNG screenshot and exit")
 	flag.Parse()
 	asteroidIDVal := ""
@@ -103,10 +101,6 @@ func main() {
 				game.loading = false
 				return
 			}
-		}
-		if *out != "" {
-			jsonData, _ := json.MarshalIndent(seed, "", "  ")
-			_ = saveToFile(*out, jsonData)
 		}
 		ast := seed.Asteroids[astIdxSel]
 		game.invalidateLegends()
