@@ -1980,9 +1980,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				op.GeoM.Translate(float64(sr.Min.X)+(float64(size)-w)/2, float64(sr.Min.Y)+(float64(size)-h)/2)
 				screen.DrawImage(cam, op)
 			}
-			if g.showShotMenu {
-				g.drawScreenshotMenu(screen)
-			}
 
 			hr := g.helpRect()
 			cx := float32(hr.Min.X + size/2)
@@ -2013,9 +2010,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				op.GeoM.Translate(float64(or.Min.X)+(float64(size)-w)/2, float64(or.Min.Y)+(float64(size)-h)/2)
 				screen.DrawImage(gear, op)
 			}
-			if g.showOptions {
-				g.drawOptionsMenu(screen)
-			}
 
 			gr := g.geyserRect()
 			gcx := float32(gr.Min.X + size/2)
@@ -2045,25 +2039,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					g.drawTooltip(screen, "Geyser List", gr, scale)
 				}
 			}
-		}
-
-		if g.showHelp && !g.screenshotMode {
-			scale := g.uiScale()
-			rect := g.helpMenuRect()
-			drawTextWithBGScale(screen, helpMessage, rect.Min.X, rect.Min.Y, scale)
-		}
-
-		if !g.screenshotMode {
-			cx := g.width / 2
-			cy := g.height / 2
-			crossClr := color.RGBA{255, 255, 255, 30}
-			vector.StrokeLine(screen, float32(cx-CrosshairSize), float32(cy), float32(cx+CrosshairSize), float32(cy), 1, crossClr, true)
-			vector.StrokeLine(screen, float32(cx), float32(cy-CrosshairSize), float32(cx), float32(cy+CrosshairSize), 1, crossClr, true)
-			worldX := int(math.Round(((float64(cx) - g.camX) / g.zoom) / 2))
-			worldY := int(math.Round(((float64(cy) - g.camY) / g.zoom) / 2))
-			coords := fmt.Sprintf("X: %d Y: %d", worldX, worldY)
-			scale := g.uiScale()
-			drawTextWithBGScale(screen, coords, 5, g.height-int(20*scale), scale)
 		}
 
 		highlightLabels := []label{}
@@ -2176,6 +2151,31 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					}
 				}
 			}
+		}
+
+		if !g.screenshotMode {
+			cx := g.width / 2
+			cy := g.height / 2
+			crossClr := color.RGBA{255, 255, 255, 30}
+			vector.StrokeLine(screen, float32(cx-CrosshairSize), float32(cy), float32(cx+CrosshairSize), float32(cy), 1, crossClr, true)
+			vector.StrokeLine(screen, float32(cx), float32(cy-CrosshairSize), float32(cx), float32(cy+CrosshairSize), 1, crossClr, true)
+			worldX := int(math.Round(((float64(cx) - g.camX) / g.zoom) / 2))
+			worldY := int(math.Round(((float64(cy) - g.camY) / g.zoom) / 2))
+			coords := fmt.Sprintf("X: %d Y: %d", worldX, worldY)
+			scale := g.uiScale()
+			drawTextWithBGScale(screen, coords, 5, g.height-int(20*scale), scale)
+		}
+
+		if g.showShotMenu {
+			g.drawScreenshotMenu(screen)
+		}
+		if g.showOptions {
+			g.drawOptionsMenu(screen)
+		}
+		if g.showHelp && !g.screenshotMode {
+			scale := g.uiScale()
+			rect := g.helpMenuRect()
+			drawTextWithBGScale(screen, helpMessage, rect.Min.X, rect.Min.Y, scale)
 		}
 
 		if g.showInfo {
