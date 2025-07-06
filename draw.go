@@ -195,7 +195,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			labels = append(labels, label{formatted, int(x) - int(float64(width)*fs/2), int(y) + 4, width, labelClr})
 		}
 
-		fs := fontScale()
 		for _, l := range labels {
 			x := l.x
 			if l.clr.A != 0 {
@@ -233,9 +232,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			screen.DrawImage(g.legend, opLegend)
 			if g.selectedBiome >= 0 {
 				spacing := float64(rowSpacing())
-				y0 := math.Round((10+spacing+spacing*float64(g.selectedBiome))*scale - g.biomeScroll)
-				h := math.Round(spacing * scale)
-				w := math.Round(float64(g.legend.Bounds().Dx()) * scale)
+				y0 := math.Round((10 + spacing + spacing*float64(g.selectedBiome)) - g.biomeScroll)
+				h := math.Round(spacing)
+				w := math.Round(float64(g.legend.Bounds().Dx()))
 				vector.StrokeRect(screen, 0.5, float32(y0)-4, float32(w)-1, float32(h)-1, 2, color.RGBA{255, 0, 0, 255}, false)
 			}
 			if useNumbers && !g.screenshotMode {
