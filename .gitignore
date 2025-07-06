@@ -2,3 +2,5 @@
 assets/*
 !assets/.gitkeep
 dist/
+
+NotoSansMono.ttf

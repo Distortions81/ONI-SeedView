@@ -17,12 +17,11 @@ import (
 	"strings"
 	"time"
 
-	_ "embed"
-
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
+	"golang.org/x/image/font"
 )
 
 var helpMessage string
@@ -255,14 +254,27 @@ func (g *Game) drawInfoRow(dst *ebiten.Image, text string, icon *ebiten.Image, x
 }
 
 func textDimensions(text string) (int, int) {
+	if notoFont == nil {
+		lines := strings.Split(text, "\n")
+		width := 0
+		for _, l := range lines {
+			if len(l) > width {
+				width = len(l)
+			}
+		}
+		return width * LabelCharWidth, len(lines) * 16
+	}
 	lines := strings.Split(text, "\n")
 	width := 0
 	for _, l := range lines {
-		if len(l) > width {
-			width = len(l)
+		b, _ := font.BoundString(notoFont, l)
+		w := (b.Max.X - b.Min.X).Ceil()
+		if w > width {
+			width = w
 		}
 	}
-	return width * LabelCharWidth, len(lines) * 16
+	h := notoFont.Metrics().Height.Ceil() * len(lines)
+	return width, h
 }
 
 func infoPanelSize(text string, icon *ebiten.Image) (int, int) {

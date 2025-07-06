@@ -4,24 +4,19 @@ package main
 
 import (
 	"embed"
-	"encoding/base64"
 	"log"
 
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 )
 
-//go:embed NotoSansMono.ttf.base64
-var notoSansMonoBase64 string
+//go:embed NotoSansMono.ttf
+var notoTTF []byte
 
 var notoFont font.Face
 
 func init() {
-	data, err := base64.StdEncoding.DecodeString(notoSansMonoBase64)
-	if err != nil {
-		log.Fatalf("failed to decode font: %v", err)
-	}
-	tt, err := opentype.Parse(data)
+	tt, err := opentype.Parse(notoTTF)
 	if err != nil {
 		log.Fatalf("failed to parse font: %v", err)
 	}
