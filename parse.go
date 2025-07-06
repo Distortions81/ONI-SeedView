@@ -1,7 +1,6 @@
 package main
 
 import (
-	"regexp"
 	"strconv"
 	"strings"
 )
@@ -9,8 +8,25 @@ import (
 // parseBiomePaths converts the raw biome path string into structured paths.
 func parseBiomePaths(data string) []BiomePath {
 	data = strings.ReplaceAll(strings.ReplaceAll(strings.TrimSpace(data), "\r", ""), "\n", " ")
-	re := regexp.MustCompile(`([A-Za-z0-9_]+:)`)
-	locs := re.FindAllStringIndex(data, -1)
+	// Locate biome names followed by a colon without using regular expressions.
+	var locs [][2]int
+	for i := 0; i < len(data); i++ {
+		if data[i] == ':' {
+			start := i - 1
+			for start >= 0 {
+				c := data[start]
+				if !((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_') {
+					break
+				}
+				start--
+			}
+			start++
+			if start < i {
+				locs = append(locs, [2]int{start, i + 1})
+			}
+		}
+	}
+
 	var paths []BiomePath
 	for i, loc := range locs {
 		name := strings.TrimSuffix(data[loc[0]:loc[1]], ":")
