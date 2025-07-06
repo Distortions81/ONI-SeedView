@@ -83,10 +83,10 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 
 	label := "Icon Size"
 	drawText(img, label, pad, y, false)
-	tw, _ = textDimensions(label)
-	bx = pad + tw + pad
-	minus = image.Rect(bx, y-uiScaled(4), bx+uiScaled(20), y-uiScaled(4)+menuButtonHeight())
-	plus = image.Rect(bx+uiScaled(24), y-uiScaled(4), bx+uiScaled(44), y-uiScaled(4)+menuButtonHeight())
+	tw, _ := textDimensions(label)
+	bx := pad + tw + pad
+	minus := image.Rect(bx, y-uiScaled(4), bx+uiScaled(20), y-uiScaled(4)+menuButtonHeight())
+	plus := image.Rect(bx+uiScaled(24), y-uiScaled(4), bx+uiScaled(44), y-uiScaled(4)+menuButtonHeight())
 	drawButton(img, minus, false)
 	drawPlusMinus(img, minus, true)
 	drawButton(img, plus, false)
