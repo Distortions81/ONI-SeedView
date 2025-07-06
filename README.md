@@ -106,9 +106,10 @@ the environments are:
 * **WebAssembly** – No command line flags are available. The viewer reads the
   seed from the page URL using `?coord=` or `#coord=` parameters and an optional
   `asteroid=` ID.
-* **Mobile** – When running on a mobile OS or in a mobile browser the toolbar
-  icons are hidden. Item details appear when the crosshair is centered over a
-  geyser or POI, or a POI is clicked, and you pan or zoom using touch gestures.
+* **Mobile** – When running on a mobile OS or in a mobile browser the viewer
+  disables item numbers at startup but the toolbar icons remain available.
+  Item details appear when the crosshair is centered over a geyser or POI or a
+  POI is tapped, and you pan or zoom using touch gestures.
 
 ## Saving Screenshots
 

@@ -17,5 +17,7 @@ This repository contains a small ebiten viewer written in Go.
 
 Additional tasks to keep the project healthy:
  - Keep `README.md` up to date when features or build steps change.
+ - Update the help menu text in `main.go` whenever controls change and keep it
+   in sync with the **Controls** section of `README.md`.
  - Refresh `screenshot.png` if the UI changes significantly.
  - Run `go mod tidy` after adding dependencies.

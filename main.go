@@ -25,17 +25,38 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
-const helpMessage = "Controls:\n" +
-	"Arrow keys/WASD or drag – pan the map\n" +
-	"Mouse wheel or +/- keys – zoom in and out\n" +
-	"Pinch with two fingers – zoom on touch\n" +
-	"Click or tap geysers/POIs – show details\n" +
-	"Tap legend entries – select and highlight items\n" +
-	"Camera icon – open screenshot menu\n" +
-	"Water-drop icon – list all geysers\n" +
-	"Question mark – toggle this help\n" +
-	"Magnify Text option – enlarge the UI\n" +
-	"Gear icon – options"
+var helpMessage string
+
+func init() {
+	lines := [][2]string{
+		{"Arrow keys/WASD", "pan the camera"},
+		{"Mouse wheel or +/-", "zoom in and out"},
+		{"Drag with the mouse", "pan"},
+		{"Pinch with two fingers", "zoom on touch"},
+		{"Click or tap geysers/POIs", "show details"},
+		{"Tap legend entries", "highlight items"},
+		{"Camera icon", "open screenshot menu"},
+		{"Water-drop icon", "list all geysers"},
+		{"Question mark", "toggle this help"},
+		{"Magnify Text option", "enlarge the UI"},
+		{"Gear icon", "open options"},
+	}
+	width := 0
+	for _, p := range lines {
+		if len(p[0]) > width {
+			width = len(p[0])
+		}
+	}
+	var b strings.Builder
+	b.WriteString("Controls:\n")
+	for i, p := range lines {
+		fmt.Fprintf(&b, "%-*s | %s", width, p[0], p[1])
+		if i < len(lines)-1 {
+			b.WriteByte('\n')
+		}
+	}
+	helpMessage = b.String()
+}
 
 type hoverIcon int
 
@@ -688,7 +709,7 @@ func (g *Game) updateHover(mx, my int) {
 			}
 		}
 	}
-	useNumbers := g.useNumbers && g.showItemNames && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+	useNumbers := g.useNumbers && g.showItemNames && g.zoom < LegendZoomThreshold && !g.screenshotMode
 	if useNumbers && g.legendImage != nil {
 		w := int(float64(g.legendImage.Bounds().Dx()) * scale)
 		x0 := g.width - w - 12
@@ -766,7 +787,7 @@ func (g *Game) clickLegend(mx, my int) bool {
 			}
 		}
 	}
-	useNumbers := g.useNumbers && g.showItemNames && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+	useNumbers := g.useNumbers && g.showItemNames && g.zoom < LegendZoomThreshold && !g.screenshotMode
 	if useNumbers && g.legendImage != nil {
 		w := int(float64(g.legendImage.Bounds().Dx()) * scale)
 		x0 := g.width - w - 12
@@ -1294,7 +1315,7 @@ iconsLoop:
 						g.touchUI = true
 					}
 				}
-				useNumbers := g.useNumbers && g.showItemNames && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+				useNumbers := g.useNumbers && g.showItemNames && g.zoom < LegendZoomThreshold && !g.screenshotMode
 				if !g.touchUI && useNumbers && g.legendImage != nil {
 					lw := int(float64(g.legendImage.Bounds().Dx()) * scale)
 					x0 := g.width - lw - 12
@@ -1333,7 +1354,7 @@ iconsLoop:
 							g.updateHover(x, y)
 						}
 					}
-					useNumbers := g.useNumbers && g.showItemNames && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+					useNumbers := g.useNumbers && g.showItemNames && g.zoom < LegendZoomThreshold && !g.screenshotMode
 					if useNumbers && g.legendImage != nil {
 						lw := int(float64(g.legendImage.Bounds().Dx()) * scale)
 						x0 := g.width - lw - 12
@@ -1378,7 +1399,7 @@ iconsLoop:
 							g.touchUI = true
 						}
 					}
-					useNumbers := g.useNumbers && g.showItemNames && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+					useNumbers := g.useNumbers && g.showItemNames && g.zoom < LegendZoomThreshold && !g.screenshotMode
 					if !g.touchUI && useNumbers && g.legendImage != nil {
 						lw := int(float64(g.legendImage.Bounds().Dx()) * scale)
 						x0 := g.width - lw - 12
@@ -1525,7 +1546,7 @@ iconsLoop:
 		} else {
 			handled := false
 			scale := g.uiScale()
-			useNumbers := g.useNumbers && g.showItemNames && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+			useNumbers := g.useNumbers && g.showItemNames && g.zoom < LegendZoomThreshold && !g.screenshotMode
 			if g.legend != nil {
 				lw := int(float64(g.legend.Bounds().Dx()) * scale)
 				lh := int(float64(g.legend.Bounds().Dy()) * scale)
@@ -1586,7 +1607,7 @@ iconsLoop:
 	}
 
 	mx, my := -1, -1
-	if !g.mobile && !g.screenshotMode {
+	if !g.screenshotMode {
 		mx, my = mxTmp, myTmp
 		if mx < 0 || mx >= g.width || my < 0 || my >= g.height {
 			mx, my = -1, -1
@@ -1637,7 +1658,7 @@ iconsLoop:
 		}
 	}
 
-	if !g.mobile && !g.screenshotMode && !g.touchUsed {
+	if !g.screenshotMode && !g.touchUsed {
 		g.updateHover(mx, my)
 		g.updateIconHover(mx, my)
 	} else if g.hoverIcon != hoverNone {
@@ -1760,7 +1781,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		labels := []label{}
 		var highlightGeysers []Geyser
 		var highlightPOIs []PointOfInterest
-		useNumbers := g.useNumbers && g.showItemNames && !g.mobile && g.zoom < LegendZoomThreshold && !g.screenshotMode
+		useNumbers := g.useNumbers && g.showItemNames && g.zoom < LegendZoomThreshold && !g.screenshotMode
 		if g.legendMap == nil {
 			g.initObjectLegend()
 		}
@@ -1960,7 +1981,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 		}
 
-		if !g.mobile && !g.screenshotMode {
+		if !g.screenshotMode {
 			tray := g.bottomTrayRect()
 			vector.DrawFilledRect(screen, float32(tray.Min.X), float32(tray.Min.Y), float32(tray.Dx()), float32(tray.Dy()), bottomTrayColor, false)
 			vector.StrokeRect(screen, float32(tray.Min.X)+0.5, float32(tray.Min.Y)+0.5, float32(tray.Dx())-1, float32(tray.Dy())-1, 1, buttonBorderColor, false)
@@ -2284,6 +2305,7 @@ func main() {
 		}
 	}
 
+	mobile := isMobile()
 	game := &Game{
 		icons:             make(map[string]*ebiten.Image),
 		width:             DefaultWidth,
@@ -2296,12 +2318,12 @@ func main() {
 		coord:             *coord,
 		asteroidID:        asteroidIDVal,
 		asteroidSpecified: asteroidSpecified,
-		mobile:            isMobile(),
+		mobile:            mobile,
 		textures:          true,
 		vsync:             true,
 		showItemNames:     true,
 		showLegend:        true,
-		useNumbers:        true,
+		useNumbers:        !mobile,
 		iconScale:         1.0,
 		smartRender:       true,
 		linearFilter:      true,
