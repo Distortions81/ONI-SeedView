@@ -1314,14 +1314,6 @@ iconsLoop:
 	mxTmp, myTmp := ebiten.CursorPosition()
 	mousePressed := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
 	mouseJustPressed := inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft)
-	if g.dragging && !g.inBounds(mxTmp, myTmp) {
-		mousePressed = false
-		mouseJustPressed = false
-		g.dragging = false
-	} else if !g.inBounds(mxTmp, myTmp) {
-		mousePressed = false
-		mouseJustPressed = false
-	}
 	if g.ssPending > 0 || g.skipClickTicks > 0 {
 		mousePressed = false
 		mouseJustPressed = false
@@ -1348,35 +1340,6 @@ iconsLoop:
 	if g.ssPending > 0 || g.skipClickTicks > 0 {
 		touchIDs = nil
 		justPressedIDs = nil
-	}
-	filter := func(ids []ebiten.TouchID) []ebiten.TouchID {
-		valid := make([]ebiten.TouchID, 0, len(ids))
-		for _, id := range ids {
-			x, y := ebiten.TouchPosition(id)
-			if g.inBounds(x, y) {
-				valid = append(valid, id)
-			}
-		}
-		return valid
-	}
-	touchIDs = filter(touchIDs)
-	justPressedIDs = filter(justPressedIDs)
-	if g.touchActive {
-		in := false
-		for _, id := range touchIDs {
-			x, y := ebiten.TouchPosition(id)
-			if g.inBounds(x, y) {
-				in = true
-				break
-			}
-		}
-		if !in {
-			g.touchActive = false
-			g.touchMoved = false
-			g.touches = nil
-			g.pinchDist = 0
-			touchIDs = nil
-		}
 	}
 	if len(touchIDs) > 0 {
 		g.touchUsed = true
