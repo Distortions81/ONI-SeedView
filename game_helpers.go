@@ -215,6 +215,27 @@ func (g *Game) bottomTrayRect() image.Rectangle {
 	return image.Rect(r.Min.X-4, r.Min.Y-4, r.Max.X+4, r.Max.Y+4)
 }
 
+func (g *Game) biomeLegendRect() image.Rectangle {
+	if g.legend == nil {
+		return image.Rectangle{}
+	}
+	w := g.legend.Bounds().Dx()
+	h := g.legend.Bounds().Dy()
+	y := -int(g.biomeScroll)
+	return image.Rect(0, y, w, y+h)
+}
+
+func (g *Game) itemLegendRect() image.Rectangle {
+	if g.legendImage == nil {
+		return image.Rectangle{}
+	}
+	w := g.legendImage.Bounds().Dx()
+	h := g.legendImage.Bounds().Dy()
+	x := g.width - w - 12
+	y := 10 - int(g.itemScroll)
+	return image.Rect(x, y, x+w, y+h)
+}
+
 func (g *Game) clampCamera() {
 	if g.astWidth == 0 || g.astHeight == 0 {
 		return

@@ -37,16 +37,13 @@ func (g *Game) handleTouchGestures(oldX, oldY float64) {
 				g.touchUI = true
 			} else {
 				if g.legend != nil && g.showLegend {
-					lw := g.legend.Bounds().Dx()
-					if x >= 0 && x < lw {
+					if g.biomeLegendRect().Overlaps(pt) {
 						g.touchUI = true
 					}
 				}
 				useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
 				if !g.touchUI && useNumbers && g.legendImage != nil && g.showLegend {
-					lw := g.legendImage.Bounds().Dx()
-					x0 := g.width - lw - 12
-					if x >= x0 && x < x0+lw {
+					if g.itemLegendRect().Overlaps(pt) {
 						g.touchUI = true
 					}
 				}
@@ -68,8 +65,8 @@ func (g *Game) handleTouchGestures(oldX, oldY float64) {
 					g.adjustGeyserScroll(-float64(dy))
 				} else {
 					if g.legend != nil && g.showLegend {
-						lw := g.legend.Bounds().Dx()
-						if g.touchStartX >= 0 && g.touchStartX < lw {
+						pt := image.Rect(g.touchStartX, g.touchStartY, g.touchStartX+1, g.touchStartY+1)
+						if g.biomeLegendRect().Overlaps(pt) {
 							g.biomeScroll -= float64(dy)
 							if g.biomeScroll < 0 {
 								g.biomeScroll = 0
@@ -82,9 +79,8 @@ func (g *Game) handleTouchGestures(oldX, oldY float64) {
 					}
 					useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
 					if useNumbers && g.legendImage != nil && g.showLegend {
-						lw := g.legendImage.Bounds().Dx()
-						x0 := g.width - lw - 12
-						if g.touchStartX >= x0 && g.touchStartX < x0+lw {
+						pt := image.Rect(g.touchStartX, g.touchStartY, g.touchStartX+1, g.touchStartY+1)
+						if g.itemLegendRect().Overlaps(pt) {
 							g.itemScroll -= float64(dy)
 							if g.itemScroll < 0 {
 								g.itemScroll = 0
@@ -119,16 +115,15 @@ func (g *Game) handleTouchGestures(oldX, oldY float64) {
 					g.touchUI = true
 				} else {
 					if g.legend != nil && g.showLegend {
-						lw := g.legend.Bounds().Dx()
-						if x >= 0 && x < lw {
+						pt := image.Rect(x, y, x+1, y+1)
+						if g.biomeLegendRect().Overlaps(pt) {
 							g.touchUI = true
 						}
 					}
 					useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
 					if !g.touchUI && useNumbers && g.legendImage != nil && g.showLegend {
-						lw := g.legendImage.Bounds().Dx()
-						x0 := g.width - lw - 12
-						if x >= x0 && x < x0+lw {
+						pt := image.Rect(x, y, x+1, y+1)
+						if g.itemLegendRect().Overlaps(pt) {
 							g.touchUI = true
 						}
 					}
