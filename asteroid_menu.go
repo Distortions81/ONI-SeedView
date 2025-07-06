@@ -25,6 +25,32 @@ func (g *Game) asteroidArrowRect() image.Rectangle {
 	return image.Rect(x, y, x+size, y+size)
 }
 
+// asteroidInfoRect returns the bounding rectangle surrounding the seed
+// coordinate, asteroid name, and arrow. This is used as the clickable area for
+// opening the asteroid menu.
+func (g *Game) asteroidInfoRect() image.Rectangle {
+	if g.coord == "" {
+		return image.Rectangle{}
+	}
+	scale := g.uiScale()
+	sw, sh := textDimensions(g.coord)
+	sx := g.width/2 - int(float64(sw)*scale/2)
+	seedRect := image.Rect(sx-2, 10-2, sx-2+int(float64(sw+4)*scale), 10-2+int(float64(sh+4)*scale))
+
+	name := g.asteroidID
+	if name == "" {
+		name = "Unknown"
+	}
+	astText := "Asteroid: " + name
+	aw, ah := textDimensions(astText)
+	ax := g.width/2 - int(float64(aw)*scale/2)
+	astRect := image.Rect(ax-2, int(30*scale)-2, ax-2+int(float64(aw+4)*scale), int(30*scale)-2+int(float64(ah+4)*scale))
+
+	rect := seedRect.Union(astRect)
+	rect = rect.Union(g.asteroidArrowRect())
+	return image.Rect(rect.Min.X-2, rect.Min.Y-2, rect.Max.X+2, rect.Max.Y+2)
+}
+
 func drawDownArrow(dst *ebiten.Image, rect image.Rectangle, up bool) {
 	drawFrame(dst, rect)
 

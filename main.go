@@ -1165,7 +1165,7 @@ iconsLoop:
 		if mx >= 0 && mx < g.width && my >= 0 && my < g.height {
 			if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 				if !g.clickAsteroidMenu(mx, my) {
-					if !g.asteroidMenuRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) && !g.asteroidArrowRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+					if !g.asteroidMenuRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) && !g.asteroidInfoRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 						g.showAstMenu = false
 						g.needsRedraw = true
 					}
@@ -1176,7 +1176,7 @@ iconsLoop:
 			x, y := ebiten.TouchPosition(id)
 			if x >= 0 && x < g.width && y >= 0 && y < g.height {
 				if !g.clickAsteroidMenu(x, y) {
-					if !g.asteroidMenuRect().Overlaps(image.Rect(x, y, x+1, y+1)) && !g.asteroidArrowRect().Overlaps(image.Rect(x, y, x+1, y+1)) {
+					if !g.asteroidMenuRect().Overlaps(image.Rect(x, y, x+1, y+1)) && !g.asteroidInfoRect().Overlaps(image.Rect(x, y, x+1, y+1)) {
 						g.showAstMenu = false
 						g.needsRedraw = true
 					}
@@ -1417,7 +1417,7 @@ iconsLoop:
 			} else if g.optionsRect().Overlaps(pt) {
 				g.showOptions = true
 				g.needsRedraw = true
-			} else if g.asteroidArrowRect().Overlaps(pt) {
+			} else if g.asteroidInfoRect().Overlaps(pt) {
 				g.showAstMenu = true
 				g.needsRedraw = true
 			} else if g.helpRect().Overlaps(pt) {
@@ -1593,7 +1593,7 @@ iconsLoop:
 		} else if justPressed && g.optionsRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.showOptions = true
 			g.needsRedraw = true
-		} else if justPressed && g.asteroidArrowRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		} else if justPressed && g.asteroidInfoRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.showAstMenu = true
 			g.needsRedraw = true
 		} else if justPressed && g.clickLegend(mx, my) {
@@ -1911,6 +1911,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				aName = "Unknown"
 			}
 			astName := fmt.Sprintf("Asteroid: %s", aName)
+			rect := g.asteroidInfoRect()
+			drawFrame(screen, rect)
+
 			w, _ := textDimensions(astName)
 			x := g.width/2 - int(float64(w)*scale/2)
 			drawTextWithBGScale(screen, astName, x, int(30*scale), scale)
