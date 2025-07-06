@@ -22,7 +22,7 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
   Clicking pins the panel so it stays visible while panning.
 * Hover over the bottom icons for tooltips describing their actions. Tooltips
   automatically stay within the window bounds.
-* A help icon displays the available controls at any time.
+* A help icon displays the available controls at any time. An X button closes the overlay.
 * A gear icon opens an options menu for toggling textures, Vsync,
   item labels, legends, number labels, smart rendering, half-resolution
   mode, automatic low-res switching and linear filtering. You can also
@@ -50,6 +50,7 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
 - **Camera icon** – open the screenshot menu.
 - **Geyser icon** – show a list of all geysers.
 - **Question mark** – toggle the help overlay.
+- **X button** – close the help overlay.
 - **Magnify Text** option – enlarge or shrink the UI.
 - **Gear icon** – open the options menu.
 
