@@ -10,21 +10,24 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	screenW := outsideWidth
 	screenH := outsideHeight
 
-	if !g.screenshotMode {
-		minDim := screenW
-		if screenH < minDim {
-			minDim = screenH
+	/*
+		if !g.screenshotMode {
+				minDim := screenW
+				if screenH < minDim {
+					minDim = screenH
+				}
+
+					newSize := baseFontSize
+					if minDim < 800 {
+						newSize = baseFontSize - 2
+					} else if minDim > 1200 {
+						newSize = baseFontSize + 2
+					}
+					if fontSize != newSize {
+						setFontSize(newSize)
+					}
 		}
-		newSize := baseFontSize
-		if minDim < 800 {
-			newSize = baseFontSize - 2
-		} else if minDim > 1200 {
-			newSize = baseFontSize + 2
-		}
-		if fontSize != newSize {
-			setFontSize(newSize)
-		}
-	}
+	*/
 
 	if g.width != screenW || g.height != screenH {
 		// Keep the world position at the center of the screen fixed so
