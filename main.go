@@ -471,7 +471,7 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 	op.GeoM.Translate(math.Round(x), math.Round(y))
 	dst.DrawImage(g.legendImage, op)
 	lh := float64(g.legendImage.Bounds().Dy()) * scale
-	drawFrame(dst, image.Rect(int(math.Round(x)), int(math.Round(y)), int(math.Round(x+w)), int(math.Round(y+lh))))
+	strokeFrame(dst, image.Rect(int(math.Round(x)), int(math.Round(y)), int(math.Round(x+w)), int(math.Round(y+lh))))
 	if g.selectedItem >= 0 {
 		spacing := float64(rowSpacing())
 		hy := y + (10+spacing*float64(g.selectedItem+1))*scale
@@ -1960,7 +1960,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			lw := int(math.Round(float64(g.legend.Bounds().Dx()) * scale))
 			lh := int(math.Round(float64(g.legend.Bounds().Dy()) * scale))
 			ly := int(math.Round(-g.biomeScroll))
-			drawFrame(screen, image.Rect(0, ly, lw, ly+lh))
+			strokeFrame(screen, image.Rect(0, ly, lw, ly+lh))
 			if g.selectedBiome >= 0 {
 				spacing := float64(rowSpacing())
 				y0 := math.Round((10+spacing+spacing*float64(g.selectedBiome))*scale - g.biomeScroll)
