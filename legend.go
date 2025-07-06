@@ -274,7 +274,7 @@ func (g *Game) maxItemScroll() float64 {
 }
 
 func (g *Game) itemPanelVisible() bool {
-	return g.showLegend && g.useNumbers && g.showItemNames && g.zoom < LegendZoomThreshold && !g.screenshotMode
+	return g.showLegend && g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
 }
 
 func (g *Game) updateHover(mx, my int) {
@@ -309,7 +309,7 @@ func (g *Game) updateHover(mx, my int) {
 			}
 		}
 	}
-	useNumbers := g.useNumbers && g.showItemNames && g.zoom < LegendZoomThreshold && !g.screenshotMode
+	useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
 	if useNumbers && g.legendImage != nil {
 		w := g.legendImage.Bounds().Dx()
 		x0 := g.width - w - 12
@@ -388,7 +388,7 @@ func (g *Game) clickLegend(mx, my int) bool {
 			}
 		}
 	}
-	useNumbers := g.useNumbers && g.showItemNames && g.zoom < LegendZoomThreshold && !g.screenshotMode
+	useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
 	if useNumbers && g.legendImage != nil {
 		w := g.legendImage.Bounds().Dx()
 		x0 := g.width - w - 12
