@@ -38,7 +38,7 @@ func buildLegendImage(biomes []BiomePath) (*ebiten.Image, []string) {
 	img.Fill(color.RGBA{0, 0, 0, 77})
 
 	y := 10
-	drawTextWithBG(img, "Biomes", 5, y)
+	drawTextWithBG(img, "Biomes", 5, y, false)
 	y += spacing
 	for _, name := range names {
 		clr, ok := biomeColors[name]
@@ -46,11 +46,11 @@ func buildLegendImage(biomes []BiomePath) (*ebiten.Image, []string) {
 			clr = color.RGBA{60, 60, 60, 255}
 		}
 		vector.DrawFilledRect(img, 5, float32(y), 20, 10, clr, false)
-		drawTextWithBGBorder(img, displayBiome(name), 30, y, clr)
+		drawTextWithBGBorder(img, displayBiome(name), 30, y, clr, false)
 		y += spacing
 	}
 
-	drawTextWithBGBorder(img, "Clear", 5, y, buttonBorderColor)
+	drawTextWithBGBorder(img, "Clear", 5, y, buttonBorderColor, false)
 
 	return img, names
 }
@@ -105,17 +105,17 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 		img := ebiten.NewImage(width, height)
 		img.Fill(color.RGBA{0, 0, 0, 77})
 		y := 10
-		drawTextWithBG(img, "Items", 5, y)
+		drawTextWithBG(img, "Items", 5, y, false)
 		y += spacing
 		for i, e := range g.legendEntries {
 			clr := color.RGBA{}
 			if i < len(g.legendColors) {
 				clr = g.legendColors[i]
 			}
-			drawTextWithBGBorder(img, e, 5, y, clr)
+			drawTextWithBGBorder(img, e, 5, y, clr, false)
 			y += spacing
 		}
-		drawTextWithBGBorder(img, "Clear", 5, y, buttonBorderColor)
+		drawTextWithBGBorder(img, "Clear", 5, y, buttonBorderColor, false)
 		g.legendImage = img
 	}
 	w := float64(g.legendImage.Bounds().Dx())

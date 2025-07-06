@@ -10,9 +10,9 @@ import (
 )
 
 // Stubbed text helpers for tests. They avoid drawing but keep signatures.
-func drawText(dst *ebiten.Image, str string, x, y int) {}
+func drawText(dst *ebiten.Image, str string, x, y int, center bool) {}
 
-func drawTextColor(dst *ebiten.Image, str string, x, y int, clr color.Color) {}
+func drawTextColor(dst *ebiten.Image, str string, x, y int, center bool, clr color.Color) {}
 
 func textDimensions(str string) (int, int) {
 	lines := strings.Split(str, "\n")
