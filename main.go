@@ -2464,13 +2464,7 @@ func main() {
 		game.astWidth = ast.SizeX
 		game.astHeight = ast.SizeY
 		game.legend, game.legendBiomes = buildLegendImage(bps)
-		zoomX := float64(game.width) / (float64(game.astWidth) * 2)
-		zoomY := float64(game.height) / (float64(game.astHeight) * 2)
-		game.zoom = math.Min(zoomX, zoomY)
-		game.minZoom = game.zoom * 0.25
-		game.camX = (float64(game.width) - float64(game.astWidth)*2*game.zoom) / 2
-		game.camY = (float64(game.height) - float64(game.astHeight)*2*game.zoom) / 2
-		game.clampCamera()
+		game.centerAndFit()
 		game.biomeTextures = loadBiomeTextures()
 		names := []string{"../icons/camera.png", "../icons/help.png", "../icons/gear.png", "geyser_water.png"}
 		set := make(map[string]struct{})
