@@ -30,18 +30,6 @@ func (g *Game) checkRedrawTriggers() {
 	}
 }
 
-func (g *Game) handleIconLoading() {
-	if g.iconLoadIndex < len(g.iconsToLoad) {
-		name := g.iconsToLoad[g.iconLoadIndex]
-		img, _ := loadImageFile(name)
-		if g.icons != nil {
-			g.icons[name] = img
-		}
-		g.iconLoadIndex++
-		g.needsRedraw = true
-	}
-}
-
 func (g *Game) processScreenshot() {
 	if g.ssPending > 0 {
 		if g.ssPending == 1 {
