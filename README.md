@@ -12,6 +12,7 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
 * Mouse wheel and `+`/`-` keys control zoom. The window can be resized at any time.
 * Font size automatically decreases on small screens and increases on large displays.
 * Optional high DPI mode uses the monitor's scale factor for crisp graphics.
+* DPI scaling can be adjusted in the options menu for fine tuning.
 * Textured biomes with a color legend and icons for geysers and points of interest.
 * The empty space around the asteroid now uses a repeating space texture.
 * Biome texture mapping is documented in [BIOME_TEXTURES.md](BIOME_TEXTURES.md).

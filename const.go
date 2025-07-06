@@ -23,10 +23,12 @@ const (
 	// BaseIconPixels is the target pixel size used when scaling
 	// geyser and POI icons. Larger icons are scaled down so the
 	// on-screen size is consistent across all items.
-	BaseIconPixels      = 96
-	LegendZoomExponent  = 10
-	DefaultWidth        = 1200
-	DefaultHeight       = 1200
+	BaseIconPixels     = 96
+	LegendZoomExponent = 10
+	DefaultWidth       = 1200
+	DefaultHeight      = 1200
+	// BaseDPI is the logical DPI used for scaling calculations.
+	BaseDPI             = 96
 	InitialZoom         = 1.0
 	LabelCharWidth      = 8
 	NumberLegendXOffset = 150

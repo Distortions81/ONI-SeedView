@@ -20,7 +20,7 @@ func (g *Game) drawUI(screen *ebiten.Image) {
 		cx := g.width / 2
 		cy := g.height / 2
 		crossClr := color.RGBA{255, 255, 255, 30}
-		s := vectorScale()
+		s := g.vectorScale()
 		vector.StrokeLine(screen, float32(cx-CrosshairSize), float32(cy), float32(cx+CrosshairSize), float32(cy), 1*s, crossClr, true)
 		vector.StrokeLine(screen, float32(cx), float32(cy-CrosshairSize), float32(cx), float32(cy+CrosshairSize), 1*s, crossClr, true)
 		if g.showItemNames {

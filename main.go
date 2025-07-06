@@ -51,6 +51,7 @@ func main() {
 		linearFilter:      true,
 		highDPI:           true,
 		dpiScale:          1.0,
+		dpiAdjust:         1.0,
 		ssQuality:         1,
 		hoverBiome:        -1,
 		hoverItem:         -1,

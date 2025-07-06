@@ -128,7 +128,7 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 		spacing := float64(rowSpacing())
 		hy := y + (10 + spacing*float64(g.selectedItem+1))
 		hh := spacing
-		vector.StrokeRect(dst, float32(math.Round(x))+0.5, float32(math.Round(hy))-4, float32(math.Round(w))-1, float32(math.Round(hh))-1, 2*vectorScale(), highlightColor, false)
+		vector.StrokeRect(dst, float32(math.Round(x))+0.5, float32(math.Round(hy))-4, float32(math.Round(w))-1, float32(math.Round(hh))-1, 2*g.vectorScale(), highlightColor, false)
 	}
 }
 

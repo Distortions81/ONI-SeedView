@@ -94,8 +94,9 @@ type Game struct {
 	smartRender   bool
 	linearFilter  bool
 
-	highDPI  bool
-	dpiScale float64
+	highDPI   bool
+	dpiScale  float64
+	dpiAdjust float64
 
 	noColor   bool
 	ssNoColor bool
@@ -123,20 +124,26 @@ func (g *Game) uiScale() float64 { return g.dpiScale }
 
 func (g *Game) updateDPIScale() {
 	old := g.dpiScale
+	scale := g.dpiAdjust
 	if g.highDPI {
-		g.dpiScale = ebiten.Monitor().DeviceScaleFactor()
-	} else {
-		g.dpiScale = 1.0
+		scale *= ebiten.Monitor().DeviceScaleFactor()
 	}
-	if g.dpiScale == 0 {
-		g.dpiScale = 1.0
+	if scale == 0 {
+		scale = 1.0
 	}
+	g.dpiScale = scale
 	if g.dpiScale != old {
 		setFontSize(fontSize / old * g.dpiScale)
 	}
 }
 
-func (g *Game) iconSize() int { return HelpIconSize }
+func (g *Game) iconSize() int {
+	return int(float64(HelpIconSize)*g.dpiScale + 0.5)
+}
+
+func (g *Game) iconMargin() int {
+	return int(float64(HelpMargin)*g.dpiScale + 0.5)
+}
 
 func (g *Game) filterMode() ebiten.Filter {
 	if g.linearFilter {
@@ -178,8 +185,9 @@ func (g *Game) drawTooltip(dst *ebiten.Image, text string, rect image.Rectangle,
 
 func (g *Game) helpRect() image.Rectangle {
 	size := g.iconSize()
-	x := g.width - size - HelpMargin
-	y := g.height - size - HelpMargin
+	m := g.iconMargin()
+	x := g.width - size - m
+	y := g.height - size - m
 	return image.Rect(x, y, x+size, y+size)
 }
 
@@ -213,15 +221,17 @@ func (g *Game) helpCloseRect() image.Rectangle {
 
 func (g *Game) geyserRect() image.Rectangle {
 	size := g.iconSize()
-	x := g.width - size*3 - HelpMargin*3
-	y := g.height - size - HelpMargin
+	m := g.iconMargin()
+	x := g.width - size*3 - m*3
+	y := g.height - size - m
 	return image.Rect(x, y, x+size, y+size)
 }
 
 func (g *Game) geyserCloseRect() image.Rectangle {
 	size := g.iconSize()
-	x := g.width - size - HelpMargin
-	y := HelpMargin
+	m := g.iconMargin()
+	x := g.width - size - m
+	y := m
 	return image.Rect(x, y, x+size, y+size)
 }
 
@@ -230,7 +240,8 @@ func (g *Game) bottomTrayRect() image.Rectangle {
 	r = r.Union(g.geyserRect())
 	r = r.Union(g.screenshotRect())
 	r = r.Union(g.helpRect())
-	return image.Rect(r.Min.X-4, r.Min.Y-4, r.Max.X+4, r.Max.Y+4)
+	pad := int(4*g.dpiScale + 0.5)
+	return image.Rect(r.Min.X-pad, r.Min.Y-pad, r.Max.X+pad, r.Max.Y+pad)
 }
 
 func (g *Game) biomeLegendRect() image.Rectangle {

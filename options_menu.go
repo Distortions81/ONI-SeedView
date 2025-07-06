@@ -11,13 +11,15 @@ import (
 
 func (g *Game) optionsRect() image.Rectangle {
 	size := g.iconSize()
-	x := g.width - size*4 - HelpMargin*4
-	y := g.height - size - HelpMargin
+	m := g.iconMargin()
+	x := g.width - size*4 - m*4
+	y := g.height - size - m
 	return image.Rect(x, y, x+size, y+size)
 }
 
 func (g *Game) optionsMenuSize() (int, int) {
 	fontLabel := fmt.Sprintf("Font Size [-] [+] %.0fpt", fontSize)
+	dpiLabel := fmt.Sprintf("DPI Scale [-] [+] %.0f%%", g.dpiAdjust*100)
 	labels := []string{
 		OptionsMenuTitle,
 		"Show Item Names",
@@ -30,6 +32,7 @@ func (g *Game) optionsMenuSize() (int, int) {
 		"Power Saver",
 		"Linear Filtering",
 		"High DPI",
+		dpiLabel,
 		"FPS: 60.0",
 		"Version: " + ClientVersion,
 		"Close",
@@ -113,6 +116,20 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	drawToggle("Power Saver", g.smartRender)
 	drawToggle("Linear Filtering", g.linearFilter)
 	drawToggle("High DPI", g.highDPI)
+
+	label = "DPI Scale"
+	drawText(img, label, 6, y, false)
+	tw, _ = textDimensions(label)
+	bx = 6 + tw + 6
+	minus = image.Rect(bx, y-4, bx+20, y-4+menuButtonHeight())
+	plus = image.Rect(bx+24, y-4, bx+44, y-4+menuButtonHeight())
+	drawButton(img, minus, false)
+	drawPlusMinus(img, minus, true)
+	drawButton(img, plus, false)
+	drawPlusMinus(img, plus, false)
+	scaleStr := fmt.Sprintf("%.0f%%", g.dpiAdjust*100)
+	drawText(img, scaleStr, plus.Max.X+6, y, false)
+	y += menuSpacing()
 
 	fps := fmt.Sprintf("FPS: %.1f", ebiten.ActualFPS())
 	drawText(img, fps, 6, y, false)
@@ -281,6 +298,27 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 		} else if g.itemScroll > max {
 			g.itemScroll = max
 		}
+		g.needsRedraw = true
+		return true
+	}
+	y += menuSpacing()
+
+	// DPI Scale buttons
+	labelW, _ = textDimensions("DPI Scale")
+	bx = 6 + labelW + 6
+	minus = image.Rect(bx, y-4, bx+20, y-4+menuButtonHeight())
+	plus = image.Rect(bx+24, y-4, bx+44, y-4+menuButtonHeight())
+	if minus.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		if g.dpiAdjust > 0.5 {
+			g.dpiAdjust -= 0.25
+			g.updateDPIScale()
+		}
+		g.needsRedraw = true
+		return true
+	}
+	if plus.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		g.dpiAdjust += 0.25
+		g.updateDPIScale()
 		g.needsRedraw = true
 		return true
 	}
