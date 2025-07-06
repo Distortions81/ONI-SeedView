@@ -40,10 +40,7 @@ func (g *Game) screenshotMenuSize() (int, int) {
 
 func (g *Game) screenshotMenuRect() image.Rectangle {
 	w, h := g.screenshotMenuSize()
-	scale := g.uiScale()
-	w = int(float64(w) * scale)
-	h = int(float64(h) * scale)
-	x := g.screenshotRect().Min.X - w - int(10*scale)
+	x := g.screenshotRect().Min.X - w - 10
 	if x < 0 {
 		x = 0
 	}
@@ -55,7 +52,6 @@ func (g *Game) screenshotMenuRect() image.Rectangle {
 }
 
 func (g *Game) drawScreenshotMenu(dst *ebiten.Image) {
-	scale := g.uiScale()
 	rect := g.screenshotMenuRect()
 	w, h := g.screenshotMenuSize()
 	img := ebiten.NewImage(w, h)
@@ -99,7 +95,6 @@ func (g *Game) drawScreenshotMenu(dst *ebiten.Image) {
 		}
 	}
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(scale, scale)
 	op.GeoM.Translate(float64(rect.Min.X), float64(rect.Min.Y))
 	dst.DrawImage(img, op)
 }
@@ -109,9 +104,8 @@ func (g *Game) clickScreenshotMenu(mx, my int) bool {
 	if !rect.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		return false
 	}
-	scale := g.uiScale()
-	x := int(float64(mx-rect.Min.X) / scale)
-	y := int(float64(my-rect.Min.Y) / scale)
+	x := mx - rect.Min.X
+	y := my - rect.Min.Y
 	mx = x
 	my = y
 	items := append([]string(nil), ScreenshotQualities...)
@@ -175,6 +169,8 @@ func (g *Game) captureScreenshot(w, h int, zoom float64) *image.RGBA {
 	g.camX = 0
 	g.camY = 0
 	g.screenshotMode = true
+	oldSize := fontSize
+	setFontSize(screenshotFontSize)
 	img := ebiten.NewImage(w, h)
 	g.needsRedraw = true
 	g.Draw(img)
@@ -182,6 +178,7 @@ func (g *Game) captureScreenshot(w, h int, zoom float64) *image.RGBA {
 	pix := make([]byte, 4*b.Dx()*b.Dy())
 	img.ReadPixels(pix)
 	rgba := &image.RGBA{Pix: pix, Stride: 4 * b.Dx(), Rect: b}
+	setFontSize(oldSize)
 	g.screenshotMode = false
 	g.width = ow
 	g.height = oh

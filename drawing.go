@@ -14,21 +14,11 @@ func drawTextWithBG(dst *ebiten.Image, text string, x, y int) {
 	drawText(dst, text, x, y)
 }
 
-func drawTextWithBGScale(dst *ebiten.Image, text string, x, y int, scale float64) {
-	if scale == 1.0 {
-		drawTextWithBG(dst, text, x, y)
-		return
-	}
-	w, h := textDimensions(text)
-	w += 4
-	h += 4
-	img := ebiten.NewImage(w, h)
-	vector.DrawFilledRect(img, 0, 0, float32(w), float32(h), color.RGBA{0, 0, 0, 128}, false)
-	drawText(img, text, 2, 2)
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(scale, scale)
-	op.GeoM.Translate(float64(x-2), float64(y-2))
-	dst.DrawImage(img, op)
+// drawTextWithBG draws text with a translucent background.
+// Previously this supported arbitrary scaling, but the UI no longer scales,
+// so this helper simply draws at the current font size.
+func drawTextWithBGScale(dst *ebiten.Image, text string, x, y int, _ float64) {
+	drawTextWithBG(dst, text, x, y)
 }
 
 func drawTextWithBGBorder(dst *ebiten.Image, text string, x, y int, border color.Color) {
@@ -42,39 +32,15 @@ func drawTextWithBGBorder(dst *ebiten.Image, text string, x, y int, border color
 	drawText(dst, text, x, y)
 }
 
-func drawTextWithBGBorderScale(dst *ebiten.Image, text string, x, y int, border color.Color, scale float64) {
-	if scale == 1.0 {
-		drawTextWithBGBorder(dst, text, x, y, border)
-		return
-	}
-	w, h := textDimensions(text)
-	w += 4
-	h += 4
-	img := ebiten.NewImage(w+2, h+2)
-	vector.DrawFilledRect(img, 0, 0, float32(w+2), float32(h+2), border, false)
-	vector.DrawFilledRect(img, 1, 1, float32(w), float32(h), color.RGBA{0, 0, 0, 128}, false)
-	drawText(img, text, 3, 3)
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(scale, scale)
-	op.GeoM.Translate(float64(x-2), float64(y-2))
-	dst.DrawImage(img, op)
+func drawTextWithBGBorderScale(dst *ebiten.Image, text string, x, y int, border color.Color, _ float64) {
+	drawTextWithBGBorder(dst, text, x, y, border)
 }
 
-func drawTextScale(dst *ebiten.Image, text string, x, y int, scale float64) {
-	if scale == 1.0 {
-		drawText(dst, text, x, y)
-		return
-	}
-	w, h := textDimensions(text)
-	img := ebiten.NewImage(w, h)
-	drawText(img, text, 0, 0)
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(scale, scale)
-	op.GeoM.Translate(float64(x), float64(y))
-	dst.DrawImage(img, op)
+func drawTextScale(dst *ebiten.Image, text string, x, y int, _ float64) {
+	drawText(dst, text, x, y)
 }
 
-func (g *Game) drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int, scale float64) {
+func (g *Game) drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int) {
 	txtW, txtH := textDimensions(text)
 	iconW, iconH := 0, 0
 	if icon != nil {
@@ -100,12 +66,11 @@ func (g *Game) drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image,
 	}
 	drawText(img, text, iconW+gap+4, 4)
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(scale, scale)
 	op.GeoM.Translate(float64(x-4), float64(y-4))
 	dst.DrawImage(img, op)
 }
 
-func (g *Game) drawInfoRow(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int, scale float64) {
+func (g *Game) drawInfoRow(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int) {
 	txtW, txtH := textDimensions(text)
 	iconW, iconH := 0, 0
 	if icon != nil {
@@ -118,18 +83,6 @@ func (g *Game) drawInfoRow(dst *ebiten.Image, text string, icon *ebiten.Image, x
 	if iconH > txtH {
 		h = iconH
 	}
-	if scale == 1.0 {
-		if icon != nil {
-			opIcon := &ebiten.DrawImageOptions{Filter: g.filterMode()}
-			sc := float64(InfoIconSize) / math.Max(float64(icon.Bounds().Dx()), float64(icon.Bounds().Dy()))
-			opIcon.GeoM.Scale(sc, sc)
-			opIcon.GeoM.Translate(float64(x), float64(y+(h-iconH)/2))
-			dst.DrawImage(icon, opIcon)
-		}
-		drawText(dst, text, x+iconW+gap, y+(h-txtH)/2)
-		return
-	}
-
 	img := ebiten.NewImage(w, h)
 	if icon != nil {
 		opIcon := &ebiten.DrawImageOptions{Filter: g.filterMode()}
@@ -140,7 +93,6 @@ func (g *Game) drawInfoRow(dst *ebiten.Image, text string, icon *ebiten.Image, x
 	}
 	drawText(img, text, iconW+gap, (h-txtH)/2)
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(scale, scale)
 	op.GeoM.Translate(float64(x), float64(y))
 	dst.DrawImage(img, op)
 }

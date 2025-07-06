@@ -25,12 +25,10 @@ func (g *Game) drawUI(screen *ebiten.Image) {
 		worldX := int(math.Round(((float64(cx) - g.camX) / g.zoom) / 2))
 		worldY := int(math.Round(((float64(cy) - g.camY) / g.zoom) / 2))
 		coords := fmt.Sprintf("X: %d Y: %d", worldX, worldY)
-		scale := g.uiScale()
-		drawTextWithBGScale(screen, coords, 5, g.height-int(20*scale), scale)
+		drawTextWithBGScale(screen, coords, 5, g.height-20, 1)
 	}
 
 	if g.showInfo {
-		scale := g.uiScale()
 		w, h := textDimensions(g.infoText)
 		iconW, iconH := 0, 0
 		if g.infoIcon != nil {
@@ -42,9 +40,9 @@ func (g *Game) drawUI(screen *ebiten.Image) {
 		if iconH > h {
 			panelH = iconH
 		}
-		tx := g.width/2 - int(float64(panelW)*scale)/2
-		ty := g.height - int(float64(panelH)*scale) - 30
-		g.drawInfoPanel(screen, g.infoText, g.infoIcon, tx, ty, scale)
+		tx := g.width/2 - panelW/2
+		ty := g.height - panelH - 30
+		g.drawInfoPanel(screen, g.infoText, g.infoIcon, tx, ty)
 	}
 
 	if g.showShotMenu {
@@ -57,10 +55,9 @@ func (g *Game) drawUI(screen *ebiten.Image) {
 		g.drawAsteroidMenu(screen)
 	}
 	if g.showHelp && !g.screenshotMode {
-		scale := g.uiScale()
 		rect := g.helpMenuRect()
 		drawFrame(screen, rect)
-		drawTextScale(screen, helpMessage, rect.Min.X+2, rect.Min.Y+2, scale)
+		drawTextScale(screen, helpMessage, rect.Min.X+2, rect.Min.Y+2, 1)
 		cr := g.helpCloseRect()
 		drawCloseButton(screen, cr)
 	}

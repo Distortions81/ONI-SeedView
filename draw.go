@@ -195,31 +195,18 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			labels = append(labels, label{formatted, int(x) - int(float64(width)*fs/2), int(y) + 4, width, labelClr})
 		}
 
-		labelScale := g.uiScale()
 		fs := fontScale()
 		for _, l := range labels {
 			x := l.x
-			if labelScale != 1.0 {
-				x -= int(float64(l.width) * fs * (labelScale - 1) / 2)
-			}
 			if l.clr.A != 0 {
-				if labelScale == 1.0 {
-					drawTextWithBGBorder(screen, l.text, x, l.y, l.clr)
-				} else {
-					drawTextWithBGBorderScale(screen, l.text, x, l.y, l.clr, labelScale)
-				}
+				drawTextWithBGBorderScale(screen, l.text, x, l.y, l.clr, 1)
 			} else {
-				if labelScale == 1.0 {
-					drawTextWithBG(screen, l.text, x, l.y)
-				} else {
-					drawTextWithBGScale(screen, l.text, x, l.y, labelScale)
-				}
+				drawTextWithBGScale(screen, l.text, x, l.y, 1)
 			}
 		}
 
 		if g.coord != "" && !g.screenshotMode {
 			label := g.coord
-			scale := g.uiScale()
 			aName := g.asteroidID
 			if aName == "" {
 				aName = "Unknown"
@@ -227,14 +214,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			astName := fmt.Sprintf("Asteroid: %s", aName)
 
 			w, _ := textDimensions(astName)
-			x := g.width/2 - int(float64(w)*scale/2)
-			drawTextWithBGScale(screen, astName, x, int(30*scale), scale)
+			x := g.width/2 - w/2
+			drawTextWithBGScale(screen, astName, x, 30, 1)
 			ar := g.asteroidArrowRect()
 			drawDownArrow(screen, ar, g.showAstMenu)
 
 			w, _ = textDimensions(label)
-			x = g.width/2 - int(float64(w)*scale/2)
-			drawTextWithBGScale(screen, label, x, 10, scale)
+			x = g.width/2 - w/2
+			drawTextWithBGScale(screen, label, x, 10, 1)
 		}
 
 		if g.showLegend {
@@ -242,8 +229,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				g.legend, g.legendBiomes = buildLegendImage(g.biomes)
 			}
 			opLegend := &ebiten.DrawImageOptions{}
-			scale := g.uiScale()
-			opLegend.GeoM.Scale(scale, scale)
 			opLegend.GeoM.Translate(0, -g.biomeScroll)
 			screen.DrawImage(g.legend, opLegend)
 			if g.selectedBiome >= 0 {
@@ -323,16 +308,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			vector.StrokeCircle(screen, gcx, gcy, float32(size)/2, 1, buttonBorderColor, true)
 
 			if g.hoverIcon != hoverNone {
-				scale := g.uiScale()
 				switch g.hoverIcon {
 				case hoverScreenshot:
-					g.drawTooltip(screen, "Screenshot", sr, scale)
+					g.drawTooltip(screen, "Screenshot", sr, 1)
 				case hoverHelp:
-					g.drawTooltip(screen, "Help", hr, scale)
+					g.drawTooltip(screen, "Help", hr, 1)
 				case hoverOptions:
-					g.drawTooltip(screen, "Options", or, scale)
+					g.drawTooltip(screen, "Options", or, 1)
 				case hoverGeysers:
-					g.drawTooltip(screen, "Geyser List", gr, scale)
+					g.drawTooltip(screen, "Geyser List", gr, 1)
 				}
 			}
 		}
@@ -431,25 +415,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		}
 		if len(highlightLabels) > 0 {
-			labelScale := g.uiScale()
-			fs := fontScale()
 			for _, l := range highlightLabels {
-				x := l.x
-				if labelScale != 1.0 {
-					x -= int(float64(l.width) * fs * (labelScale - 1) / 2)
-				}
 				if l.clr.A != 0 {
-					if labelScale == 1.0 {
-						drawTextWithBGBorder(screen, l.text, x, l.y, l.clr)
-					} else {
-						drawTextWithBGBorderScale(screen, l.text, x, l.y, l.clr, labelScale)
-					}
+					drawTextWithBGBorderScale(screen, l.text, l.x, l.y, l.clr, 1)
 				} else {
-					if labelScale == 1.0 {
-						drawTextWithBG(screen, l.text, x, l.y)
-					} else {
-						drawTextWithBGScale(screen, l.text, x, l.y, labelScale)
-					}
+					drawTextWithBGScale(screen, l.text, l.x, l.y, 1)
 				}
 			}
 		}

@@ -12,16 +12,15 @@ import (
 )
 
 func (g *Game) asteroidArrowRect() image.Rectangle {
-	scale := g.uiScale()
 	name := g.asteroidID
 	if name == "" {
 		name = "Unknown"
 	}
 	text := "Asteroid: " + name
 	w, _ := textDimensions(text)
-	x := g.width/2 + int(float64(w)*scale/2) + int(4*scale)
-	size := int(12 * scale)
-	y := int(30*scale + 8*scale - float64(size)/2)
+	x := g.width/2 + w/2 + 4
+	size := 12
+	y := 30 + 8 - size/2
 	return image.Rect(x, y, x+size, y+size)
 }
 
@@ -32,10 +31,9 @@ func (g *Game) asteroidInfoRect() image.Rectangle {
 	if g.coord == "" {
 		return image.Rectangle{}
 	}
-	scale := g.uiScale()
 	sw, sh := textDimensions(g.coord)
-	sx := g.width/2 - int(float64(sw)*scale/2)
-	seedRect := image.Rect(sx-2, 10-2, sx-2+int(float64(sw+4)*scale), 10-2+int(float64(sh+4)*scale))
+	sx := g.width/2 - sw/2
+	seedRect := image.Rect(sx-2, 8, sx+sw+2, 8+sh+4)
 
 	name := g.asteroidID
 	if name == "" {
@@ -43,8 +41,8 @@ func (g *Game) asteroidInfoRect() image.Rectangle {
 	}
 	astText := "Asteroid: " + name
 	aw, ah := textDimensions(astText)
-	ax := g.width/2 - int(float64(aw)*scale/2)
-	astRect := image.Rect(ax-2, int(30*scale)-2, ax-2+int(float64(aw+4)*scale), int(30*scale)-2+int(float64(ah+4)*scale))
+	ax := g.width/2 - aw/2
+	astRect := image.Rect(ax-2, 28, ax+aw+2, 28+ah+4)
 
 	rect := seedRect.Union(astRect)
 	rect = rect.Union(g.asteroidArrowRect())
@@ -108,9 +106,6 @@ func (g *Game) asteroidMenuSize() (int, int) {
 
 func (g *Game) asteroidMenuRect() image.Rectangle {
 	w, h := g.asteroidMenuSize()
-	scale := g.uiScale()
-	w = int(float64(w) * scale)
-	h = int(float64(h) * scale)
 	ar := g.asteroidArrowRect()
 	x := ar.Min.X + ar.Dx()/2 - w/2
 	if x < 0 {
@@ -119,7 +114,7 @@ func (g *Game) asteroidMenuRect() image.Rectangle {
 	if x+w > g.width {
 		x = g.width - w
 	}
-	y := ar.Max.Y + int(4*scale)
+	y := ar.Max.Y + 4
 	if y+h > g.height {
 		y = g.height - h
 	}
@@ -128,8 +123,7 @@ func (g *Game) asteroidMenuRect() image.Rectangle {
 
 func (g *Game) maxAsteroidScroll() float64 {
 	_, h := g.asteroidMenuSize()
-	scale := g.uiScale()
-	max := float64(h)*scale - float64(g.height)
+	max := float64(h) - float64(g.height)
 	if max < 0 {
 		return 0
 	}
@@ -148,7 +142,6 @@ func (g *Game) adjustAsteroidScroll(d float64) {
 }
 
 func (g *Game) drawAsteroidMenu(dst *ebiten.Image) {
-	scale := g.uiScale()
 	rect := g.asteroidMenuRect()
 	w, h := g.asteroidMenuSize()
 	img := ebiten.NewImage(w, h)
@@ -166,7 +159,6 @@ func (g *Game) drawAsteroidMenu(dst *ebiten.Image) {
 		y += AsteroidMenuSpacing
 	}
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(scale, scale)
 	op.GeoM.Translate(float64(rect.Min.X), float64(rect.Min.Y))
 	dst.DrawImage(img, op)
 }
@@ -176,9 +168,8 @@ func (g *Game) clickAsteroidMenu(mx, my int) bool {
 	if !rect.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		return false
 	}
-	scale := g.uiScale()
-	x := int(float64(mx-rect.Min.X) / scale)
-	y := int(float64(my-rect.Min.Y)/scale) + int(g.asteroidScroll)
+	x := mx - rect.Min.X
+	y := my - rect.Min.Y + int(g.asteroidScroll)
 	mx = x
 	my = y
 	w, _ := g.asteroidMenuSize()

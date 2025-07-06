@@ -118,29 +118,26 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 		drawTextWithBGBorder(img, "Clear", 5, y, buttonBorderColor)
 		g.legendImage = img
 	}
-	scale := g.uiScale()
-	w := float64(g.legendImage.Bounds().Dx()) * scale
+	w := float64(g.legendImage.Bounds().Dx())
 	x := float64(dst.Bounds().Dx()) - w - 12
 	y := 10.0 - g.itemScroll
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(scale, scale)
 	op.GeoM.Translate(math.Round(x), math.Round(y))
 	dst.DrawImage(g.legendImage, op)
 	if g.selectedItem >= 0 {
 		spacing := float64(rowSpacing())
-		hy := y + (10+spacing*float64(g.selectedItem+1))*scale
-		hh := spacing * scale
+		hy := y + (10 + spacing*float64(g.selectedItem+1))
+		hh := spacing
 		vector.StrokeRect(dst, float32(math.Round(x))+0.5, float32(math.Round(hy))-4, float32(math.Round(w))-1, float32(math.Round(hh))-1, 2, color.RGBA{255, 0, 0, 255}, false)
 	}
 }
 
 func (g *Game) drawGeyserList(dst *ebiten.Image) {
 	vector.DrawFilledRect(dst, 0, 0, float32(g.width), float32(g.height), color.RGBA{0, 0, 0, 255}, false)
-	scale := g.uiScale()
 	cr := g.geyserCloseRect()
 	drawCloseButton(dst, cr)
 
-	spacing := int(10 * scale)
+	spacing := 10
 	type item struct {
 		text string
 		icon *ebiten.Image
@@ -156,12 +153,10 @@ func (g *Game) drawGeyserList(dst *ebiten.Image) {
 		}
 		txt := displayGeyser(gy.ID) + "\n" + formatGeyserInfo(gy)
 		w, h := infoRowSize(txt, ic)
-		sw := int(float64(w) * scale)
-		sh := int(float64(h) * scale)
-		if sw > maxW {
-			maxW = sw
+		if w > maxW {
+			maxW = w
 		}
-		items[i] = item{text: txt, icon: ic, w: sw, h: sh}
+		items[i] = item{text: txt, icon: ic, w: w, h: h}
 	}
 	cols := 1
 	if maxW+spacing > 0 {
@@ -184,7 +179,7 @@ func (g *Game) drawGeyserList(dst *ebiten.Image) {
 		x := spacing
 		for c := 0; c < cols && idx < len(items); c++ {
 			it := items[idx]
-			g.drawInfoRow(dst, it.text, it.icon, x, y, scale)
+			g.drawInfoRow(dst, it.text, it.icon, x, y)
 			x += maxW + spacing
 			idx++
 		}
@@ -193,8 +188,7 @@ func (g *Game) drawGeyserList(dst *ebiten.Image) {
 }
 
 func (g *Game) maxGeyserScroll() float64 {
-	scale := g.uiScale()
-	spacing := int(10 * scale)
+	spacing := 10
 	type item struct {
 		w int
 		h int
@@ -208,12 +202,10 @@ func (g *Game) maxGeyserScroll() float64 {
 		}
 		txt := displayGeyser(gy.ID) + "\n" + formatGeyserInfo(gy)
 		w, h := infoRowSize(txt, ic)
-		sw := int(float64(w) * scale)
-		sh := int(float64(h) * scale)
-		if sw > maxW {
-			maxW = sw
+		if w > maxW {
+			maxW = w
 		}
-		items[i] = item{w: sw, h: sh}
+		items[i] = item{w: w, h: h}
 	}
 	cols := 1
 	if maxW+spacing > 0 {
@@ -259,9 +251,8 @@ func (g *Game) maxBiomeScroll() float64 {
 	if g.legend == nil {
 		return 0
 	}
-	scale := g.uiScale()
-	h := float64(g.legend.Bounds().Dy()) * scale
-	extra := float64(rowSpacing()*LegendScrollExtraRows) * scale
+	h := float64(g.legend.Bounds().Dy())
+	extra := float64(rowSpacing() * LegendScrollExtraRows)
 	max := h - float64(g.height) + extra
 	if max < 0 {
 		max = 0
@@ -273,9 +264,8 @@ func (g *Game) maxItemScroll() float64 {
 	if g.legendImage == nil {
 		return 0
 	}
-	scale := g.uiScale()
-	h := float64(g.legendImage.Bounds().Dy()) * scale
-	extra := float64(rowSpacing()*LegendScrollExtraRows) * scale
+	h := float64(g.legendImage.Bounds().Dy())
+	extra := float64(rowSpacing() * LegendScrollExtraRows)
 	max := h + 10 - float64(g.height) + extra
 	if max < 0 {
 		max = 0
@@ -298,13 +288,12 @@ func (g *Game) updateHover(mx, my int) {
 		}
 		return
 	}
-	scale := g.uiScale()
 	if g.legend != nil && len(g.legendBiomes) > 0 {
-		w := int(float64(g.legend.Bounds().Dx()) * scale)
+		w := g.legend.Bounds().Dx()
 		if mx >= 0 && mx < w {
 			spacing := float64(rowSpacing())
-			baseY := int((10+spacing)*scale) - int(g.biomeScroll)
-			rowH := int(spacing * scale)
+			baseY := int(10+spacing) - int(g.biomeScroll)
+			rowH := int(spacing)
 			for i := range g.legendBiomes {
 				ry := baseY + i*rowH
 				if my >= ry && my < ry+rowH {
@@ -322,12 +311,12 @@ func (g *Game) updateHover(mx, my int) {
 	}
 	useNumbers := g.useNumbers && g.showItemNames && g.zoom < LegendZoomThreshold && !g.screenshotMode
 	if useNumbers && g.legendImage != nil {
-		w := int(float64(g.legendImage.Bounds().Dx()) * scale)
+		w := g.legendImage.Bounds().Dx()
 		x0 := g.width - w - 12
 		if mx >= x0 && mx < x0+w {
 			spacing := float64(rowSpacing())
-			baseY := int((10+spacing)*scale) - int(g.itemScroll)
-			rowH := int(spacing * scale)
+			baseY := int(10+spacing) - int(g.itemScroll)
+			rowH := int(spacing)
 			for i := range g.legendEntries {
 				ry := baseY + i*rowH
 				if my >= ry && my < ry+rowH {
@@ -378,13 +367,12 @@ func (g *Game) clickLegend(mx, my int) bool {
 		return false
 	}
 	handled := false
-	scale := g.uiScale()
 	if g.legend != nil && len(g.legendBiomes) > 0 {
-		w := int(float64(g.legend.Bounds().Dx()) * scale)
+		w := g.legend.Bounds().Dx()
 		if mx >= 0 && mx < w {
 			spacing := float64(rowSpacing())
-			baseY := int((10+spacing)*scale) - int(g.biomeScroll)
-			rowH := int(spacing * scale)
+			baseY := int(10+spacing) - int(g.biomeScroll)
+			rowH := int(spacing)
 			count := len(g.legendBiomes)
 			for i := 0; i <= count; i++ {
 				ry := baseY + i*rowH
@@ -402,12 +390,12 @@ func (g *Game) clickLegend(mx, my int) bool {
 	}
 	useNumbers := g.useNumbers && g.showItemNames && g.zoom < LegendZoomThreshold && !g.screenshotMode
 	if useNumbers && g.legendImage != nil {
-		w := int(float64(g.legendImage.Bounds().Dx()) * scale)
+		w := g.legendImage.Bounds().Dx()
 		x0 := g.width - w - 12
 		if mx >= x0 && mx < x0+w {
 			spacing := float64(rowSpacing())
-			baseY := int((10+spacing)*scale) - int(g.itemScroll)
-			rowH := int(spacing * scale)
+			baseY := int(10+spacing) - int(g.itemScroll)
+			rowH := int(spacing)
 			count := len(g.legendEntries)
 			for i := 0; i <= count; i++ {
 				ry := baseY + i*rowH

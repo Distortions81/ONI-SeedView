@@ -46,10 +46,7 @@ func (g *Game) optionsMenuSize() (int, int) {
 
 func (g *Game) optionsMenuRect() image.Rectangle {
 	w, h := g.optionsMenuSize()
-	scale := g.uiScale()
-	w = int(float64(w) * scale)
-	h = int(float64(h) * scale)
-	x := g.optionsRect().Min.X - w - int(10*scale)
+	x := g.optionsRect().Min.X - w - 10
 	if x < 0 {
 		x = 0
 	}
@@ -61,7 +58,6 @@ func (g *Game) optionsMenuRect() image.Rectangle {
 }
 
 func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
-	scale := g.uiScale()
 	rect := g.optionsMenuRect()
 	w, h := g.optionsMenuSize()
 	img := ebiten.NewImage(w, h)
@@ -125,7 +121,6 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	drawText(img, "Close", btn.Min.X+6, btn.Min.Y+4)
 
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(scale, scale)
 	op.GeoM.Translate(float64(rect.Min.X), float64(rect.Min.Y))
 	dst.DrawImage(img, op)
 }
@@ -135,9 +130,8 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	if !rect.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		return false
 	}
-	scale := g.uiScale()
-	x := int(float64(mx-rect.Min.X) / scale)
-	y := int(float64(my-rect.Min.Y) / scale)
+	x := mx - rect.Min.X
+	y := my - rect.Min.Y
 	mx = x
 	my = y
 	w, _ := g.optionsMenuSize()
