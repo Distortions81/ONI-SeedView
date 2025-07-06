@@ -823,6 +823,7 @@ type Game struct {
 	geysers           []Geyser
 	pois              []PointOfInterest
 	biomes            []BiomePath
+	asteroids         []Asteroid
 	icons             map[string]*ebiten.Image
 	biomeTextures     map[string]*ebiten.Image
 	width             int
@@ -878,7 +879,9 @@ type Game struct {
 	touchMoved        bool
 	touchUI           bool
 	showShotMenu      bool
+	showAstMenu       bool
 	showOptions       bool
+	asteroidScroll    float64
 	screenshotMode    bool
 	ssQuality         int
 	ssSaved           time.Time
@@ -1227,6 +1230,36 @@ iconsLoop:
 		return nil
 	}
 
+	if g.showAstMenu {
+		_, wheelY := ebiten.Wheel()
+		if wheelY != 0 {
+			g.adjustAsteroidScroll(-float64(wheelY) * 10)
+		}
+		mx, my := ebiten.CursorPosition()
+		if mx >= 0 && mx < g.width && my >= 0 && my < g.height {
+			if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+				if !g.clickAsteroidMenu(mx, my) {
+					if !g.asteroidMenuRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) && !g.asteroidArrowRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+						g.showAstMenu = false
+						g.needsRedraw = true
+					}
+				}
+			}
+		}
+		for _, id := range inpututil.AppendJustPressedTouchIDs(nil) {
+			x, y := ebiten.TouchPosition(id)
+			if x >= 0 && x < g.width && y >= 0 && y < g.height {
+				if !g.clickAsteroidMenu(x, y) {
+					if !g.asteroidMenuRect().Overlaps(image.Rect(x, y, x+1, y+1)) && !g.asteroidArrowRect().Overlaps(image.Rect(x, y, x+1, y+1)) {
+						g.showAstMenu = false
+						g.needsRedraw = true
+					}
+				}
+			}
+		}
+		return nil
+	}
+
 	oldX, oldY, oldZoom := g.camX, g.camY, g.zoom
 
 	// Keyboard panning
@@ -1300,7 +1333,7 @@ iconsLoop:
 		g.touchMoved = false
 		g.touchActive = true
 		g.touchUI = false
-		if g.showGeyserList || g.showShotMenu {
+		if g.showGeyserList || g.showShotMenu || g.showAstMenu {
 			g.touchUI = true
 		} else {
 			pt := image.Rect(x, y, x+1, y+1)
@@ -1388,7 +1421,7 @@ iconsLoop:
 			g.touchMoved = false
 			g.touchActive = true
 			g.touchUI = false
-			if g.showGeyserList || g.showShotMenu {
+			if g.showGeyserList || g.showShotMenu || g.showAstMenu {
 				g.touchUI = true
 			} else {
 				pt := image.Rect(x, y, x+1, y+1)
@@ -1654,6 +1687,9 @@ iconsLoop:
 		} else if justPressed && g.optionsRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.showOptions = true
 			g.needsRedraw = true
+		} else if justPressed && g.asteroidArrowRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+			g.showAstMenu = true
+			g.needsRedraw = true
 		} else if justPressed && g.clickLegend(mx, my) {
 			// handled in clickLegend
 		} else if justPressed && g.geyserRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
@@ -1732,6 +1768,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	if g.showGeyserList {
 		screen.Fill(color.Black)
 		g.drawGeyserList(screen)
+		g.needsRedraw = false
+		g.lastDraw = time.Now()
+		return
+	}
+	if g.showAstMenu {
+		screen.Fill(color.Black)
+		g.drawAsteroidMenu(screen)
 		g.needsRedraw = false
 		g.lastDraw = time.Now()
 		return
@@ -1968,6 +2011,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			astName := fmt.Sprintf("Asteroid: %s", aName)
 			x := g.width/2 - int(float64(len(astName)*LabelCharWidth)*scale/2)
 			drawTextWithBGScale(screen, astName, x, int(30*scale), scale)
+			ar := g.asteroidArrowRect()
+			drawDownArrow(screen, ar, g.showAstMenu)
 
 			x = g.width/2 - int(float64(len(label)*LabelCharWidth)*scale/2)
 			drawTextWithBGScale(screen, label, x, 10, scale)
@@ -2358,6 +2403,7 @@ func main() {
 			return
 		}
 		seed, err := decodeSeed(cborData)
+		game.asteroids = seed.Asteroids
 		if err != nil {
 			game.status = "Error: " + err.Error()
 			game.statusError = false
