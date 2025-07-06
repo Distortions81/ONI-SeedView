@@ -356,16 +356,16 @@ func buildLegendImage(biomes []BiomePath) (*ebiten.Image, []string) {
 		}
 	}
 
-	scale := fontScale()
+	spacing := rowSpacing()
 	width := 30 + maxW + 5
-	height := int(float64(LegendRowSpacing*(len(names)+2))*scale) + 7
+	height := spacing*(len(names)+2) + 7
 
 	img := ebiten.NewImage(width, height)
 	img.Fill(color.RGBA{0, 30, 30, 77})
 
 	y := 10
 	drawTextWithBG(img, "Biomes", 5, y)
-	y += LegendRowSpacing
+	y += spacing
 	for _, name := range names {
 		clr, ok := biomeColors[name]
 		if !ok {
@@ -373,7 +373,7 @@ func buildLegendImage(biomes []BiomePath) (*ebiten.Image, []string) {
 		}
 		vector.DrawFilledRect(img, 5, float32(y), 20, 10, clr, false)
 		drawTextWithBGBorder(img, displayBiome(name), 30, y, clr)
-		y += LegendRowSpacing
+		y += spacing
 	}
 
 	drawTextWithBGBorder(img, "Clear", 5, y, buttonBorderColor)
@@ -410,6 +410,11 @@ func (g *Game) initObjectLegend() {
 	}
 }
 
+func (g *Game) invalidateLegends() {
+	g.legend = nil
+	g.legendImage = nil
+}
+
 // drawNumberLegend draws the cached legend image on the top right corner with
 // a single semi-transparent background.
 func (g *Game) drawNumberLegend(dst *ebiten.Image) {
@@ -424,21 +429,21 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 				maxW = w
 			}
 		}
-		scale := fontScale()
+		spacing := rowSpacing()
 		width := maxW + 10
-		height := int(float64(LegendRowSpacing*(len(g.legendEntries)+2))*scale) + 7
+		height := spacing*(len(g.legendEntries)+2) + 7
 		img := ebiten.NewImage(width, height)
 		img.Fill(color.RGBA{0, 30, 30, 77})
 		y := 10
 		drawTextWithBG(img, "Items", 5, y)
-		y += LegendRowSpacing
+		y += spacing
 		for i, e := range g.legendEntries {
 			clr := color.RGBA{}
 			if i < len(g.legendColors) {
 				clr = g.legendColors[i]
 			}
 			drawTextWithBGBorder(img, e, 5, y, clr)
-			y += LegendRowSpacing
+			y += spacing
 		}
 		drawTextWithBGBorder(img, "Clear", 5, y, buttonBorderColor)
 		g.legendImage = img
@@ -452,8 +457,9 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 	op.GeoM.Translate(math.Round(x), math.Round(y))
 	dst.DrawImage(g.legendImage, op)
 	if g.selectedItem >= 0 {
-		hy := y + float64(10+LegendRowSpacing*(g.selectedItem+1))*scale
-		hh := float64(LegendRowSpacing) * scale
+		spacing := float64(rowSpacing())
+		hy := y + (10+spacing*float64(g.selectedItem+1))*scale
+		hh := spacing * scale
 		vector.StrokeRect(dst, float32(math.Round(x))+0.5, float32(math.Round(hy))-4, float32(math.Round(w))-1, float32(math.Round(hh))-1, 2, color.RGBA{255, 0, 0, 255}, false)
 	}
 }
@@ -585,7 +591,7 @@ func (g *Game) maxBiomeScroll() float64 {
 	}
 	scale := g.uiScale()
 	h := float64(g.legend.Bounds().Dy()) * scale
-	extra := float64(LegendRowSpacing*LegendScrollExtraRows) * scale
+	extra := float64(rowSpacing()*LegendScrollExtraRows) * scale
 	max := h - float64(g.height) + extra
 	if max < 0 {
 		max = 0
@@ -599,7 +605,7 @@ func (g *Game) maxItemScroll() float64 {
 	}
 	scale := g.uiScale()
 	h := float64(g.legendImage.Bounds().Dy()) * scale
-	extra := float64(LegendRowSpacing*LegendScrollExtraRows) * scale
+	extra := float64(rowSpacing()*LegendScrollExtraRows) * scale
 	max := h + 10 - float64(g.height) + extra
 	if max < 0 {
 		max = 0
@@ -626,8 +632,9 @@ func (g *Game) updateHover(mx, my int) {
 	if g.legend != nil && len(g.legendBiomes) > 0 {
 		w := int(float64(g.legend.Bounds().Dx()) * scale)
 		if mx >= 0 && mx < w {
-			baseY := int(float64(10+LegendRowSpacing)*scale) - int(g.biomeScroll)
-			rowH := int(float64(LegendRowSpacing) * scale)
+			spacing := float64(rowSpacing())
+			baseY := int((10+spacing)*scale) - int(g.biomeScroll)
+			rowH := int(spacing * scale)
 			for i := range g.legendBiomes {
 				ry := baseY + i*rowH
 				if my >= ry && my < ry+rowH {
@@ -648,8 +655,9 @@ func (g *Game) updateHover(mx, my int) {
 		w := int(float64(g.legendImage.Bounds().Dx()) * scale)
 		x0 := g.width - w - 12
 		if mx >= x0 && mx < x0+w {
-			baseY := int(float64(10+LegendRowSpacing)*scale) - int(g.itemScroll)
-			rowH := int(float64(LegendRowSpacing) * scale)
+			spacing := float64(rowSpacing())
+			baseY := int((10+spacing)*scale) - int(g.itemScroll)
+			rowH := int(spacing * scale)
 			for i := range g.legendEntries {
 				ry := baseY + i*rowH
 				if my >= ry && my < ry+rowH {
@@ -704,8 +712,9 @@ func (g *Game) clickLegend(mx, my int) bool {
 	if g.legend != nil && len(g.legendBiomes) > 0 {
 		w := int(float64(g.legend.Bounds().Dx()) * scale)
 		if mx >= 0 && mx < w {
-			baseY := int(float64(10+LegendRowSpacing)*scale) - int(g.biomeScroll)
-			rowH := int(float64(LegendRowSpacing) * scale)
+			spacing := float64(rowSpacing())
+			baseY := int((10+spacing)*scale) - int(g.biomeScroll)
+			rowH := int(spacing * scale)
 			count := len(g.legendBiomes)
 			for i := 0; i <= count; i++ {
 				ry := baseY + i*rowH
@@ -726,8 +735,9 @@ func (g *Game) clickLegend(mx, my int) bool {
 		w := int(float64(g.legendImage.Bounds().Dx()) * scale)
 		x0 := g.width - w - 12
 		if mx >= x0 && mx < x0+w {
-			baseY := int(float64(10+LegendRowSpacing)*scale) - int(g.itemScroll)
-			rowH := int(float64(LegendRowSpacing) * scale)
+			spacing := float64(rowSpacing())
+			baseY := int((10+spacing)*scale) - int(g.itemScroll)
+			rowH := int(spacing * scale)
 			count := len(g.legendEntries)
 			for i := 0; i <= count; i++ {
 				ry := baseY + i*rowH
@@ -1922,8 +1932,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			opLegend.GeoM.Translate(0, -g.biomeScroll)
 			screen.DrawImage(g.legend, opLegend)
 			if g.selectedBiome >= 0 {
-				y0 := math.Round(float64(10+LegendRowSpacing+g.selectedBiome*LegendRowSpacing)*scale - g.biomeScroll)
-				h := math.Round(float64(LegendRowSpacing) * scale)
+				spacing := float64(rowSpacing())
+				y0 := math.Round((10+spacing+spacing*float64(g.selectedBiome))*scale - g.biomeScroll)
+				h := math.Round(spacing * scale)
 				w := math.Round(float64(g.legend.Bounds().Dx()) * scale)
 				vector.StrokeRect(screen, 0.5, float32(y0)-4, float32(w)-1, float32(h)-1, 2, color.RGBA{255, 0, 0, 255}, false)
 			}
@@ -2290,6 +2301,7 @@ func main() {
 		selectedBiome:     -1,
 		selectedItem:      -1,
 	}
+	registerFontChange(game.invalidateLegends)
 	go func(id string) {
 		//fmt.Println("Fetching:", *coord)
 		cborData, err := fetchSeedCBOR(*coord)
