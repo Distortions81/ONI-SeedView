@@ -147,13 +147,13 @@ func (g *Game) drawLoadingScreen(dst *ebiten.Image) bool {
 		msg = "Fetching asteroid data..."
 		scale = 2.0
 	}
-	w, h := textDimensions(msg)
-	x := g.width/2 - int(float64(w)*scale/2)
+	_, h := textDimensions(msg)
+	x := g.width / 2
 	y := g.height/2 - int(float64(h)*scale/2)
 	if g.statusError {
-		drawTextWithBGBorderScale(dst, msg, x, y, errorBorderColor, scale)
+		drawTextWithBGBorderScale(dst, msg, x, y, errorBorderColor, scale, true)
 	} else {
-		drawTextWithBGScale(dst, msg, x, y, scale)
+		drawTextWithBGScale(dst, msg, x, y, scale, true)
 	}
 	g.lastDraw = time.Now()
 	return true

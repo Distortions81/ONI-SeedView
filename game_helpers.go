@@ -100,11 +100,10 @@ type Game struct {
 }
 
 type label struct {
-	text  string
-	x     int
-	y     int
-	width int
-	clr   color.RGBA
+	text string
+	x    int
+	y    int
+	clr  color.RGBA
 }
 
 type touchPoint struct {
@@ -156,7 +155,7 @@ func (g *Game) drawTooltip(dst *ebiten.Image, text string, rect image.Rectangle,
 	if y < 0 {
 		y = rect.Max.Y + 4
 	}
-	drawTextWithBGScale(dst, text, x, y, scale)
+	drawTextWithBGScale(dst, text, x, y, scale, false)
 }
 
 func (g *Game) helpRect() image.Rectangle {

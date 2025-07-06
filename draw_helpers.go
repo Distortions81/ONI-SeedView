@@ -25,7 +25,7 @@ func (g *Game) drawUI(screen *ebiten.Image) {
 		worldX := int(math.Round(((float64(cx) - g.camX) / g.zoom) / 2))
 		worldY := int(math.Round(((float64(cy) - g.camY) / g.zoom) / 2))
 		coords := fmt.Sprintf("X: %d Y: %d", worldX, worldY)
-		drawTextWithBGScale(screen, coords, 5, g.height-20, 1)
+		drawTextWithBGScale(screen, coords, 5, g.height-20, 1, false)
 	}
 
 	if g.showInfo {
@@ -57,7 +57,7 @@ func (g *Game) drawUI(screen *ebiten.Image) {
 	if g.showHelp && !g.screenshotMode {
 		rect := g.helpMenuRect()
 		drawFrame(screen, rect)
-		drawTextScale(screen, helpMessage, rect.Min.X+2, rect.Min.Y+2, 1)
+		drawTextScale(screen, helpMessage, rect.Min.X+2, rect.Min.Y+2, 1, false)
 		cr := g.helpCloseRect()
 		drawCloseButton(screen, cr)
 	}

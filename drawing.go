@@ -8,36 +8,42 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
-func drawTextWithBG(dst *ebiten.Image, text string, x, y int) {
+func drawTextWithBG(dst *ebiten.Image, text string, x, y int, center bool) {
 	w, h := textDimensions(text)
+	if center {
+		x -= w / 2
+	}
 	vector.DrawFilledRect(dst, float32(x-2), float32(y-2), float32(w+4), float32(h+4), color.RGBA{0, 0, 0, 128}, false)
-	drawText(dst, text, x, y)
+	drawText(dst, text, x, y, false)
 }
 
 // drawTextWithBG draws text with a translucent background.
 // Previously this supported arbitrary scaling, but the UI no longer scales,
 // so this helper simply draws at the current font size.
-func drawTextWithBGScale(dst *ebiten.Image, text string, x, y int, _ float64) {
-	drawTextWithBG(dst, text, x, y)
+func drawTextWithBGScale(dst *ebiten.Image, text string, x, y int, _ float64, center bool) {
+	drawTextWithBG(dst, text, x, y, center)
 }
 
-func drawTextWithBGBorder(dst *ebiten.Image, text string, x, y int, border color.Color) {
+func drawTextWithBGBorder(dst *ebiten.Image, text string, x, y int, border color.Color, center bool) {
 	w, h := textDimensions(text)
+	if center {
+		x -= w / 2
+	}
 	bx := x - 2
 	by := y - 2
 	bw := w + 4
 	bh := h + 4
 	vector.DrawFilledRect(dst, float32(bx-1), float32(by-1), float32(bw+2), float32(bh+2), border, false)
 	vector.DrawFilledRect(dst, float32(bx), float32(by), float32(bw), float32(bh), color.RGBA{0, 0, 0, 128}, false)
-	drawText(dst, text, x, y)
+	drawText(dst, text, x, y, false)
 }
 
-func drawTextWithBGBorderScale(dst *ebiten.Image, text string, x, y int, border color.Color, _ float64) {
-	drawTextWithBGBorder(dst, text, x, y, border)
+func drawTextWithBGBorderScale(dst *ebiten.Image, text string, x, y int, border color.Color, _ float64, center bool) {
+	drawTextWithBGBorder(dst, text, x, y, border, center)
 }
 
-func drawTextScale(dst *ebiten.Image, text string, x, y int, _ float64) {
-	drawText(dst, text, x, y)
+func drawTextScale(dst *ebiten.Image, text string, x, y int, _ float64, center bool) {
+	drawText(dst, text, x, y, center)
 }
 
 func (g *Game) drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int) {
@@ -64,7 +70,7 @@ func (g *Game) drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image,
 		opIcon.GeoM.Translate(4, float64(h-iconH)/2)
 		img.DrawImage(icon, opIcon)
 	}
-	drawText(img, text, iconW+gap+4, 4)
+	drawText(img, text, iconW+gap+4, 4, false)
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(x-4), float64(y-4))
 	dst.DrawImage(img, op)
@@ -91,7 +97,7 @@ func (g *Game) drawInfoRow(dst *ebiten.Image, text string, icon *ebiten.Image, x
 		opIcon.GeoM.Translate(0, float64(h-iconH)/2)
 		img.DrawImage(icon, opIcon)
 	}
-	drawText(img, text, iconW+gap, (h-txtH)/2)
+	drawText(img, text, iconW+gap, (h-txtH)/2, false)
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(x), float64(y))
 	dst.DrawImage(img, op)

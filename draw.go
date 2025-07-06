@@ -79,7 +79,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			y := math.Round((float64(gy.Y) * 2 * g.zoom) + g.camY)
 
 			name := displayGeyser(gy.ID)
-			formatted, width := formatLabel(name)
+			formatted, _ := formatLabel(name)
 			dotClr := color.RGBA{}
 			if idx, ok := g.legendMap["g"+name]; ok && idx-1 < len(g.legendColors) {
 				dotClr = g.legendColors[idx-1]
@@ -112,12 +112,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					}
 					if useNumbers {
 						formatted = strconv.Itoa(g.legendMap["g"+name])
-						width = len(formatted)
 					}
 					if g.showItemNames || useNumbers {
 						if g.showItemNames || useNumbers {
-							fs := fontScale()
-							labels = append(labels, label{formatted, int(x) - int(float64(width)*fs/2), int(y+h/2) + 2, width, labelClr})
+							labels = append(labels, label{formatted, int(x), int(y+h/2) + 2, labelClr})
 						}
 					}
 					continue
@@ -130,12 +128,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 			if useNumbers {
 				formatted = strconv.Itoa(g.legendMap["g"+name])
-				width = len(formatted)
 			}
 			if g.showItemNames || useNumbers {
 				if g.showItemNames || useNumbers {
-					fs := fontScale()
-					labels = append(labels, label{formatted, int(x) - int(float64(width)*fs/2), int(y) + 4, width, labelClr})
+					labels = append(labels, label{formatted, int(x), int(y) + 4, labelClr})
 				}
 			}
 		}
@@ -144,7 +140,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			y := math.Round((float64(poi.Y) * 2 * g.zoom) + g.camY)
 
 			name := displayPOI(poi.ID)
-			formatted, width := formatLabel(name)
+			formatted, _ := formatLabel(name)
 			dotClr := color.RGBA{}
 			if idx, ok := g.legendMap["p"+name]; ok && idx-1 < len(g.legendColors) {
 				dotClr = g.legendColors[idx-1]
@@ -175,10 +171,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					}
 					if useNumbers {
 						formatted = strconv.Itoa(g.legendMap["p"+name])
-						width = len(formatted)
 					}
-					fs := fontScale()
-					labels = append(labels, label{formatted, int(x) - int(float64(width)*fs/2), int(y+h/2) + 2, width, labelClr})
+					labels = append(labels, label{formatted, int(x), int(y+h/2) + 2, labelClr})
 					continue
 				}
 			}
@@ -189,18 +183,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 			if useNumbers {
 				formatted = strconv.Itoa(g.legendMap["p"+name])
-				width = len(formatted)
 			}
-			fs := fontScale()
-			labels = append(labels, label{formatted, int(x) - int(float64(width)*fs/2), int(y) + 4, width, labelClr})
+			labels = append(labels, label{formatted, int(x), int(y) + 4, labelClr})
 		}
 
 		for _, l := range labels {
-			x := l.x
 			if l.clr.A != 0 {
-				drawTextWithBGBorderScale(screen, l.text, x, l.y, l.clr, 1)
+				drawTextWithBGBorderScale(screen, l.text, l.x, l.y, l.clr, 1, true)
 			} else {
-				drawTextWithBGScale(screen, l.text, x, l.y, 1)
+				drawTextWithBGScale(screen, l.text, l.x, l.y, 1, true)
 			}
 		}
 
@@ -212,15 +203,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 			astName := fmt.Sprintf("Asteroid: %s", aName)
 
-			w, _ := textDimensions(astName)
-			x := g.width/2 - w/2
-			drawTextWithBGScale(screen, astName, x, 30, 1)
+			x := g.width / 2
+			drawTextWithBGScale(screen, astName, x, 30, 1, true)
 			ar := g.asteroidArrowRect()
 			drawDownArrow(screen, ar, g.showAstMenu)
 
-			w, _ = textDimensions(label)
-			x = g.width/2 - w/2
-			drawTextWithBGScale(screen, label, x, 10, 1)
+			drawTextWithBGScale(screen, label, x, 10, 1, true)
 		}
 
 		if g.showLegend {
@@ -327,7 +315,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				y := math.Round((float64(gy.Y) * 2 * g.zoom) + g.camY)
 
 				name := displayGeyser(gy.ID)
-				formatted, width := formatLabel(name)
+				formatted, _ := formatLabel(name)
 				dotClr := color.RGBA{255, 0, 0, 255}
 				labelClr := dotClr
 				if !useNumbers {
@@ -349,10 +337,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 						vector.StrokeRect(screen, float32(left)+0.5, float32(top)+0.5, float32(math.Round(w))-1, float32(math.Round(h))-1, 2, dotClr, false)
 						if useNumbers {
 							formatted = strconv.Itoa(g.legendMap["g"+name])
-							width = len(formatted)
 						}
-						fs := fontScale()
-						highlightLabels = append(highlightLabels, label{formatted, int(x) - int(float64(width)*fs/2), int(y+h/2) + 2, width, labelClr})
+						highlightLabels = append(highlightLabels, label{formatted, int(x), int(y+h/2) + 2, labelClr})
 						continue
 					}
 				}
@@ -361,10 +347,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				vector.StrokeRect(screen, float32(x-3), float32(y-3), 6, 6, 2, dotClr, false)
 				if useNumbers {
 					formatted = strconv.Itoa(g.legendMap["g"+name])
-					width = len(formatted)
 				}
-				fs := fontScale()
-				highlightLabels = append(highlightLabels, label{formatted, int(x) - int(float64(width)*fs/2), int(y) + 4, width, labelClr})
+				highlightLabels = append(highlightLabels, label{formatted, int(x), int(y) + 4, labelClr})
 			}
 
 			for _, poi := range highlightPOIs {
@@ -372,7 +356,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				y := math.Round((float64(poi.Y) * 2 * g.zoom) + g.camY)
 
 				name := displayPOI(poi.ID)
-				formatted, width := formatLabel(name)
+				formatted, _ := formatLabel(name)
 				dotClr := color.RGBA{255, 0, 0, 255}
 				labelClr := dotClr
 				if !useNumbers {
@@ -394,10 +378,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 						vector.StrokeRect(screen, float32(left)+0.5, float32(top)+0.5, float32(math.Round(w))-1, float32(math.Round(h))-1, 2, dotClr, false)
 						if useNumbers {
 							formatted = strconv.Itoa(g.legendMap["p"+name])
-							width = len(formatted)
 						}
-						fs := fontScale()
-						highlightLabels = append(highlightLabels, label{formatted, int(x) - int(float64(width)*fs/2), int(y+h/2) + 2, width, labelClr})
+						highlightLabels = append(highlightLabels, label{formatted, int(x), int(y+h/2) + 2, labelClr})
 						continue
 					}
 				}
@@ -406,19 +388,17 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				vector.StrokeRect(screen, float32(x-3), float32(y-1), 6, 6, 2, dotClr, false)
 				if useNumbers {
 					formatted = strconv.Itoa(g.legendMap["p"+name])
-					width = len(formatted)
 				}
-				fs := fontScale()
-				highlightLabels = append(highlightLabels, label{formatted, int(x) - int(float64(width)*fs/2), int(y) + 4, width, labelClr})
+				highlightLabels = append(highlightLabels, label{formatted, int(x), int(y) + 4, labelClr})
 			}
 
 		}
 		if len(highlightLabels) > 0 {
 			for _, l := range highlightLabels {
 				if l.clr.A != 0 {
-					drawTextWithBGBorderScale(screen, l.text, l.x, l.y, l.clr, 1)
+					drawTextWithBGBorderScale(screen, l.text, l.x, l.y, l.clr, 1, true)
 				} else {
-					drawTextWithBGScale(screen, l.text, l.x, l.y, 1)
+					drawTextWithBGScale(screen, l.text, l.x, l.y, 1, true)
 				}
 			}
 		}

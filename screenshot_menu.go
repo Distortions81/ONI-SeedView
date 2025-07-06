@@ -56,7 +56,7 @@ func (g *Game) drawScreenshotMenu(dst *ebiten.Image) {
 	w, h := g.screenshotMenuSize()
 	img := ebiten.NewImage(w, h)
 	drawFrame(img, image.Rect(0, 0, w, h))
-	drawText(img, ScreenshotMenuTitle, 6, 6)
+	drawText(img, ScreenshotMenuTitle, 6, 6, false)
 
 	label := ScreenshotSaveLabel
 	if g.ssPending > 0 {
@@ -88,7 +88,7 @@ func (g *Game) drawScreenshotMenu(dst *ebiten.Image) {
 		if notoFont != nil {
 			lh = notoFont.Metrics().Height.Ceil()
 		}
-		drawText(img, it, btn.Min.X+6, btn.Min.Y+(menuButtonHeight()-lh)/2)
+		drawText(img, it, btn.Min.X+6, btn.Min.Y+(menuButtonHeight()-lh)/2, false)
 		y += menuSpacing()
 		if i == len(ScreenshotQualities)-1 || i == len(ScreenshotQualities) {
 			y += menuSpacing()
