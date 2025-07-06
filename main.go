@@ -27,14 +27,14 @@ import (
 
 const helpMessage = "Controls:\n" +
 	"Arrow keys/WASD or drag – pan the map\n" +
-	"Mouse wheel or +/- – zoom in and out\n" +
+	"Mouse wheel or +/- keys – zoom in and out\n" +
 	"Pinch with two fingers – zoom on touch\n" +
 	"Click or tap geysers/POIs – show details\n" +
-	"Hover legend entries – highlight items\n" +
+	"Tap legend entries – select and highlight items\n" +
 	"Camera icon – open screenshot menu\n" +
 	"Water-drop icon – list all geysers\n" +
 	"Question mark – toggle this help\n" +
-	"Plus/Minus – enlarge or shrink UI\n" +
+	"Magnify Text option – enlarge the UI\n" +
 	"Gear icon – options"
 
 type hoverIcon int
@@ -45,7 +45,6 @@ const (
 	hoverGeysers
 	hoverScreenshot
 	hoverHelp
-	hoverMagnify
 )
 
 var errorBorderColor = color.RGBA{R: 244, G: 67, B: 54, A: 255}
@@ -735,8 +734,6 @@ func (g *Game) updateIconHover(mx, my int) {
 		g.hoverIcon = hoverScreenshot
 	case g.helpRect().Overlaps(pt):
 		g.hoverIcon = hoverHelp
-	case g.magnifyRect().Overlaps(pt):
-		g.hoverIcon = hoverMagnify
 	}
 	if prev != g.hoverIcon {
 		g.needsRedraw = true
@@ -966,23 +963,16 @@ func (g *Game) drawTooltip(dst *ebiten.Image, text string, rect image.Rectangle,
 	drawTextWithBGScale(dst, text, x, y, scale)
 }
 
-func (g *Game) magnifyRect() image.Rectangle {
+func (g *Game) helpRect() image.Rectangle {
 	size := g.iconSize()
 	x := g.width - size - HelpMargin
 	y := g.height - size - HelpMargin
 	return image.Rect(x, y, x+size, y+size)
 }
 
-func (g *Game) helpRect() image.Rectangle {
-	size := g.iconSize()
-	x := g.width - size*2 - HelpMargin*2
-	y := g.height - size - HelpMargin
-	return image.Rect(x, y, x+size, y+size)
-}
-
 func (g *Game) geyserRect() image.Rectangle {
 	size := g.iconSize()
-	x := g.width - size*4 - HelpMargin*4
+	x := g.width - size*3 - HelpMargin*3
 	y := g.height - size - HelpMargin
 	return image.Rect(x, y, x+size, y+size)
 }
@@ -999,7 +989,6 @@ func (g *Game) bottomTrayRect() image.Rectangle {
 	r = r.Union(g.geyserRect())
 	r = r.Union(g.screenshotRect())
 	r = r.Union(g.helpRect())
-	r = r.Union(g.magnifyRect())
 	return image.Rect(r.Min.X-4, r.Min.Y-4, r.Max.X+4, r.Max.Y+4)
 }
 
@@ -1267,7 +1256,7 @@ iconsLoop:
 		} else {
 			pt := image.Rect(x, y, x+1, y+1)
 			if g.helpRect().Overlaps(pt) || g.screenshotRect().Overlaps(pt) ||
-				g.magnifyRect().Overlaps(pt) || g.geyserRect().Overlaps(pt) || g.optionsRect().Overlaps(pt) {
+				g.geyserRect().Overlaps(pt) || g.optionsRect().Overlaps(pt) {
 				g.touchUI = true
 			} else {
 				scale := g.uiScale()
@@ -1351,7 +1340,7 @@ iconsLoop:
 			} else {
 				pt := image.Rect(x, y, x+1, y+1)
 				if g.helpRect().Overlaps(pt) || g.screenshotRect().Overlaps(pt) ||
-					g.magnifyRect().Overlaps(pt) || g.geyserRect().Overlaps(pt) || g.optionsRect().Overlaps(pt) {
+					g.geyserRect().Overlaps(pt) || g.optionsRect().Overlaps(pt) {
 					g.touchUI = true
 				} else {
 					scale := g.uiScale()
@@ -1437,19 +1426,6 @@ iconsLoop:
 			} else if g.optionsRect().Overlaps(pt) {
 				g.showOptions = true
 				g.needsRedraw = true
-			} else if g.magnifyRect().Overlaps(pt) {
-				g.magnify = !g.magnify
-				if max := g.maxBiomeScroll(); max == 0 {
-					g.biomeScroll = 0
-				} else if g.biomeScroll > max {
-					g.biomeScroll = max
-				}
-				if max := g.maxItemScroll(); max == 0 {
-					g.itemScroll = 0
-				} else if g.itemScroll > max {
-					g.itemScroll = max
-				}
-				g.needsRedraw = true
 			} else if g.helpRect().Overlaps(pt) {
 				g.showHelp = !g.showHelp
 				g.needsRedraw = true
@@ -1461,6 +1437,7 @@ iconsLoop:
 				g.needsRedraw = true
 			} else if g.touchUI {
 				g.updateHover(mx, my)
+				g.clickLegend(mx, my)
 			} else if g.mobile {
 				if _, ix, iy, _, found := g.itemAt(mx, my); found {
 					g.camX += float64(g.width/2 - ix)
@@ -1623,19 +1600,6 @@ iconsLoop:
 			g.needsRedraw = true
 		} else if justPressed && g.clickLegend(mx, my) {
 			// handled in clickLegend
-		} else if justPressed && g.magnifyRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-			g.magnify = !g.magnify
-			if max := g.maxBiomeScroll(); max == 0 {
-				g.biomeScroll = 0
-			} else if g.biomeScroll > max {
-				g.biomeScroll = max
-			}
-			if max := g.maxItemScroll(); max == 0 {
-				g.itemScroll = 0
-			} else if g.itemScroll > max {
-				g.itemScroll = max
-			}
-			g.needsRedraw = true
 		} else if justPressed && g.geyserRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.camX = oldX
 			g.camY = oldY
@@ -1991,13 +1955,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				g.drawScreenshotMenu(screen)
 			}
 
-			mr := g.magnifyRect()
-			mcx := float32(mr.Min.X + size/2)
-			mcy := float32(mr.Min.Y + size/2)
-			vector.DrawFilledCircle(screen, mcx, mcy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
-			vector.StrokeCircle(screen, mcx, mcy, float32(size)/2, 1, buttonBorderColor, true)
-			drawPlusMinus(screen, mr, g.magnify)
-
 			hr := g.helpRect()
 			cx := float32(hr.Min.X + size/2)
 			cy := float32(hr.Min.Y + size/2)
@@ -2051,12 +2008,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				switch g.hoverIcon {
 				case hoverScreenshot:
 					g.drawTooltip(screen, "Screenshot", sr, scale)
-				case hoverMagnify:
-					lbl := "Enlarge UI"
-					if g.magnify {
-						lbl = "Shrink UI"
-					}
-					g.drawTooltip(screen, lbl, mr, scale)
 				case hoverHelp:
 					g.drawTooltip(screen, "Help", hr, scale)
 				case hoverOptions:

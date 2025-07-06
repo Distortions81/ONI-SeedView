@@ -27,7 +27,7 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
   item labels, legends, number labels, smart rendering, half-resolution
   mode, automatic low-res switching and linear filtering. You can also
   adjust icon size and view the current FPS.
-* A `+` icon toggles enlarged UI text for accessibility.
+* A **Magnify Text** option toggles enlarged UI text for accessibility.
 * Crosshairs at the center show the current world coordinates,
   useful for lining up precise screenshots.
 * A water-drop icon opens a scrollable list of all geysers
@@ -45,11 +45,11 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
 - **Drag with the mouse** – pan.
 - **Pinch gestures** – zoom on touch devices.
 - **Click or tap geysers/POIs** – view details in a popup.
-- **Hover legend entries** – highlight matching objects.
+- **Hover or tap legend entries** – highlight and select matching objects.
 - **Camera icon** – open the screenshot menu.
 - **Water-drop icon** – show a list of all geysers.
 - **Question mark** – toggle the help overlay.
-- **Plus icon** – enlarge (or shrink) the UI.
+- **Magnify Text** option – enlarge or shrink the UI.
 - **Gear icon** – open the options menu.
 
 ## Getting Started
