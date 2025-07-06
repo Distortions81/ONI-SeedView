@@ -4,9 +4,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/nfnt/bmp"
 	"image"
 	"image/color"
-	"image/png"
 	"math"
 	"os"
 	"time"
@@ -89,7 +89,7 @@ func (g *Game) captureScreen(screen *ebiten.Image) {
 	screen.ReadPixels(pixels)
 	img := &image.RGBA{Pix: pixels, Stride: 4 * b.Dx(), Rect: b}
 	if f, err := os.Create(g.screenshotPath); err == nil {
-		_ = png.Encode(f, img)
+		_ = bmp.Encode(f, img)
 		f.Close()
 	}
 	g.captured = true
