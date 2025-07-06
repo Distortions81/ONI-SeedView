@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	coord := flag.String("coord", "SNDST-A-7-0-0-0", "seed coordinate")
+	coord := flag.String("coord", "V-FRST-C-1331877-0-0-0", "seed coordinate")
 	screenshot := flag.String("screenshot", "", "path to save a PNG screenshot and exit")
 	flag.Parse()
 	asteroidIDVal := ""
