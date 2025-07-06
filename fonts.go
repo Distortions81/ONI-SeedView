@@ -48,11 +48,11 @@ func setFontSize(size float64) {
 	}
 }
 
-func increaseFontSize() { setFontSize(fontSize + 2) }
+func increaseFontSize() { setFontSize(fontSize + 3) }
 
 func decreaseFontSize() {
 	if fontSize > 6 {
-		setFontSize(fontSize - 2)
+		setFontSize(fontSize - 3)
 	}
 }
 
