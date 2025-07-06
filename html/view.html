@@ -59,8 +59,8 @@
     }
   </style>
   <script src="wasm_exec.js"></script>
-  <script src="https://unpkg.com/pako@2.1.0/dist/pako.min.js"></script>
-  <script>
+  <script type="module">
+    import brotliPromise from 'https://unpkg.com/brotli-dec-wasm@2.3.0/index.js?module';
     if (!WebAssembly.instantiateStreaming) {
       WebAssembly.instantiateStreaming = async (resp, importObject) => {
         const source = await (await resp).arrayBuffer();
@@ -68,7 +68,8 @@
       };
     }
     const go = new Go();
-    fetch("oni-view.wasm.gz")
+    const brotli = await brotliPromise;
+    fetch("oni-view.wasm.br")
       .then(async (resp) => {
         const total = parseInt(resp.headers.get("content-length") || "0", 10);
         let buf;
@@ -106,7 +107,7 @@
           }
           document.getElementById("speed").textContent = "Loading application.";
         }
-        const decompressed = pako.ungzip(new Uint8Array(buf)).buffer;
+        const decompressed = brotli.decompress(new Uint8Array(buf)).buffer;
         return WebAssembly.instantiate(decompressed, go.importObject);
       })
       .then((result) => {

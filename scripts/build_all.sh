@@ -18,8 +18,8 @@ env CGO_ENABLED=0 GOOS=js GOARCH=wasm go build -ldflags="-s -w" -trimpath -build
 #    build/oni-view.wasm -o build/oni-view.wasm
 #fi
 
-# Compress the WASM to reduce size.
-gzip -9 -c build/oni-view.wasm > build/oni-view.wasm.gz
+# Compress the WASM to reduce size using Brotli.
+brotli -f -q 11 build/oni-view.wasm -o build/oni-view.wasm.br
 rm build/oni-view.wasm
 
 # Copy the JS runtime and HTML loader for WASM builds.
