@@ -19,6 +19,7 @@ var (
 	notoFont   font.Face
 	fontSize   = baseFontSize
 	fontParsed *opentype.Font
+	fontChange []func()
 )
 
 func loadFont(size float64) font.Face {
@@ -40,6 +41,9 @@ func loadFont(size float64) font.Face {
 func setFontSize(size float64) {
 	notoFont = loadFont(size)
 	fontSize = size
+	for _, cb := range fontChange {
+		cb()
+	}
 }
 
 func increaseFontSize() { setFontSize(fontSize + 2) }
@@ -50,7 +54,18 @@ func decreaseFontSize() {
 	}
 }
 
+func registerFontChange(fn func()) {
+	fontChange = append(fontChange, fn)
+}
+
 func fontScale() float64 { return fontSize / baseFontSize }
+
+func rowSpacing() int {
+	if notoFont != nil {
+		return notoFont.Metrics().Height.Ceil() + 8
+	}
+	return int(float64(LegendRowSpacing) * fontScale())
+}
 
 func init() {
 	setFontSize(fontSize)
