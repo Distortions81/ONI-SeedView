@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"encoding/binary"
 	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"golang.org/x/image/font/opentype"
 )
 
 func main() {
@@ -40,7 +43,18 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := os.WriteFile(filepath.Clean(*outPath), data[start:end], 0o644); err != nil {
+	fontData := data[start:end]
+	font, err := opentype.Parse(fontData)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to parse font: %v\n", err)
+		os.Exit(1)
+	}
+	buf := &bytes.Buffer{}
+	if _, err := font.WriteSourceTo(nil, buf); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to copy font data: %v\n", err)
+		os.Exit(1)
+	}
+	if err := os.WriteFile(filepath.Clean(*outPath), buf.Bytes(), 0o644); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to write %s: %v\n", *outPath, err)
 		os.Exit(1)
 	}
