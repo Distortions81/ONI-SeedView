@@ -2,12 +2,13 @@
 package main
 
 import (
+	"image/color"
 	"math"
 	"time"
 )
 
 const (
-	ClientVersion    = "v0.0.3"
+	ClientVersion    = "v0.0.6-2507060337"
 	BaseURL          = "https://ingest.mapsnotincluded.org/coordinate/"
 	AcceptCBORHeader = "application/cbor"
 	PanSpeed         = 15
@@ -27,7 +28,7 @@ const (
 	DefaultWidth        = 1200
 	DefaultHeight       = 1200
 	InitialZoom         = 1.0
-	LabelCharWidth      = 6
+	LabelCharWidth      = 8
 	NumberLegendXOffset = 150
 	LegendRowSpacing    = 25
 	// LegendScrollExtraRows controls how many additional rows the legend
@@ -40,15 +41,17 @@ const (
 	InfoIconScale         = 0.3
 	InfoIconSize          = 32
 	InfoPanelAlpha        = 200
-	TouchDragThreshold    = 10
-	ScreenshotMenuSpacing = 26
+	TouchDragThreshold    = 20
 	ScreenshotMenuTitle   = "Image quality:"
 	ScreenshotSaveLabel   = "Save Screenshot"
 	ScreenshotTakingLabel = "Taking Screenshot..."
 	ScreenshotSavedLabel  = "Saved!"
+	ScreenshotBWLabel     = "Black and White"
+	ScreenshotCloseLabel  = "Close"
 	GeyserRowSpacing      = 60
-	OptionsMenuSpacing    = 26
 	OptionsMenuTitle      = "Options:"
+	AsteroidMenuSpacing   = 26
+	AsteroidMenuTitle     = "Asteroids:"
 
 	// BiomeTextureScale controls the repetition of biome textures.
 	// Smaller values result in more repetitions.
@@ -94,3 +97,11 @@ var biomeOrder = []string{
 	"OilField",
 	"MagmaCore",
 }
+
+var (
+	buttonActiveColor   = color.RGBA{0, 96, 96, 255}
+	buttonInactiveColor = color.RGBA{40, 40, 40, 255}
+	buttonBorderColor   = color.RGBA{255, 255, 255, 255}
+	frameColor          = color.RGBA{0, 0, 0, 255}
+	bottomTrayColor     = color.RGBA{0, 0, 0, 180}
+)

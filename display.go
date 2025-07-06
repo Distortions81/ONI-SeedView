@@ -154,7 +154,8 @@ func displayPOI(id string) string {
 func formatLabel(name string) (string, int) {
 	words := strings.Fields(name)
 	if len(words) <= 2 {
-		return name, len(name)
+		w, _ := textDimensions(name)
+		return name, w
 	}
 	var lines []string
 	for i := 0; i < len(words); i += 2 {
@@ -165,20 +166,9 @@ func formatLabel(name string) (string, int) {
 		line := strings.Join(words[i:end], " ")
 		lines = append(lines, line)
 	}
-	width := 0
-	for _, l := range lines {
-		if len(l) > width {
-			width = len(l)
-		}
-	}
-	for i, l := range lines {
-		if len(l) < width {
-			pad := (width - len(l)) / 2
-			lines[i] = strings.Repeat(" ", pad) + l
-		}
-	}
 	formatted := strings.Join(lines, "\n")
-	return formatted, width
+	w, _ := textDimensions(formatted)
+	return formatted, w
 }
 
 func formatNum(n float64) string {

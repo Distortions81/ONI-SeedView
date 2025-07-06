@@ -5,42 +5,51 @@ package main
 import (
 	"fmt"
 	"image"
-	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 func (g *Game) optionsRect() image.Rectangle {
 	size := g.iconSize()
-	x := g.width - size*5 - HelpMargin*5
+	x := g.width - size*4 - HelpMargin*4
 	y := g.height - size - HelpMargin
 	return image.Rect(x, y, x+size, y+size)
 }
 
-func (g *Game) optionsMenuRect() image.Rectangle {
+func (g *Game) optionsMenuSize() (int, int) {
 	labels := []string{
 		OptionsMenuTitle,
-		"Textures",
-		"Vsync",
 		"Show Item Names",
 		"Show Legends",
 		"Use Item Numbers",
+		"Font Size [-] [+]",
 		"Icon Size [-] [+]",
-		"Smart Rendering",
+		"Textures",
+		"Vsync",
+		"Power Saver",
+		"Linear Filtering",
 		"FPS: 60.0",
 		"Version: " + ClientVersion,
 		"Close",
 	}
 	maxW := 0
 	for _, s := range labels {
-		if len(s) > maxW {
-			maxW = len(s)
+		w, _ := textDimensions(s)
+		if w > maxW {
+			maxW = w
 		}
 	}
-	w := maxW*LabelCharWidth + 4
-	h := (len(labels)+1)*OptionsMenuSpacing + 4
-	x := g.optionsRect().Min.X - w - 10
+	w := maxW + 4
+	h := (len(labels)+1)*menuSpacing() + 4
+	return w, h
+}
+
+func (g *Game) optionsMenuRect() image.Rectangle {
+	w, h := g.optionsMenuSize()
+	scale := g.uiScale()
+	w = int(float64(w) * scale)
+	h = int(float64(h) * scale)
+	x := g.optionsRect().Min.X - w - int(10*scale)
 	if x < 0 {
 		x = 0
 	}
@@ -52,50 +61,73 @@ func (g *Game) optionsMenuRect() image.Rectangle {
 }
 
 func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
+	scale := g.uiScale()
 	rect := g.optionsMenuRect()
-	vector.DrawFilledRect(dst, float32(rect.Min.X), float32(rect.Min.Y), float32(rect.Dx()), float32(rect.Dy()), colorRGBA(0, 0, 0, 200), false)
-	drawTextWithBG(dst, OptionsMenuTitle, rect.Min.X+2, rect.Min.Y+2)
-	y := rect.Min.Y + 2 + OptionsMenuSpacing
+	w, h := g.optionsMenuSize()
+	img := ebiten.NewImage(w, h)
+	drawFrame(img, image.Rect(0, 0, w, h))
+	drawText(img, OptionsMenuTitle, 6, 6)
+	y := 6 + menuSpacing()
 
 	drawToggle := func(label string, enabled bool) {
-		if enabled {
-			drawTextWithBGBorder(dst, label, rect.Min.X+2, y, color.RGBA{255, 255, 255, 255})
-		} else {
-			drawTextWithBG(dst, label, rect.Min.X+2, y)
+		btn := image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
+		drawButton(img, btn, enabled)
+		lh := menuButtonHeight() - 5
+		if notoFont != nil {
+			lh = notoFont.Metrics().Height.Ceil()
 		}
-		y += OptionsMenuSpacing
+		drawText(img, label, btn.Min.X+6, btn.Min.Y+(menuButtonHeight()-lh)/2)
+		y += menuSpacing()
 	}
 
-	drawToggle("Textures", g.textures)
-	drawToggle("Vsync", g.vsync)
 	drawToggle("Show Item Names", g.showItemNames)
 	drawToggle("Show Legends", g.showLegend)
 	drawToggle("Use Item Numbers", g.useNumbers)
 
-	label := "Icon Size"
-	drawTextWithBG(dst, label, rect.Min.X+2, y)
-	w, _ := textDimensions(label)
-	bx := rect.Min.X + 2 + w + 6
-	minus := image.Rect(bx, y-2, bx+16, y-2+20)
-	plus := image.Rect(bx+20, y-2, bx+36, y-2+20)
-	vector.DrawFilledRect(dst, float32(minus.Min.X), float32(minus.Min.Y), float32(minus.Dx()), float32(minus.Dy()), colorRGBA(0, 0, 0, 180), false)
-	vector.StrokeRect(dst, float32(minus.Min.X)+0.5, float32(minus.Min.Y)+0.5, float32(minus.Dx())-1, float32(minus.Dy())-1, 2, color.RGBA{255, 255, 255, 255}, false)
-	drawPlusMinus(dst, minus, true)
-	vector.DrawFilledRect(dst, float32(plus.Min.X), float32(plus.Min.Y), float32(plus.Dx()), float32(plus.Dy()), colorRGBA(0, 0, 0, 180), false)
-	vector.StrokeRect(dst, float32(plus.Min.X)+0.5, float32(plus.Min.Y)+0.5, float32(plus.Dx())-1, float32(plus.Dy())-1, 2, color.RGBA{255, 255, 255, 255}, false)
-	drawPlusMinus(dst, plus, false)
-	y += OptionsMenuSpacing
+	label := "Font Size"
+	drawText(img, label, 6, y)
+	tw, _ := textDimensions(label)
+	bx := 6 + tw + 6
+	minus := image.Rect(bx, y-4, bx+20, y-4+menuButtonHeight())
+	plus := image.Rect(bx+24, y-4, bx+44, y-4+menuButtonHeight())
+	drawButton(img, minus, false)
+	drawPlusMinus(img, minus, true)
+	drawButton(img, plus, false)
+	drawPlusMinus(img, plus, false)
+	y += menuSpacing()
 
-	drawToggle("Smart Rendering", g.smartRender)
+	label = "Icon Size"
+	drawText(img, label, 6, y)
+	tw, _ = textDimensions(label)
+	bx = 6 + tw + 6
+	minus = image.Rect(bx, y-4, bx+20, y-4+menuButtonHeight())
+	plus = image.Rect(bx+24, y-4, bx+44, y-4+menuButtonHeight())
+	drawButton(img, minus, false)
+	drawPlusMinus(img, minus, true)
+	drawButton(img, plus, false)
+	drawPlusMinus(img, plus, false)
+	y += menuSpacing()
+
+	drawToggle("Textures", g.textures)
+	drawToggle("Vsync", g.vsync)
+	drawToggle("Power Saver", g.smartRender)
+	drawToggle("Linear Filtering", g.linearFilter)
 
 	fps := fmt.Sprintf("FPS: %.1f", ebiten.ActualFPS())
-	drawTextWithBG(dst, fps, rect.Min.X+2, y)
-	y += OptionsMenuSpacing
+	drawText(img, fps, 6, y)
+	y += menuSpacing()
 
-	drawTextWithBG(dst, "Version: "+ClientVersion, rect.Min.X+2, y)
-	y += OptionsMenuSpacing
+	drawText(img, "Version: "+ClientVersion, 6, y)
+	y += menuSpacing()
 
-	drawTextWithBGBorder(dst, "Close", rect.Min.X+2, y, color.RGBA{255, 255, 255, 255})
+	btn := image.Rect(4, y-4, w-4, y-4+22)
+	drawButton(img, btn, true)
+	drawText(img, "Close", btn.Min.X+6, btn.Min.Y+4)
+
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(scale, scale)
+	op.GeoM.Translate(float64(rect.Min.X), float64(rect.Min.Y))
+	dst.DrawImage(img, op)
 }
 
 func (g *Game) clickOptionsMenu(mx, my int) bool {
@@ -103,59 +135,83 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	if !rect.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		return false
 	}
-	y := rect.Min.Y + 2 + OptionsMenuSpacing
-
-	// Textures
-	r := image.Rect(rect.Min.X, y-2, rect.Min.X+rect.Dx(), y-2+20)
-	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-		g.textures = !g.textures
-		g.needsRedraw = true
-		return true
-	}
-	y += OptionsMenuSpacing
-
-	// Vsync
-	r = image.Rect(rect.Min.X, y-2, rect.Min.X+rect.Dx(), y-2+20)
-	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-		g.vsync = !g.vsync
-		ebiten.SetVsyncEnabled(g.vsync)
-		g.needsRedraw = true
-		return true
-	}
-	y += OptionsMenuSpacing
+	scale := g.uiScale()
+	x := int(float64(mx-rect.Min.X) / scale)
+	y := int(float64(my-rect.Min.Y) / scale)
+	mx = x
+	my = y
+	w, _ := g.optionsMenuSize()
+	y = 6 + menuSpacing()
 
 	// Show Item Names
-	r = image.Rect(rect.Min.X, y-2, rect.Min.X+rect.Dx(), y-2+20)
+	r := image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.showItemNames = !g.showItemNames
 		g.needsRedraw = true
 		return true
 	}
-	y += OptionsMenuSpacing
+	y += menuSpacing()
 
 	// Show Legends
-	r = image.Rect(rect.Min.X, y-2, rect.Min.X+rect.Dx(), y-2+20)
+	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.showLegend = !g.showLegend
 		g.needsRedraw = true
 		return true
 	}
-	y += OptionsMenuSpacing
+	y += menuSpacing()
 
 	// Use Item Numbers
-	r = image.Rect(rect.Min.X, y-2, rect.Min.X+rect.Dx(), y-2+20)
+	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.useNumbers = !g.useNumbers
 		g.needsRedraw = true
 		return true
 	}
-	y += OptionsMenuSpacing
+	y += menuSpacing()
+
+	// Font Size buttons
+	labelW, _ := textDimensions("Font Size")
+	bx := 6 + labelW + 6
+	minus := image.Rect(bx, y-4, bx+20, y-4+menuButtonHeight())
+	plus := image.Rect(bx+24, y-4, bx+44, y-4+menuButtonHeight())
+	if minus.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		decreaseFontSize()
+		if max := g.maxBiomeScroll(); max == 0 {
+			g.biomeScroll = 0
+		} else if g.biomeScroll > max {
+			g.biomeScroll = max
+		}
+		if max := g.maxItemScroll(); max == 0 {
+			g.itemScroll = 0
+		} else if g.itemScroll > max {
+			g.itemScroll = max
+		}
+		g.needsRedraw = true
+		return true
+	}
+	if plus.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		increaseFontSize()
+		if max := g.maxBiomeScroll(); max == 0 {
+			g.biomeScroll = 0
+		} else if g.biomeScroll > max {
+			g.biomeScroll = max
+		}
+		if max := g.maxItemScroll(); max == 0 {
+			g.itemScroll = 0
+		} else if g.itemScroll > max {
+			g.itemScroll = max
+		}
+		g.needsRedraw = true
+		return true
+	}
+	y += menuSpacing()
 
 	// Icon Size buttons
-	labelW, _ := textDimensions("Icon Size")
-	bx := rect.Min.X + 2 + labelW + 6
-	minus := image.Rect(bx, y-2, bx+16, y-2+20)
-	plus := image.Rect(bx+20, y-2, bx+36, y-2+20)
+	labelW, _ = textDimensions("Icon Size")
+	bx = 6 + labelW + 6
+	minus = image.Rect(bx, y-4, bx+20, y-4+menuButtonHeight())
+	plus = image.Rect(bx+24, y-4, bx+44, y-4+menuButtonHeight())
 	if minus.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		if g.iconScale > 0.25 {
 			g.iconScale -= 0.25
@@ -168,25 +224,53 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 		g.needsRedraw = true
 		return true
 	}
-	y += OptionsMenuSpacing
+	y += menuSpacing()
 
-	// Smart Rendering
-	r = image.Rect(rect.Min.X, y-2, rect.Min.X+rect.Dx(), y-2+20)
+	// Textures
+	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
+	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		g.textures = !g.textures
+		g.needsRedraw = true
+		return true
+	}
+	y += menuSpacing()
+
+	// Vsync
+	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
+	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		g.vsync = !g.vsync
+		ebiten.SetVsyncEnabled(g.vsync)
+		g.needsRedraw = true
+		return true
+	}
+	y += menuSpacing()
+
+	// Power Saver
+	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.smartRender = !g.smartRender
 		g.needsRedraw = true
 		return true
 	}
-	y += OptionsMenuSpacing
+	y += menuSpacing()
+
+	// Linear Filtering
+	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
+	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		g.linearFilter = !g.linearFilter
+		g.needsRedraw = true
+		return true
+	}
+	y += menuSpacing()
 
 	// FPS (not clickable)
-	y += OptionsMenuSpacing
+	y += menuSpacing()
 
 	// Version (not clickable)
-	y += OptionsMenuSpacing
+	y += menuSpacing()
 
 	// Close
-	r = image.Rect(rect.Min.X, y-2, rect.Min.X+rect.Dx(), y-2+20)
+	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.showOptions = false
 		g.needsRedraw = true

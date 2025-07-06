@@ -114,7 +114,7 @@ func loadBiomeTextures() map[string]*ebiten.Image {
 	for _, name := range biomeOrder {
 		img, err := loadImageFile("../biomes/" + name + ".png")
 		if err != nil {
-			fmt.Println("load biome", name, ":", err)
+			//fmt.Println("load biome", name, ":", err)
 			continue
 		}
 		textures[name] = img

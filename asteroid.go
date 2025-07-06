@@ -1,10 +1,13 @@
 package main
 
+import "strings"
+
 // asteroidIndexByID searches the asteroid slice for the given ID and returns
 // its index, or -1 if not found.
 func asteroidIndexByID(asts []Asteroid, id string) int {
+	id = strings.TrimSpace(id)
 	for i, a := range asts {
-		if a.ID == id {
+		if strings.EqualFold(a.ID, id) {
 			return i
 		}
 	}
