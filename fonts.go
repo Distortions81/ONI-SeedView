@@ -3,7 +3,7 @@
 package main
 
 import (
-	"embed"
+	_ "embed"
 	"log"
 
 	"golang.org/x/image/font"
