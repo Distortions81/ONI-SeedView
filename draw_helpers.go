@@ -19,9 +19,8 @@ func (g *Game) drawUI(screen *ebiten.Image) {
 	if !g.screenshotMode {
 		cx := g.width / 2
 		cy := g.height / 2
-		crossClr := color.RGBA{255, 255, 255, 30}
-		vector.StrokeLine(screen, float32(cx-CrosshairSize), float32(cy), float32(cx+CrosshairSize), float32(cy), 1, crossClr, true)
-		vector.StrokeLine(screen, float32(cx), float32(cy-CrosshairSize), float32(cx), float32(cy+CrosshairSize), 1, crossClr, true)
+		vector.StrokeLine(screen, float32(cx-CrosshairSize), float32(cy), float32(cx+CrosshairSize), float32(cy), 1, crosshairColor, true)
+		vector.StrokeLine(screen, float32(cx), float32(cy-CrosshairSize), float32(cx), float32(cy+CrosshairSize), 1, crosshairColor, true)
 		worldX := int(math.Round(((float64(cx) - g.camX) / g.zoom) / 2))
 		worldY := int(math.Round(((float64(cy) - g.camY) / g.zoom) / 2))
 		coords := fmt.Sprintf("X: %d Y: %d", worldX, worldY)

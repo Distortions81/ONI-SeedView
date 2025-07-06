@@ -38,6 +38,9 @@ const (
 	HelpIconSize          = 24
 	HelpMargin            = 10
 	CrosshairSize         = 10
+	BaseMenuButtonHeight  = 22
+	BaseMenuSpacing       = 26
+	MenuMargin            = 10
 	InfoIconScale         = 0.3
 	InfoIconSize          = 32
 	InfoPanelAlpha        = 200
@@ -104,4 +107,5 @@ var (
 	buttonBorderColor   = color.RGBA{255, 255, 255, 255}
 	frameColor          = color.RGBA{0, 0, 0, 128}
 	bottomTrayColor     = color.RGBA{0, 0, 0, 128}
+	crosshairColor      = color.RGBA{255, 255, 255, 30}
 )

@@ -71,14 +71,14 @@ func menuButtonHeight() int {
 	if notoFont != nil {
 		return notoFont.Metrics().Height.Ceil() + 5
 	}
-	return int(float64(22) * fontScale())
+	return int(float64(BaseMenuButtonHeight) * fontScale())
 }
 
 func menuSpacing() int {
 	if notoFont != nil {
 		return menuButtonHeight() + 4
 	}
-	return int(float64(26) * fontScale())
+	return int(float64(BaseMenuSpacing) * fontScale())
 }
 
 func init() {

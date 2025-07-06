@@ -49,7 +49,7 @@ func (g *Game) optionsMenuRect() image.Rectangle {
 	scale := g.uiScale()
 	w = int(float64(w) * scale)
 	h = int(float64(h) * scale)
-	x := g.optionsRect().Min.X - w - int(10*scale)
+	x := g.optionsRect().Min.X - w - int(float64(MenuMargin)*scale)
 	if x < 0 {
 		x = 0
 	}
@@ -120,7 +120,7 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	drawText(img, "Version: "+ClientVersion, 6, y)
 	y += menuSpacing()
 
-	btn := image.Rect(4, y-4, w-4, y-4+22)
+	btn := image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
 	drawButton(img, btn, true)
 	drawText(img, "Close", btn.Min.X+6, btn.Min.Y+4)
 

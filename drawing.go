@@ -10,7 +10,7 @@ import (
 
 func drawTextWithBG(dst *ebiten.Image, text string, x, y int) {
 	w, h := textDimensions(text)
-	vector.DrawFilledRect(dst, float32(x-2), float32(y-2), float32(w+4), float32(h+4), color.RGBA{0, 0, 0, 128}, false)
+	vector.DrawFilledRect(dst, float32(x-2), float32(y-2), float32(w+4), float32(h+4), frameColor, false)
 	drawText(dst, text, x, y)
 }
 
@@ -23,7 +23,7 @@ func drawTextWithBGScale(dst *ebiten.Image, text string, x, y int, scale float64
 	w += 4
 	h += 4
 	img := ebiten.NewImage(w, h)
-	vector.DrawFilledRect(img, 0, 0, float32(w), float32(h), color.RGBA{0, 0, 0, 128}, false)
+	vector.DrawFilledRect(img, 0, 0, float32(w), float32(h), frameColor, false)
 	drawText(img, text, 2, 2)
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(scale, scale)
@@ -38,7 +38,7 @@ func drawTextWithBGBorder(dst *ebiten.Image, text string, x, y int, border color
 	bw := w + 4
 	bh := h + 4
 	vector.DrawFilledRect(dst, float32(bx-1), float32(by-1), float32(bw+2), float32(bh+2), border, false)
-	vector.DrawFilledRect(dst, float32(bx), float32(by), float32(bw), float32(bh), color.RGBA{0, 0, 0, 128}, false)
+	vector.DrawFilledRect(dst, float32(bx), float32(by), float32(bw), float32(bh), frameColor, false)
 	drawText(dst, text, x, y)
 }
 
@@ -52,7 +52,7 @@ func drawTextWithBGBorderScale(dst *ebiten.Image, text string, x, y int, border 
 	h += 4
 	img := ebiten.NewImage(w+2, h+2)
 	vector.DrawFilledRect(img, 0, 0, float32(w+2), float32(h+2), border, false)
-	vector.DrawFilledRect(img, 1, 1, float32(w), float32(h), color.RGBA{0, 0, 0, 128}, false)
+	vector.DrawFilledRect(img, 1, 1, float32(w), float32(h), frameColor, false)
 	drawText(img, text, 3, 3)
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(scale, scale)

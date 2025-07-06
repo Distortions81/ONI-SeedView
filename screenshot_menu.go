@@ -43,7 +43,7 @@ func (g *Game) screenshotMenuRect() image.Rectangle {
 	scale := g.uiScale()
 	w = int(float64(w) * scale)
 	h = int(float64(h) * scale)
-	x := g.screenshotRect().Min.X - w - int(10*scale)
+	x := g.screenshotRect().Min.X - w - int(float64(MenuMargin)*scale)
 	if x < 0 {
 		x = 0
 	}
@@ -194,8 +194,4 @@ func (g *Game) captureScreenshot(w, h int, zoom float64) *image.RGBA {
 	g.showShotMenu = menu
 	g.needsRedraw = true
 	return rgba
-}
-
-func colorRGBA(r, g0, b, a uint8) color.RGBA {
-	return color.RGBA{R: r, G: g0, B: b, A: a}
 }
