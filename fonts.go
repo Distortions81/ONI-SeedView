@@ -13,9 +13,11 @@ import (
 //go:embed NotoSansMono.ttf
 var notoTTF []byte
 
+const baseFontSize = 13.0
+
 var (
 	notoFont   font.Face
-	fontSize   = 13.0
+	fontSize   = baseFontSize
 	fontParsed *opentype.Font
 )
 
@@ -47,6 +49,8 @@ func decreaseFontSize() {
 		setFontSize(fontSize - 2)
 	}
 }
+
+func fontScale() float64 { return fontSize / baseFontSize }
 
 func init() {
 	setFontSize(fontSize)

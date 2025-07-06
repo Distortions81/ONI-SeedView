@@ -87,15 +87,8 @@ var grayColorM = func() ebiten.ColorM {
 }()
 
 func drawTextWithBG(dst *ebiten.Image, text string, x, y int) {
-	lines := strings.Split(text, "\n")
-	width := 0
-	for _, l := range lines {
-		if len(l) > width {
-			width = len(l)
-		}
-	}
-	height := len(lines) * 20
-	vector.DrawFilledRect(dst, float32(x-2), float32(y-2), float32(width*LabelCharWidth+4), float32(height+4), color.RGBA{0, 0, 0, 128}, false)
+	w, h := textDimensions(text)
+	vector.DrawFilledRect(dst, float32(x-2), float32(y-2), float32(w+4), float32(h+4), color.RGBA{0, 0, 0, 128}, false)
 	drawText(dst, text, x, y)
 }
 
@@ -104,16 +97,9 @@ func drawTextWithBGScale(dst *ebiten.Image, text string, x, y int, scale float64
 		drawTextWithBG(dst, text, x, y)
 		return
 	}
-	lines := strings.Split(text, "\n")
-	width := 0
-	for _, l := range lines {
-		if len(l) > width {
-			width = len(l)
-		}
-	}
-	height := len(lines) * 20
-	w := width*LabelCharWidth + 4
-	h := height + 4
+	w, h := textDimensions(text)
+	w += 4
+	h += 4
 	img := ebiten.NewImage(w, h)
 	vector.DrawFilledRect(img, 0, 0, float32(w), float32(h), color.RGBA{0, 0, 0, 128}, false)
 	drawText(img, text, 2, 2)
@@ -124,18 +110,11 @@ func drawTextWithBGScale(dst *ebiten.Image, text string, x, y int, scale float64
 }
 
 func drawTextWithBGBorder(dst *ebiten.Image, text string, x, y int, border color.Color) {
-	lines := strings.Split(text, "\n")
-	width := 0
-	for _, l := range lines {
-		if len(l) > width {
-			width = len(l)
-		}
-	}
-	height := len(lines) * 20
+	w, h := textDimensions(text)
 	bx := x - 2
 	by := y - 2
-	bw := width*LabelCharWidth + 4
-	bh := height + 4
+	bw := w + 4
+	bh := h + 4
 	vector.DrawFilledRect(dst, float32(bx-1), float32(by-1), float32(bw+2), float32(bh+2), border, false)
 	vector.DrawFilledRect(dst, float32(bx), float32(by), float32(bw), float32(bh), color.RGBA{0, 0, 0, 128}, false)
 	drawText(dst, text, x, y)
@@ -146,16 +125,9 @@ func drawTextWithBGBorderScale(dst *ebiten.Image, text string, x, y int, border 
 		drawTextWithBGBorder(dst, text, x, y, border)
 		return
 	}
-	lines := strings.Split(text, "\n")
-	width := 0
-	for _, l := range lines {
-		if len(l) > width {
-			width = len(l)
-		}
-	}
-	height := len(lines) * 20
-	w := width*LabelCharWidth + 4
-	h := height + 4
+	w, h := textDimensions(text)
+	w += 4
+	h += 4
 	img := ebiten.NewImage(w+2, h+2)
 	vector.DrawFilledRect(img, 0, 0, float32(w+2), float32(h+2), border, false)
 	vector.DrawFilledRect(img, 1, 1, float32(w), float32(h), color.RGBA{0, 0, 0, 128}, false)
@@ -167,15 +139,7 @@ func drawTextWithBGBorderScale(dst *ebiten.Image, text string, x, y int, border 
 }
 
 func (g *Game) drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int, scale float64) {
-	lines := strings.Split(text, "\n")
-	width := 0
-	for _, l := range lines {
-		if len(l) > width {
-			width = len(l)
-		}
-	}
-	txtW := width * LabelCharWidth
-	txtH := len(lines) * 20
+	txtW, txtH := textDimensions(text)
 	iconW, iconH := 0, 0
 	if icon != nil {
 		iconW = InfoIconSize
@@ -205,15 +169,7 @@ func (g *Game) drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image,
 }
 
 func (g *Game) drawInfoRow(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int, scale float64) {
-	lines := strings.Split(text, "\n")
-	width := 0
-	for _, l := range lines {
-		if len(l) > width {
-			width = len(l)
-		}
-	}
-	txtW := width * LabelCharWidth
-	txtH := len(lines) * 20
+	txtW, txtH := textDimensions(text)
 	iconW, iconH := 0, 0
 	if icon != nil {
 		iconW = InfoIconSize
@@ -261,7 +217,10 @@ func textDimensions(text string) (int, int) {
 				width = len(l)
 			}
 		}
-		return width * LabelCharWidth, len(lines) * 20
+		scale := fontScale()
+		w := int(float64(width*LabelCharWidth) * scale)
+		h := int(float64(len(lines)*20) * scale)
+		return w, h
 	}
 	lines := strings.Split(text, "\n")
 	width := 0
@@ -284,8 +243,9 @@ func infoPanelSize(text string, icon *ebiten.Image) (int, int) {
 			width = len(l)
 		}
 	}
-	txtW := width * LabelCharWidth
-	txtH := len(lines) * 20
+	scale := fontScale()
+	txtW := int(float64(width*LabelCharWidth) * scale)
+	txtH := int(float64(len(lines)*20) * scale)
 	iconW, iconH := 0, 0
 	if icon != nil {
 		iconW = InfoIconSize
@@ -309,8 +269,9 @@ func infoRowSize(text string, icon *ebiten.Image) (int, int) {
 			width = len(l)
 		}
 	}
-	txtW := width * LabelCharWidth
-	txtH := len(lines) * 20
+	scale := fontScale()
+	txtW := int(float64(width*LabelCharWidth) * scale)
+	txtH := int(float64(len(lines)*20) * scale)
 	iconW, iconH := 0, 0
 	if icon != nil {
 		iconW = InfoIconSize
@@ -433,15 +394,17 @@ func buildLegendImage(biomes []BiomePath) (*ebiten.Image, []string) {
 	}
 	sort.Strings(names)
 
-	maxLen := 0
+	maxW := 0
 	for _, name := range names {
-		if l := len(displayBiome(name)); l > maxLen {
-			maxLen = l
+		w, _ := textDimensions(displayBiome(name))
+		if w > maxW {
+			maxW = w
 		}
 	}
 
-	width := 30 + maxLen*LabelCharWidth + 5
-	height := LegendRowSpacing*(len(names)+2) + 7
+	scale := fontScale()
+	width := 30 + maxW + 5
+	height := int(float64(LegendRowSpacing*(len(names)+2))*scale) + 7
 
 	img := ebiten.NewImage(width, height)
 	img.Fill(color.RGBA{0, 30, 30, 77})
@@ -500,14 +463,16 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 		return
 	}
 	if g.legendImage == nil {
-		maxLen := 0
+		maxW := 0
 		for _, e := range g.legendEntries {
-			if len(e) > maxLen {
-				maxLen = len(e)
+			w, _ := textDimensions(e)
+			if w > maxW {
+				maxW = w
 			}
 		}
-		width := maxLen*LabelCharWidth + 10
-		height := LegendRowSpacing*(len(g.legendEntries)+2) + 7
+		scale := fontScale()
+		width := maxW + 10
+		height := int(float64(LegendRowSpacing*(len(g.legendEntries)+2))*scale) + 7
 		img := ebiten.NewImage(width, height)
 		img.Fill(color.RGBA{0, 30, 30, 77})
 		y := 10
@@ -1873,7 +1838,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					}
 					if g.showItemNames || useNumbers {
 						if g.showItemNames || useNumbers {
-							labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, width, labelClr})
+							fs := fontScale()
+							labels = append(labels, label{formatted, int(x) - int(float64(width*LabelCharWidth)*fs/2), int(y+h/2) + 2, width, labelClr})
 						}
 					}
 					continue
@@ -1890,7 +1856,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 			if g.showItemNames || useNumbers {
 				if g.showItemNames || useNumbers {
-					labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, width, labelClr})
+					fs := fontScale()
+					labels = append(labels, label{formatted, int(x) - int(float64(width*LabelCharWidth)*fs/2), int(y) + 4, width, labelClr})
 				}
 			}
 		}
@@ -1932,7 +1899,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 						formatted = strconv.Itoa(g.legendMap["p"+name])
 						width = len(formatted)
 					}
-					labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, width, labelClr})
+					fs := fontScale()
+					labels = append(labels, label{formatted, int(x) - int(float64(width*LabelCharWidth)*fs/2), int(y+h/2) + 2, width, labelClr})
 					continue
 				}
 			}
@@ -1945,14 +1913,16 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				formatted = strconv.Itoa(g.legendMap["p"+name])
 				width = len(formatted)
 			}
-			labels = append(labels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, width, labelClr})
+			fs := fontScale()
+			labels = append(labels, label{formatted, int(x) - int(float64(width*LabelCharWidth)*fs/2), int(y) + 4, width, labelClr})
 		}
 
 		labelScale := g.uiScale()
+		fs := fontScale()
 		for _, l := range labels {
 			x := l.x
 			if labelScale != 1.0 {
-				x -= int(float64(l.width*LabelCharWidth) * (labelScale - 1) / 2)
+				x -= int(float64(l.width*LabelCharWidth) * fs * (labelScale - 1) / 2)
 			}
 			if l.clr.A != 0 {
 				if labelScale == 1.0 {
@@ -1977,12 +1947,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				aName = "Unknown"
 			}
 			astName := fmt.Sprintf("Asteroid: %s", aName)
-			x := g.width/2 - int(float64(len(astName)*LabelCharWidth)*scale/2)
+			w, _ := textDimensions(astName)
+			x := g.width/2 - int(float64(w)*scale/2)
 			drawTextWithBGScale(screen, astName, x, int(30*scale), scale)
 			ar := g.asteroidArrowRect()
 			drawDownArrow(screen, ar, g.showAstMenu)
 
-			x = g.width/2 - int(float64(len(label)*LabelCharWidth)*scale/2)
+			w, _ = textDimensions(label)
+			x = g.width/2 - int(float64(w)*scale/2)
 			drawTextWithBGScale(screen, label, x, 10, scale)
 		}
 
@@ -2117,7 +2089,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 							formatted = strconv.Itoa(g.legendMap["g"+name])
 							width = len(formatted)
 						}
-						highlightLabels = append(highlightLabels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, width, labelClr})
+						fs := fontScale()
+						highlightLabels = append(highlightLabels, label{formatted, int(x) - int(float64(width*LabelCharWidth)*fs/2), int(y+h/2) + 2, width, labelClr})
 						continue
 					}
 				}
@@ -2128,7 +2101,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					formatted = strconv.Itoa(g.legendMap["g"+name])
 					width = len(formatted)
 				}
-				highlightLabels = append(highlightLabels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, width, labelClr})
+				fs := fontScale()
+				highlightLabels = append(highlightLabels, label{formatted, int(x) - int(float64(width*LabelCharWidth)*fs/2), int(y) + 4, width, labelClr})
 			}
 
 			for _, poi := range highlightPOIs {
@@ -2160,7 +2134,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 							formatted = strconv.Itoa(g.legendMap["p"+name])
 							width = len(formatted)
 						}
-						highlightLabels = append(highlightLabels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y+h/2) + 2, width, labelClr})
+						fs := fontScale()
+						highlightLabels = append(highlightLabels, label{formatted, int(x) - int(float64(width*LabelCharWidth)*fs/2), int(y+h/2) + 2, width, labelClr})
 						continue
 					}
 				}
@@ -2171,16 +2146,18 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					formatted = strconv.Itoa(g.legendMap["p"+name])
 					width = len(formatted)
 				}
-				highlightLabels = append(highlightLabels, label{formatted, int(x) - (width*LabelCharWidth)/2, int(y) + 4, width, labelClr})
+				fs := fontScale()
+				highlightLabels = append(highlightLabels, label{formatted, int(x) - int(float64(width*LabelCharWidth)*fs/2), int(y) + 4, width, labelClr})
 			}
 
 		}
 		if len(highlightLabels) > 0 {
 			labelScale := g.uiScale()
+			fs := fontScale()
 			for _, l := range highlightLabels {
 				x := l.x
 				if labelScale != 1.0 {
-					x -= int(float64(l.width*LabelCharWidth) * (labelScale - 1) / 2)
+					x -= int(float64(l.width*LabelCharWidth) * fs * (labelScale - 1) / 2)
 				}
 				if l.clr.A != 0 {
 					if labelScale == 1.0 {
