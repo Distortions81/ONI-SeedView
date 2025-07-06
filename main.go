@@ -1165,7 +1165,6 @@ iconsLoop:
 			if g.lowFPSStart.IsZero() {
 				g.lowFPSStart = time.Now()
 			} else if time.Since(g.lowFPSStart) > 2*time.Second {
-				g.halfRes = true
 				g.textures = false
 				g.linearFilter = false
 				g.vsync = false
