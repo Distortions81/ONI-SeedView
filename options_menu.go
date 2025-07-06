@@ -17,12 +17,13 @@ func (g *Game) optionsRect() image.Rectangle {
 }
 
 func (g *Game) optionsMenuSize() (int, int) {
+	fontLabel := fmt.Sprintf("Font Size [-] [+] %.0fpt", fontSize)
 	labels := []string{
 		OptionsMenuTitle,
 		"Show Item Names",
 		"Show Legends",
 		"Use Item Numbers",
-		"Font Size [-] [+]",
+		fontLabel,
 		"Icon Size [-] [+]",
 		"Textures",
 		"Vsync",
@@ -90,6 +91,8 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	drawPlusMinus(img, minus, true)
 	drawButton(img, plus, false)
 	drawPlusMinus(img, plus, false)
+	sizeStr := fmt.Sprintf("%.0fpt", fontSize)
+	drawText(img, sizeStr, plus.Max.X+6, y, false)
 	y += menuSpacing()
 
 	label = "Icon Size"
