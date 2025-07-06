@@ -199,6 +199,7 @@ func (g *Game) clickAsteroidMenu(mx, my int) bool {
 }
 
 func (g *Game) loadAsteroid(ast Asteroid) {
+	g.invalidateLegends()
 	g.asteroidID = ast.ID
 	// Reset cached legends so item numbering matches the newly loaded
 	// asteroid contents. These are rebuilt lazily when needed.
