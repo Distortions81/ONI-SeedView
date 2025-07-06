@@ -28,12 +28,13 @@ func (g *Game) screenshotMenuSize() (int, int) {
 	allLabels = append(allLabels, ScreenshotTakingLabel, ScreenshotSavedLabel)
 	maxW := 0
 	for _, s := range allLabels {
-		if len(s) > maxW {
-			maxW = len(s)
+		w, _ := textDimensions(s)
+		if w > maxW {
+			maxW = w
 		}
 	}
 	scale := fontScale()
-	w := int(float64(maxW*LabelCharWidth)*scale) + 4
+	w := int(float64(maxW)*scale) + 4
 	h := int(float64((itemCount+1)*ScreenshotMenuSpacing)*scale) + 4
 	return w, h
 }

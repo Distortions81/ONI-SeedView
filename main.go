@@ -19,6 +19,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"golang.org/x/image/font"
 )
@@ -208,44 +209,8 @@ func (g *Game) drawInfoRow(dst *ebiten.Image, text string, icon *ebiten.Image, x
 	dst.DrawImage(img, op)
 }
 
-func textDimensions(text string) (int, int) {
-	if notoFont == nil {
-		lines := strings.Split(text, "\n")
-		width := 0
-		for _, l := range lines {
-			if len(l) > width {
-				width = len(l)
-			}
-		}
-		scale := fontScale()
-		w := int(float64(width*LabelCharWidth) * scale)
-		h := int(float64(len(lines)*20) * scale)
-		return w, h
-	}
-	lines := strings.Split(text, "\n")
-	width := 0
-	for _, l := range lines {
-		b, _ := font.BoundString(notoFont, l)
-		w := (b.Max.X - b.Min.X).Ceil()
-		if w > width {
-			width = w
-		}
-	}
-	h := notoFont.Metrics().Height.Ceil() * len(lines)
-	return width, h
-}
-
 func infoPanelSize(text string, icon *ebiten.Image) (int, int) {
-	lines := strings.Split(text, "\n")
-	width := 0
-	for _, l := range lines {
-		if len(l) > width {
-			width = len(l)
-		}
-	}
-	scale := fontScale()
-	txtW := int(float64(width*LabelCharWidth) * scale)
-	txtH := int(float64(len(lines)*20) * scale)
+	txtW, txtH := textDimensions(text)
 	iconW, iconH := 0, 0
 	if icon != nil {
 		iconW = InfoIconSize
@@ -262,16 +227,7 @@ func infoPanelSize(text string, icon *ebiten.Image) (int, int) {
 }
 
 func infoRowSize(text string, icon *ebiten.Image) (int, int) {
-	lines := strings.Split(text, "\n")
-	width := 0
-	for _, l := range lines {
-		if len(l) > width {
-			width = len(l)
-		}
-	}
-	scale := fontScale()
-	txtW := int(float64(width*LabelCharWidth) * scale)
-	txtH := int(float64(len(lines)*20) * scale)
+	txtW, txtH := textDimensions(text)
 	iconW, iconH := 0, 0
 	if icon != nil {
 		iconW = InfoIconSize
@@ -1839,7 +1795,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					if g.showItemNames || useNumbers {
 						if g.showItemNames || useNumbers {
 							fs := fontScale()
-							labels = append(labels, label{formatted, int(x) - int(float64(width*LabelCharWidth)*fs/2), int(y+h/2) + 2, width, labelClr})
+							labels = append(labels, label{formatted, int(x) - int(float64(width)*fs/2), int(y+h/2) + 2, width, labelClr})
 						}
 					}
 					continue
@@ -1857,7 +1813,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if g.showItemNames || useNumbers {
 				if g.showItemNames || useNumbers {
 					fs := fontScale()
-					labels = append(labels, label{formatted, int(x) - int(float64(width*LabelCharWidth)*fs/2), int(y) + 4, width, labelClr})
+					labels = append(labels, label{formatted, int(x) - int(float64(width)*fs/2), int(y) + 4, width, labelClr})
 				}
 			}
 		}
@@ -1900,7 +1856,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 						width = len(formatted)
 					}
 					fs := fontScale()
-					labels = append(labels, label{formatted, int(x) - int(float64(width*LabelCharWidth)*fs/2), int(y+h/2) + 2, width, labelClr})
+					labels = append(labels, label{formatted, int(x) - int(float64(width)*fs/2), int(y+h/2) + 2, width, labelClr})
 					continue
 				}
 			}
@@ -1914,7 +1870,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				width = len(formatted)
 			}
 			fs := fontScale()
-			labels = append(labels, label{formatted, int(x) - int(float64(width*LabelCharWidth)*fs/2), int(y) + 4, width, labelClr})
+			labels = append(labels, label{formatted, int(x) - int(float64(width)*fs/2), int(y) + 4, width, labelClr})
 		}
 
 		labelScale := g.uiScale()
@@ -1922,7 +1878,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		for _, l := range labels {
 			x := l.x
 			if labelScale != 1.0 {
-				x -= int(float64(l.width*LabelCharWidth) * fs * (labelScale - 1) / 2)
+				x -= int(float64(l.width) * fs * (labelScale - 1) / 2)
 			}
 			if l.clr.A != 0 {
 				if labelScale == 1.0 {
@@ -2090,7 +2046,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 							width = len(formatted)
 						}
 						fs := fontScale()
-						highlightLabels = append(highlightLabels, label{formatted, int(x) - int(float64(width*LabelCharWidth)*fs/2), int(y+h/2) + 2, width, labelClr})
+						highlightLabels = append(highlightLabels, label{formatted, int(x) - int(float64(width)*fs/2), int(y+h/2) + 2, width, labelClr})
 						continue
 					}
 				}
@@ -2102,7 +2058,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					width = len(formatted)
 				}
 				fs := fontScale()
-				highlightLabels = append(highlightLabels, label{formatted, int(x) - int(float64(width*LabelCharWidth)*fs/2), int(y) + 4, width, labelClr})
+				highlightLabels = append(highlightLabels, label{formatted, int(x) - int(float64(width)*fs/2), int(y) + 4, width, labelClr})
 			}
 
 			for _, poi := range highlightPOIs {
@@ -2135,7 +2091,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 							width = len(formatted)
 						}
 						fs := fontScale()
-						highlightLabels = append(highlightLabels, label{formatted, int(x) - int(float64(width*LabelCharWidth)*fs/2), int(y+h/2) + 2, width, labelClr})
+						highlightLabels = append(highlightLabels, label{formatted, int(x) - int(float64(width)*fs/2), int(y+h/2) + 2, width, labelClr})
 						continue
 					}
 				}
@@ -2147,7 +2103,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					width = len(formatted)
 				}
 				fs := fontScale()
-				highlightLabels = append(highlightLabels, label{formatted, int(x) - int(float64(width*LabelCharWidth)*fs/2), int(y) + 4, width, labelClr})
+				highlightLabels = append(highlightLabels, label{formatted, int(x) - int(float64(width)*fs/2), int(y) + 4, width, labelClr})
 			}
 
 		}
@@ -2157,7 +2113,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			for _, l := range highlightLabels {
 				x := l.x
 				if labelScale != 1.0 {
-					x -= int(float64(l.width*LabelCharWidth) * fs * (labelScale - 1) / 2)
+					x -= int(float64(l.width) * fs * (labelScale - 1) / 2)
 				}
 				if l.clr.A != 0 {
 					if labelScale == 1.0 {
