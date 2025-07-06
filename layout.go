@@ -4,8 +4,6 @@ package main
 
 import (
 	"math"
-
-	"github.com/hajimehoshi/ebiten/v2"
 )
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
