@@ -1154,6 +1154,9 @@ iconsLoop:
 				g.halfRes = true
 				g.textures = false
 				g.linearFilter = false
+				g.vsync = false
+				ebiten.SetVsyncEnabled(g.vsync)
+				g.needsRedraw = true
 				g.lowFPSStart = time.Time{}
 			}
 		} else {
