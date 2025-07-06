@@ -25,8 +25,8 @@ const (
 	// on-screen size is consistent across all items.
 	BaseIconPixels      = 96
 	LegendZoomExponent  = 10
-	DefaultWidth        = 1200
-	DefaultHeight       = 1200
+	DefaultWidth        = 800
+	DefaultHeight       = 800
 	InitialZoom         = 1.0
 	LabelCharWidth      = 8
 	NumberLegendXOffset = 150
