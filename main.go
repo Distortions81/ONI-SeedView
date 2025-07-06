@@ -31,14 +31,13 @@ func init() {
 	lines := [][2]string{
 		{"Arrow keys/WASD", "pan the camera"},
 		{"Mouse wheel or +/-", "zoom in and out"},
-		{"Drag with the mouse", "pan"},
+		{"Drag with the mouse/touch", "pan"},
 		{"Pinch with two fingers", "zoom on touch"},
 		{"Click or tap geysers/POIs", "show details"},
 		{"Tap legend entries", "highlight items"},
 		{"Camera icon", "open screenshot menu"},
-		{"Water-drop icon", "list all geysers"},
+		{"Geyser-icon", "list all geysers"},
 		{"Question mark", "toggle this help"},
-		{"Magnify Text option", "enlarge the UI"},
 		{"Gear icon", "open options"},
 	}
 	width := 0
