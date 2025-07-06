@@ -47,6 +47,9 @@ func (g *Game) screenshotMenuRect() image.Rectangle {
 	if y < 0 {
 		y = 0
 	}
+	if y+h > g.height {
+		y = g.height - h
+	}
 	return image.Rect(x, y, x+w, y+h)
 }
 
