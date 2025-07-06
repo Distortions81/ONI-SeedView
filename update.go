@@ -18,15 +18,16 @@ func (g *Game) Update() error {
 	g.handleIconLoading()
 	g.processScreenshot()
 
+	oldX, oldY, oldZoom := g.camX, g.camY, g.zoom
+
 	if g.handleGeyserListInput() {
+		g.handleTouchGestures(oldX, oldY)
 		return nil
 	}
 
 	if g.handleAsteroidMenuInput() {
 		return nil
 	}
-
-	oldX, oldY, oldZoom := g.camX, g.camY, g.zoom
 
 	// Keyboard panning
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) || ebiten.IsKeyPressed(ebiten.KeyA) {
