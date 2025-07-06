@@ -4,7 +4,7 @@ package main
 
 import "golang.org/x/image/font"
 
-const baseFontSize = 13.0
+const baseFontSize = 12.0
 
 var (
 	notoFont font.Face

@@ -13,7 +13,7 @@ import (
 //go:embed NotoSansMono.ttf
 var notoTTF []byte
 
-const baseFontSize = 13.0
+const baseFontSize = 12.0
 
 var (
 	notoFont   font.Face
