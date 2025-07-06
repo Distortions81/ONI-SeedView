@@ -1474,7 +1474,10 @@ iconsLoop:
 			} else if g.optionsRect().Overlaps(pt) {
 				g.showOptions = true
 				g.needsRedraw = true
-			} else if g.showHelp && !g.helpRect().Overlaps(pt) {
+			} else if g.helpRect().Overlaps(pt) {
+				g.showHelp = !g.showHelp
+				g.needsRedraw = true
+			} else if g.showHelp {
 				g.showHelp = false
 				g.needsRedraw = true
 			} else if g.geyserRect().Overlaps(pt) {
