@@ -970,6 +970,31 @@ func (g *Game) helpRect() image.Rectangle {
 	return image.Rect(x, y, x+size, y+size)
 }
 
+func helpMenuSize() (int, int) {
+	w, h := textDimensions(helpMessage)
+	return w + 4, h + 4
+}
+
+func (g *Game) helpMenuRect() image.Rectangle {
+	w, h := helpMenuSize()
+	scale := g.uiScale()
+	w = int(float64(w) * scale)
+	h = int(float64(h) * scale)
+	r := g.helpRect()
+	x := r.Max.X - w
+	if x < 0 {
+		x = 0
+	}
+	if x+w > g.width {
+		x = g.width - w
+	}
+	y := r.Min.Y - h
+	if y < 0 {
+		y = 0
+	}
+	return image.Rect(x, y, x+w, y+h)
+}
+
 func (g *Game) geyserRect() image.Rectangle {
 	size := g.iconSize()
 	x := g.width - size*3 - HelpMargin*3
@@ -2024,10 +2049,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		if g.showHelp && !g.screenshotMode {
 			scale := g.uiScale()
-			hr := g.helpRect()
-			tx := hr.Min.X - int(170*scale)
-			ty := hr.Min.Y - int(70*scale)
-			drawTextWithBGScale(screen, helpMessage, tx, ty, scale)
+			rect := g.helpMenuRect()
+			drawTextWithBGScale(screen, helpMessage, rect.Min.X, rect.Min.Y, scale)
 		}
 
 		if !g.screenshotMode {
