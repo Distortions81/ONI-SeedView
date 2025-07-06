@@ -1,6 +1,1 @@
-# downloaded assets
-objects/*
-!objects/.gitkeep
 build/
-
-data/NotoSansMono.ttf
