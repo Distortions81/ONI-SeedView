@@ -6,7 +6,7 @@ import (
 	_ "embed"
 )
 
-//go:embed short_names.json
+//go:embed data/short_names.json
 var shortNamesData []byte
 
 // shortNameTables holds mappings of item IDs to shortened labels.

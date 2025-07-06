@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	ClientVersion    = "v0.0.7-2507060706"
+	ClientVersion    = "v0.0.7-2507061636"
 	BaseURL          = "https://ingest.mapsnotincluded.org/coordinate/"
 	AcceptCBORHeader = "application/cbor"
 	PanSpeed         = 15
@@ -64,7 +64,7 @@ const (
 	// WebAssetBase specifies the path used to fetch image assets
 	// when running in WebAssembly. The assets should be served
 	// relative to the page URL.
-	WebAssetBase = "assets/"
+	WebAssetBase = "objects/"
 )
 
 var LegendZoomThreshold = math.Pow(WheelZoomFactor, LegendZoomExponent)

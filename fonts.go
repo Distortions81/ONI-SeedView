@@ -10,7 +10,7 @@ import (
 	"golang.org/x/image/font/opentype"
 )
 
-//go:embed NotoSansMono.ttf
+//go:embed data/NotoSansMono.ttf
 var notoTTF []byte
 
 const baseFontSize = 12.0
