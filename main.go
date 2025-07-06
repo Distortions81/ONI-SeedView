@@ -31,14 +31,13 @@ func init() {
 	lines := [][2]string{
 		{"Arrow keys/WASD", "pan the camera"},
 		{"Mouse wheel or +/-", "zoom in and out"},
-		{"Drag with the mouse", "pan"},
+		{"Drag with the mouse/touch", "pan"},
 		{"Pinch with two fingers", "zoom on touch"},
 		{"Click or tap geysers/POIs", "show details"},
 		{"Tap legend entries", "highlight items"},
 		{"Camera icon", "open screenshot menu"},
-		{"Water-drop icon", "list all geysers"},
+		{"Geyser-icon", "list all geysers"},
 		{"Question mark", "toggle this help"},
-		{"Magnify Text option", "enlarge the UI"},
 		{"Gear icon", "open options"},
 	}
 	width := 0
@@ -677,6 +676,10 @@ func (g *Game) maxItemScroll() float64 {
 	return max
 }
 
+func (g *Game) itemPanelVisible() bool {
+	return g.showLegend && g.useNumbers && g.showItemNames && g.zoom < LegendZoomThreshold && !g.screenshotMode
+}
+
 func (g *Game) updateHover(mx, my int) {
 	prevBiome := g.hoverBiome
 	prevItem := g.hoverItem
@@ -1279,6 +1282,7 @@ iconsLoop:
 	if mxTmp < 0 || mxTmp >= g.width || myTmp < 0 || myTmp >= g.height {
 		mousePressed = false
 		mouseJustPressed = false
+		g.dragging = false
 	}
 	if g.ssPending > 0 || g.skipClickTicks > 0 {
 		mousePressed = false
@@ -1508,7 +1512,10 @@ iconsLoop:
 			} else if g.optionsRect().Overlaps(pt) {
 				g.showOptions = true
 				g.needsRedraw = true
-			} else if g.showHelp && !g.helpRect().Overlaps(pt) {
+			} else if g.helpRect().Overlaps(pt) {
+				g.showHelp = !g.showHelp
+				g.needsRedraw = true
+			} else if g.showHelp {
 				g.showHelp = false
 				g.needsRedraw = true
 			} else if g.geyserRect().Overlaps(pt) {
@@ -1736,6 +1743,11 @@ iconsLoop:
 	}
 
 	if g.showInfo != prevShow || g.infoPinned != prevPinned || g.infoText != prevText || g.infoIcon != prevIcon {
+		g.needsRedraw = true
+	}
+
+	if !g.itemPanelVisible() && g.selectedItem != -1 {
+		g.selectedItem = -1
 		g.needsRedraw = true
 	}
 
@@ -2231,18 +2243,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			drawTextWithBGScale(screen, coords, 5, g.height-int(20*scale), scale)
 		}
 
-		if g.showShotMenu {
-			g.drawScreenshotMenu(screen)
-		}
-		if g.showOptions {
-			g.drawOptionsMenu(screen)
-		}
-		if g.showHelp && !g.screenshotMode {
-			scale := g.uiScale()
-			rect := g.helpMenuRect()
-			drawTextWithBGScale(screen, helpMessage, rect.Min.X, rect.Min.Y, scale)
-		}
-
 		if g.showInfo {
 			scale := g.uiScale()
 			w, h := textDimensions(g.infoText)
@@ -2259,6 +2259,18 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			tx := g.width/2 - int(float64(panelW)*scale)/2
 			ty := g.height - int(float64(panelH)*scale) - 30
 			g.drawInfoPanel(screen, g.infoText, g.infoIcon, tx, ty, scale)
+		}
+
+		if g.showShotMenu {
+			g.drawScreenshotMenu(screen)
+		}
+		if g.showOptions {
+			g.drawOptionsMenu(screen)
+		}
+		if g.showHelp && !g.screenshotMode {
+			scale := g.uiScale()
+			rect := g.helpMenuRect()
+			drawTextWithBGScale(screen, helpMessage, rect.Min.X, rect.Min.Y, scale)
 		}
 
 		g.needsRedraw = false
