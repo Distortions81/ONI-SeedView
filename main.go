@@ -1337,11 +1337,7 @@ iconsLoop:
 			g.touchUI = true
 		} else {
 			pt := image.Rect(x, y, x+1, y+1)
-			if g.helpRect().Overlaps(pt) {
-				g.showHelp = !g.showHelp
-				g.needsRedraw = true
-				g.touchUI = true
-			} else if g.screenshotRect().Overlaps(pt) ||
+			if g.helpRect().Overlaps(pt) ||
 				g.geyserRect().Overlaps(pt) || g.optionsRect().Overlaps(pt) {
 				g.touchUI = true
 			} else {
@@ -1511,6 +1507,9 @@ iconsLoop:
 				g.needsRedraw = true
 			} else if g.optionsRect().Overlaps(pt) {
 				g.showOptions = true
+				g.needsRedraw = true
+			} else if g.asteroidArrowRect().Overlaps(pt) {
+				g.showAstMenu = true
 				g.needsRedraw = true
 			} else if g.helpRect().Overlaps(pt) {
 				g.showHelp = !g.showHelp
