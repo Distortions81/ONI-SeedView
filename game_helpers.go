@@ -94,6 +94,9 @@ type Game struct {
 	smartRender   bool
 	linearFilter  bool
 
+	highDPI  bool
+	dpiScale float64
+
 	noColor   bool
 	ssNoColor bool
 	grayImage *ebiten.Image
@@ -116,7 +119,22 @@ type loadedIcon struct {
 	img  *ebiten.Image
 }
 
-func (g *Game) uiScale() float64 { return 1.0 }
+func (g *Game) uiScale() float64 { return g.dpiScale }
+
+func (g *Game) updateDPIScale() {
+	old := g.dpiScale
+	if g.highDPI {
+		g.dpiScale = ebiten.Monitor().DeviceScaleFactor()
+	} else {
+		g.dpiScale = 1.0
+	}
+	if g.dpiScale == 0 {
+		g.dpiScale = 1.0
+	}
+	if g.dpiScale != old {
+		setFontSize(fontSize / old * g.dpiScale)
+	}
+}
 
 func (g *Game) iconSize() int { return HelpIconSize }
 

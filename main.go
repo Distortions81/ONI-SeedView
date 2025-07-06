@@ -49,12 +49,15 @@ func main() {
 		iconScale:         1.0,
 		smartRender:       true,
 		linearFilter:      true,
+		highDPI:           true,
+		dpiScale:          1.0,
 		ssQuality:         1,
 		hoverBiome:        -1,
 		hoverItem:         -1,
 		selectedBiome:     -1,
 		selectedItem:      -1,
 	}
+	game.updateDPIScale()
 	registerFontChange(game.invalidateLegends)
 	go func(id string) {
 		//fmt.Println("Fetching:", *coord)
