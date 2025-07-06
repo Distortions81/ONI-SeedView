@@ -181,13 +181,7 @@ func (g *Game) loadAsteroid(ast Asteroid) {
 	g.astWidth = ast.SizeX
 	g.astHeight = ast.SizeY
 	g.legend, g.legendBiomes = buildLegendImage(bps)
-	zoomX := float64(g.width) / (float64(g.astWidth) * 2)
-	zoomY := float64(g.height) / (float64(g.astHeight) * 2)
-	g.zoom = math.Min(zoomX, zoomY)
-	g.minZoom = g.zoom * 0.25
-	g.camX = (float64(g.width) - float64(g.astWidth)*2*g.zoom) / 2
-	g.camY = (float64(g.height) - float64(g.astHeight)*2*g.zoom) / 2
-	g.clampCamera()
+	g.centerAndFit()
 	g.biomeTextures = loadBiomeTextures()
 	names := []string{"../icons/camera.png", "../icons/help.png", "../icons/gear.png", "geyser_water.png"}
 	set := make(map[string]struct{})
@@ -208,6 +202,19 @@ func (g *Game) loadAsteroid(ast Asteroid) {
 		}
 	}
 	g.startIconLoader(names)
+}
+
+func (g *Game) centerAndFit() {
+	if g.astWidth == 0 || g.astHeight == 0 {
+		return
+	}
+	zoomX := float64(g.width) / (float64(g.astWidth) * 2)
+	zoomY := float64(g.height) / (float64(g.astHeight) * 2)
+	g.zoom = math.Min(zoomX, zoomY)
+	g.minZoom = g.zoom * 0.25
+	g.camX = (float64(g.width) - float64(g.astWidth)*2*g.zoom) / 2
+	g.camY = (float64(g.height) - float64(g.astHeight)*2*g.zoom) / 2
+	g.clampCamera()
 }
 
 var colorWhite = color.RGBA{255, 255, 255, 255}
