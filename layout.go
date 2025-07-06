@@ -4,11 +4,14 @@ package main
 
 import (
 	"math"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	screenW := outsideWidth
-	screenH := outsideHeight
+	scale := ebiten.Monitor().DeviceScaleFactor()
+	screenW := int(float64(outsideWidth) * scale)
+	screenH := int(float64(outsideHeight) * scale)
 
 	/*
 		if !g.screenshotMode {
