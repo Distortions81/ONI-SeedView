@@ -18,19 +18,15 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
-func (g *Game) Update() error {
-	const panSpeed = PanSpeed
-
+func (g *Game) checkRedrawTriggers() {
 	if g.fitOnLoad {
 		g.centerAndFit()
 		g.needsRedraw = true
 		g.fitOnLoad = false
 	}
-
 	if !g.smartRender {
 		g.needsRedraw = true
 	}
-
 	minimized := ebiten.IsWindowMinimized()
 	if g.wasMinimized && !minimized {
 		g.needsRedraw = true
@@ -39,8 +35,9 @@ func (g *Game) Update() error {
 	if time.Since(g.lastDraw) >= time.Second {
 		g.needsRedraw = true
 	}
+}
 
-iconsLoop:
+func (g *Game) handleIconLoading() {
 	for g.iconResults != nil {
 		select {
 		case li, ok := <-g.iconResults:
@@ -53,10 +50,12 @@ iconsLoop:
 			}
 			g.needsRedraw = true
 		default:
-			break iconsLoop
+			return
 		}
 	}
+}
 
+func (g *Game) processScreenshot() {
 	if g.ssPending > 0 {
 		if g.ssPending == 1 {
 			g.saveScreenshot()
@@ -69,60 +68,124 @@ iconsLoop:
 	} else if g.skipClickTicks > 0 {
 		g.skipClickTicks--
 	}
+}
 
-	if g.showGeyserList {
-		_, wheelY := ebiten.Wheel()
-		if wheelY != 0 {
-			g.adjustGeyserScroll(-float64(wheelY) * 10)
+func (g *Game) handleGeyserListInput() bool {
+	if !g.showGeyserList {
+		return false
+	}
+	_, wheelY := ebiten.Wheel()
+	if wheelY != 0 {
+		g.adjustGeyserScroll(-float64(wheelY) * 10)
+	}
+	mx, my := ebiten.CursorPosition()
+	if mx >= 0 && mx < g.width && my >= 0 && my < g.height {
+		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+			if g.geyserCloseRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+				g.showGeyserList = false
+				g.needsRedraw = true
+			}
 		}
-		mx, my := ebiten.CursorPosition()
-		if mx >= 0 && mx < g.width && my >= 0 && my < g.height {
-			if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-				if g.geyserCloseRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-					g.showGeyserList = false
+	}
+	for _, id := range inpututil.AppendJustPressedTouchIDs(nil) {
+		x, y := ebiten.TouchPosition(id)
+		if x >= 0 && x < g.width && y >= 0 && y < g.height {
+			if g.geyserCloseRect().Overlaps(image.Rect(x, y, x+1, y+1)) {
+				g.showGeyserList = false
+				g.needsRedraw = true
+			}
+		}
+	}
+	return true
+}
+
+func (g *Game) handleAsteroidMenuInput() bool {
+	if !g.showAstMenu {
+		return false
+	}
+	_, wheelY := ebiten.Wheel()
+	if wheelY != 0 {
+		g.adjustAsteroidScroll(-float64(wheelY) * 10)
+	}
+	mx, my := ebiten.CursorPosition()
+	if mx >= 0 && mx < g.width && my >= 0 && my < g.height {
+		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+			if !g.clickAsteroidMenu(mx, my) {
+				if !g.asteroidMenuRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) && !g.asteroidInfoRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+					g.showAstMenu = false
 					g.needsRedraw = true
 				}
 			}
 		}
-		for _, id := range inpututil.AppendJustPressedTouchIDs(nil) {
-			x, y := ebiten.TouchPosition(id)
-			if x >= 0 && x < g.width && y >= 0 && y < g.height {
-				if g.geyserCloseRect().Overlaps(image.Rect(x, y, x+1, y+1)) {
-					g.showGeyserList = false
+	}
+	for _, id := range inpututil.AppendJustPressedTouchIDs(nil) {
+		x, y := ebiten.TouchPosition(id)
+		if x >= 0 && x < g.width && y >= 0 && y < g.height {
+			if !g.clickAsteroidMenu(x, y) {
+				if !g.asteroidMenuRect().Overlaps(image.Rect(x, y, x+1, y+1)) && !g.asteroidInfoRect().Overlaps(image.Rect(x, y, x+1, y+1)) {
+					g.showAstMenu = false
 					g.needsRedraw = true
 				}
 			}
 		}
+	}
+	return true
+}
+
+func (g *Game) drawGeyserListScreen(dst *ebiten.Image) bool {
+	if !g.showGeyserList {
+		return false
+	}
+	dst.Fill(color.Black)
+	g.drawGeyserList(dst)
+	g.needsRedraw = false
+	g.lastDraw = time.Now()
+	return true
+}
+
+func (g *Game) drawLoadingScreen(dst *ebiten.Image) bool {
+	if !(g.loading || (len(g.biomes) == 0 && g.status != "")) {
+		return false
+	}
+	dst.Fill(color.RGBA{30, 30, 30, 255})
+	msg := g.status
+	scale := 1.0
+	if msg == "" {
+		msg = "Fetching asteroid data..."
+		scale = 2.0
+	}
+	w, h := textDimensions(msg)
+	x := g.width/2 - int(float64(w)*scale/2)
+	y := g.height/2 - int(float64(h)*scale/2)
+	if g.statusError {
+		if scale == 1.0 {
+			drawTextWithBGBorder(dst, msg, x, y, errorBorderColor)
+		} else {
+			drawTextWithBGBorderScale(dst, msg, x, y, errorBorderColor, scale)
+		}
+	} else {
+		if scale == 1.0 {
+			drawTextWithBG(dst, msg, x, y)
+		} else {
+			drawTextWithBGScale(dst, msg, x, y, scale)
+		}
+	}
+	g.lastDraw = time.Now()
+	return true
+}
+
+func (g *Game) Update() error {
+	const panSpeed = PanSpeed
+
+	g.checkRedrawTriggers()
+	g.handleIconLoading()
+	g.processScreenshot()
+
+	if g.handleGeyserListInput() {
 		return nil
 	}
 
-	if g.showAstMenu {
-		_, wheelY := ebiten.Wheel()
-		if wheelY != 0 {
-			g.adjustAsteroidScroll(-float64(wheelY) * 10)
-		}
-		mx, my := ebiten.CursorPosition()
-		if mx >= 0 && mx < g.width && my >= 0 && my < g.height {
-			if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-				if !g.clickAsteroidMenu(mx, my) {
-					if !g.asteroidMenuRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) && !g.asteroidInfoRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-						g.showAstMenu = false
-						g.needsRedraw = true
-					}
-				}
-			}
-		}
-		for _, id := range inpututil.AppendJustPressedTouchIDs(nil) {
-			x, y := ebiten.TouchPosition(id)
-			if x >= 0 && x < g.width && y >= 0 && y < g.height {
-				if !g.clickAsteroidMenu(x, y) {
-					if !g.asteroidMenuRect().Overlaps(image.Rect(x, y, x+1, y+1)) && !g.asteroidInfoRect().Overlaps(image.Rect(x, y, x+1, y+1)) {
-						g.showAstMenu = false
-						g.needsRedraw = true
-					}
-				}
-			}
-		}
+	if g.handleAsteroidMenuInput() {
 		return nil
 	}
 
@@ -640,38 +703,10 @@ iconsLoop:
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	if g.showGeyserList {
-		screen.Fill(color.Black)
-		g.drawGeyserList(screen)
-		g.needsRedraw = false
-		g.lastDraw = time.Now()
+	if g.drawGeyserListScreen(screen) {
 		return
 	}
-	if g.loading || (len(g.biomes) == 0 && g.status != "") {
-		screen.Fill(color.RGBA{30, 30, 30, 255})
-		msg := g.status
-		scale := 1.0
-		if msg == "" {
-			msg = "Fetching asteroid data..."
-			scale = 2.0
-		}
-		w, h := textDimensions(msg)
-		x := g.width/2 - int(float64(w)*scale/2)
-		y := g.height/2 - int(float64(h)*scale/2)
-		if g.statusError {
-			if scale == 1.0 {
-				drawTextWithBGBorder(screen, msg, x, y, errorBorderColor)
-			} else {
-				drawTextWithBGBorderScale(screen, msg, x, y, errorBorderColor, scale)
-			}
-		} else {
-			if scale == 1.0 {
-				drawTextWithBG(screen, msg, x, y)
-			} else {
-				drawTextWithBGScale(screen, msg, x, y, scale)
-			}
-		}
-		g.lastDraw = time.Now()
+	if g.drawLoadingScreen(screen) {
 		return
 	}
 	if g.needsRedraw {
