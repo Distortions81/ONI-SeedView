@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	ClientVersion    = "v0.0.6-2507060227"
+	ClientVersion    = "v0.0.6-2507060228"
 	BaseURL          = "https://ingest.mapsnotincluded.org/coordinate/"
 	AcceptCBORHeader = "application/cbor"
 	PanSpeed         = 15
@@ -28,7 +28,7 @@ const (
 	DefaultWidth        = 1200
 	DefaultHeight       = 1200
 	InitialZoom         = 1.0
-	LabelCharWidth      = 6
+	LabelCharWidth      = 8
 	NumberLegendXOffset = 150
 	LegendRowSpacing    = 25
 	// LegendScrollExtraRows controls how many additional rows the legend
