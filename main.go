@@ -2276,6 +2276,7 @@ func main() {
 	asteroidSpecified := false
 	if runtime.GOARCH == "wasm" {
 		if c := coordFromURL(); c != "" {
+			c = strings.TrimSpace(c)
 			*coord = c
 		}
 		if a, ok := asteroidFromURL(); ok {
