@@ -20,7 +20,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		return
 	}
 	if g.needsRedraw {
-		screen.Fill(color.RGBA{30, 30, 30, 255})
+		screen.Fill(backgroundColor)
 		if g.textures && g.biomeTextures != nil {
 			if tex := g.biomeTextures["Space"]; tex != nil {
 				clr := color.RGBA{255, 255, 255, 255}
@@ -223,7 +223,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				y0 := math.Round((10 + spacing + spacing*float64(g.selectedBiome)) - g.biomeScroll)
 				h := math.Round(spacing)
 				w := math.Round(float64(g.legend.Bounds().Dx()))
-				vector.StrokeRect(screen, 0.5, float32(y0)-4, float32(w)-1, float32(h)-1, 2, color.RGBA{255, 0, 0, 255}, false)
+				vector.StrokeRect(screen, 0.5, float32(y0)-4, float32(w)-1, float32(h)-1, 2, highlightColor, false)
 			}
 			if useNumbers && !g.screenshotMode {
 				g.drawNumberLegend(screen)
@@ -237,7 +237,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			sr := g.screenshotRect()
 			scx := float32(sr.Min.X + size/2)
 			scy := float32(sr.Min.Y + size/2)
-			vector.DrawFilledCircle(screen, scx, scy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
+			vector.DrawFilledCircle(screen, scx, scy, float32(size)/2, overlayColor, true)
 			if cam, ok := g.icons["../icons/camera.png"]; ok && cam != nil {
 				op := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 				scale := float64(size) / math.Max(float64(cam.Bounds().Dx()), float64(cam.Bounds().Dy()))
@@ -252,7 +252,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			hr := g.helpRect()
 			cx := float32(hr.Min.X + size/2)
 			cy := float32(hr.Min.Y + size/2)
-			vector.DrawFilledCircle(screen, cx, cy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
+			vector.DrawFilledCircle(screen, cx, cy, float32(size)/2, overlayColor, true)
 			if helpImg, ok := g.icons["../icons/help.png"]; ok && helpImg != nil {
 				op := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 				sc := float64(size) / math.Max(float64(helpImg.Bounds().Dx()), float64(helpImg.Bounds().Dy()))
@@ -267,7 +267,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			or := g.optionsRect()
 			ocx := float32(or.Min.X + size/2)
 			ocy := float32(or.Min.Y + size/2)
-			vector.DrawFilledCircle(screen, ocx, ocy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
+			vector.DrawFilledCircle(screen, ocx, ocy, float32(size)/2, overlayColor, true)
 			if gear, ok := g.icons["../icons/gear.png"]; ok && gear != nil {
 				op := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 				sc := float64(size) / math.Max(float64(gear.Bounds().Dx()), float64(gear.Bounds().Dy()))
@@ -282,7 +282,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			gr := g.geyserRect()
 			gcx := float32(gr.Min.X + size/2)
 			gcy := float32(gr.Min.Y + size/2)
-			vector.DrawFilledCircle(screen, gcx, gcy, float32(size)/2, color.RGBA{0, 0, 0, 180}, true)
+			vector.DrawFilledCircle(screen, gcx, gcy, float32(size)/2, overlayColor, true)
 			if icon, ok := g.icons["geyser_water.png"]; ok && icon != nil {
 				op := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 				sc := float64(size) / math.Max(float64(icon.Bounds().Dx()), float64(icon.Bounds().Dy()))
@@ -316,7 +316,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 				name := displayGeyser(gy.ID)
 				formatted, _ := formatLabel(name)
-				dotClr := color.RGBA{255, 0, 0, 255}
+				dotClr := highlightColor
 				labelClr := dotClr
 				if !useNumbers {
 					labelClr = color.RGBA{}
@@ -357,7 +357,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 				name := displayPOI(poi.ID)
 				formatted, _ := formatLabel(name)
-				dotClr := color.RGBA{255, 0, 0, 255}
+				dotClr := highlightColor
 				labelClr := dotClr
 				if !useNumbers {
 					labelClr = color.RGBA{}

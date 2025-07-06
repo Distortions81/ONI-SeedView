@@ -35,7 +35,7 @@ func buildLegendImage(biomes []BiomePath) (*ebiten.Image, []string) {
 	height := spacing*(len(names)+2) + 7
 
 	img := ebiten.NewImage(width, height)
-	img.Fill(color.RGBA{0, 0, 0, 77})
+	img.Fill(legendBGColor)
 
 	y := 10
 	drawTextWithBG(img, "Biomes", 5, y, false)
@@ -103,7 +103,7 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 		width := maxW + 10
 		height := spacing*(len(g.legendEntries)+2) + 7
 		img := ebiten.NewImage(width, height)
-		img.Fill(color.RGBA{0, 0, 0, 77})
+		img.Fill(legendBGColor)
 		y := 10
 		drawTextWithBG(img, "Items", 5, y, false)
 		y += spacing
@@ -128,7 +128,7 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 		spacing := float64(rowSpacing())
 		hy := y + (10 + spacing*float64(g.selectedItem+1))
 		hh := spacing
-		vector.StrokeRect(dst, float32(math.Round(x))+0.5, float32(math.Round(hy))-4, float32(math.Round(w))-1, float32(math.Round(hh))-1, 2, color.RGBA{255, 0, 0, 255}, false)
+		vector.StrokeRect(dst, float32(math.Round(x))+0.5, float32(math.Round(hy))-4, float32(math.Round(w))-1, float32(math.Round(hh))-1, 2, highlightColor, false)
 	}
 }
 

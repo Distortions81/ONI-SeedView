@@ -140,7 +140,7 @@ func (g *Game) drawLoadingScreen(dst *ebiten.Image) bool {
 	if !(g.loading || (len(g.biomes) == 0 && g.status != "")) {
 		return false
 	}
-	dst.Fill(color.RGBA{30, 30, 30, 255})
+	dst.Fill(backgroundColor)
 	msg := g.status
 	scale := 1.0
 	if msg == "" {
