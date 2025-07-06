@@ -24,14 +24,17 @@ func (g *Game) screenshotRect() image.Rectangle {
 func (g *Game) screenshotMenuSize() (int, int) {
 	labels := append([]string{ScreenshotMenuTitle}, ScreenshotQualities...)
 	labels = append(labels, ScreenshotBWLabel, ScreenshotSaveLabel, ScreenshotCloseLabel)
+	itemCount := len(labels)
+	allLabels := append([]string(nil), labels...)
+	allLabels = append(allLabels, ScreenshotTakingLabel, ScreenshotSavedLabel)
 	maxW := 0
-	for _, s := range labels {
+	for _, s := range allLabels {
 		if len(s) > maxW {
 			maxW = len(s)
 		}
 	}
 	w := maxW*LabelCharWidth + 4
-	h := (len(labels)+1)*ScreenshotMenuSpacing + 4
+	h := (itemCount+1)*ScreenshotMenuSpacing + 4
 	return w, h
 }
 
