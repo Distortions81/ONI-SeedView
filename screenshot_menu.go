@@ -60,7 +60,7 @@ func (g *Game) drawScreenshotMenu(dst *ebiten.Image) {
 	w, h := g.screenshotMenuSize()
 	img := ebiten.NewImage(w, h)
 	drawFrame(img, image.Rect(0, 0, w, h))
-	ebitenutil.DebugPrintAt(img, ScreenshotMenuTitle, 6, 6)
+	drawText(img, ScreenshotMenuTitle, 6, 6)
 
 	label := ScreenshotSaveLabel
 	if g.ssPending > 0 {
@@ -88,7 +88,7 @@ func (g *Game) drawScreenshotMenu(dst *ebiten.Image) {
 		default:
 			drawButton(img, btn, selected)
 		}
-		ebitenutil.DebugPrintAt(img, it, btn.Min.X+6, btn.Min.Y+4)
+		drawText(img, it, btn.Min.X+6, btn.Min.Y+4)
 		y += ScreenshotMenuSpacing
 		if i == len(ScreenshotQualities)-1 || i == len(ScreenshotQualities) {
 			y += ScreenshotMenuSpacing

@@ -125,7 +125,7 @@ func (g *Game) drawAsteroidMenu(dst *ebiten.Image) {
 	w, h := g.asteroidMenuSize()
 	img := ebiten.NewImage(w, h)
 	drawFrame(img, image.Rect(0, 0, w, h))
-	ebitenutil.DebugPrintAt(img, AsteroidMenuTitle, 6, 6)
+	drawText(img, AsteroidMenuTitle, 6, 6)
 	y := 6 + AsteroidMenuSpacing - int(g.asteroidScroll)
 	for _, a := range g.asteroids {
 		btn := image.Rect(4, y-4, w-4, y-4+22)
@@ -134,7 +134,7 @@ func (g *Game) drawAsteroidMenu(dst *ebiten.Image) {
 			ck := image.Rect(btn.Min.X+4, btn.Min.Y+4, btn.Min.X+16, btn.Min.Y+16)
 			drawCheck(img, ck)
 		}
-		ebitenutil.DebugPrintAt(img, a.ID, btn.Min.X+20, btn.Min.Y+4)
+		drawText(img, a.ID, btn.Min.X+20, btn.Min.Y+4)
 		y += AsteroidMenuSpacing
 	}
 	op := &ebiten.DrawImageOptions{}

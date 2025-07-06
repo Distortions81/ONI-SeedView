@@ -17,12 +17,11 @@ import (
 	"strings"
 	"time"
 
-	_ "embed"
-
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
+	"golang.org/x/image/font"
 )
 
 var helpMessage string
@@ -98,7 +97,7 @@ func drawTextWithBG(dst *ebiten.Image, text string, x, y int) {
 	}
 	height := len(lines) * 16
 	vector.DrawFilledRect(dst, float32(x-2), float32(y-2), float32(width*6+4), float32(height+4), color.RGBA{0, 0, 0, 128}, false)
-	ebitenutil.DebugPrintAt(dst, text, x, y)
+	drawText(dst, text, x, y)
 }
 
 func drawTextWithBGScale(dst *ebiten.Image, text string, x, y int, scale float64) {
@@ -118,7 +117,7 @@ func drawTextWithBGScale(dst *ebiten.Image, text string, x, y int, scale float64
 	h := height + 4
 	img := ebiten.NewImage(w, h)
 	vector.DrawFilledRect(img, 0, 0, float32(w), float32(h), color.RGBA{0, 0, 0, 128}, false)
-	ebitenutil.DebugPrintAt(img, text, 2, 2)
+	drawText(img, text, 2, 2)
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(scale, scale)
 	op.GeoM.Translate(float64(x-2), float64(y-2))
@@ -140,7 +139,7 @@ func drawTextWithBGBorder(dst *ebiten.Image, text string, x, y int, border color
 	bh := height + 4
 	vector.DrawFilledRect(dst, float32(bx-1), float32(by-1), float32(bw+2), float32(bh+2), border, false)
 	vector.DrawFilledRect(dst, float32(bx), float32(by), float32(bw), float32(bh), color.RGBA{0, 0, 0, 128}, false)
-	ebitenutil.DebugPrintAt(dst, text, x, y)
+	drawText(dst, text, x, y)
 }
 
 func drawTextWithBGBorderScale(dst *ebiten.Image, text string, x, y int, border color.Color, scale float64) {
@@ -161,7 +160,7 @@ func drawTextWithBGBorderScale(dst *ebiten.Image, text string, x, y int, border 
 	img := ebiten.NewImage(w+2, h+2)
 	vector.DrawFilledRect(img, 0, 0, float32(w+2), float32(h+2), border, false)
 	vector.DrawFilledRect(img, 1, 1, float32(w), float32(h), color.RGBA{0, 0, 0, 128}, false)
-	ebitenutil.DebugPrintAt(img, text, 3, 3)
+	drawText(img, text, 3, 3)
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(scale, scale)
 	op.GeoM.Translate(float64(x-2), float64(y-2))
@@ -199,7 +198,7 @@ func (g *Game) drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image,
 		opIcon.GeoM.Translate(2, float64(h-iconH)/2)
 		img.DrawImage(icon, opIcon)
 	}
-	ebitenutil.DebugPrintAt(img, text, iconW+gap+2, 2)
+	drawText(img, text, iconW+gap+2, 2)
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(scale, scale)
 	op.GeoM.Translate(float64(x-2), float64(y-2))
@@ -235,7 +234,7 @@ func (g *Game) drawInfoRow(dst *ebiten.Image, text string, icon *ebiten.Image, x
 			opIcon.GeoM.Translate(float64(x), float64(y+(h-iconH)/2))
 			dst.DrawImage(icon, opIcon)
 		}
-		ebitenutil.DebugPrintAt(dst, text, x+iconW+gap, y+(h-txtH)/2)
+		drawText(dst, text, x+iconW+gap, y+(h-txtH)/2)
 		return
 	}
 
@@ -247,7 +246,7 @@ func (g *Game) drawInfoRow(dst *ebiten.Image, text string, icon *ebiten.Image, x
 		opIcon.GeoM.Translate(0, float64(h-iconH)/2)
 		img.DrawImage(icon, opIcon)
 	}
-	ebitenutil.DebugPrintAt(img, text, iconW+gap, (h-txtH)/2)
+	drawText(img, text, iconW+gap, (h-txtH)/2)
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(scale, scale)
 	op.GeoM.Translate(float64(x), float64(y))
@@ -255,14 +254,27 @@ func (g *Game) drawInfoRow(dst *ebiten.Image, text string, icon *ebiten.Image, x
 }
 
 func textDimensions(text string) (int, int) {
+	if notoFont == nil {
+		lines := strings.Split(text, "\n")
+		width := 0
+		for _, l := range lines {
+			if len(l) > width {
+				width = len(l)
+			}
+		}
+		return width * LabelCharWidth, len(lines) * 16
+	}
 	lines := strings.Split(text, "\n")
 	width := 0
 	for _, l := range lines {
-		if len(l) > width {
-			width = len(l)
+		b, _ := font.BoundString(notoFont, l)
+		w := (b.Max.X - b.Min.X).Ceil()
+		if w > width {
+			width = w
 		}
 	}
-	return width * LabelCharWidth, len(lines) * 16
+	h := notoFont.Metrics().Height.Ceil() * len(lines)
+	return width, h
 }
 
 func infoPanelSize(text string, icon *ebiten.Image) (int, int) {
