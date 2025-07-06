@@ -202,7 +202,15 @@ func (g *Game) clickAsteroidMenu(mx, my int) bool {
 }
 
 func (g *Game) loadAsteroid(ast Asteroid) {
+	g.invalidateLegends()
 	g.asteroidID = ast.ID
+	// Reset cached legends so item numbering matches the newly loaded
+	// asteroid contents. These are rebuilt lazily when needed.
+	g.legendMap = nil
+	g.legendEntries = nil
+	g.legendColors = nil
+	g.selectedItem = -1
+	g.itemScroll = 0
 	bps := parseBiomePaths(ast.BiomePaths)
 	g.geysers = ast.Geysers
 	g.pois = ast.POIs
