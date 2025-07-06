@@ -99,7 +99,9 @@ func (g *Game) asteroidMenuSize() (int, int) {
 			maxW = w
 		}
 	}
-	w := maxW + 24
+	// Add extra space for the checkmark and a small amount of padding so
+	// longer names don't butt up against the right edge of the menu.
+	w := maxW + 28
 	h := (len(g.asteroids)+1)*AsteroidMenuSpacing + 4
 	return w, h
 }
