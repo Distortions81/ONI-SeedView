@@ -2,21 +2,21 @@ package main
 
 // Data structures used to decode the geyser information.
 type Geyser struct {
-	ID             string  `json:"id"`
-	X              int     `json:"x"`
-	Y              int     `json:"y"`
-	ActiveCycles   float64 `json:"activeCycles"`
-	AvgEmitRate    float64 `json:"avgEmitRate"`
-	DormancyCycles float64 `json:"dormancyCycles"`
-	EmitRate       float64 `json:"emitRate"`
-	EruptionTime   float64 `json:"eruptionTime"`
-	IdleTime       float64 `json:"idleTime"`
+	ID             string
+	X              int
+	Y              int
+	ActiveCycles   float64
+	AvgEmitRate    float64
+	DormancyCycles float64
+	EmitRate       float64
+	EruptionTime   float64
+	IdleTime       float64
 }
 
 type PointOfInterest struct {
-	ID string `json:"id"`
-	X  int    `json:"x"`
-	Y  int    `json:"y"`
+	ID string
+	X  int
+	Y  int
 }
 
 type Point struct {

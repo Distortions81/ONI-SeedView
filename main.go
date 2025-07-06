@@ -28,7 +28,6 @@ func main() {
 		}
 	}
 
-	mobile := isMobile()
 	game := &Game{
 		icons:             make(map[string]*ebiten.Image),
 		width:             DefaultWidth,
@@ -41,12 +40,11 @@ func main() {
 		coord:             *coord,
 		asteroidID:        asteroidIDVal,
 		asteroidSpecified: asteroidSpecified,
-		mobile:            mobile,
 		textures:          true,
 		vsync:             true,
 		showItemNames:     true,
 		showLegend:        true,
-		useNumbers:        !mobile,
+		useNumbers:        true,
 		iconScale:         1.0,
 		smartRender:       true,
 		linearFilter:      true,
