@@ -11,13 +11,14 @@ import (
 
 func (g *Game) optionsRect() image.Rectangle {
 	size := g.iconSize()
-	x := g.width - size*4 - HelpMargin*4
-	y := g.height - size - HelpMargin
+	x := g.width - size*4 - uiScaled(HelpMargin*4)
+	y := g.height - size - uiScaled(HelpMargin)
 	return image.Rect(x, y, x+size, y+size)
 }
 
 func (g *Game) optionsMenuSize() (int, int) {
 	fontLabel := fmt.Sprintf("Font Size [-] [+] %.0fpt", fontSize)
+	uiLabel := fmt.Sprintf("UI Scale [-] [+] %.0f%%", uiScale*100)
 	labels := []string{
 		OptionsMenuTitle,
 		"Show Item Names",
@@ -25,6 +26,7 @@ func (g *Game) optionsMenuSize() (int, int) {
 		"Use Item Numbers",
 		fontLabel,
 		"Icon Size [-] [+]",
+		uiLabel,
 		"Textures",
 		"Vsync",
 		"Power Saver",
@@ -40,14 +42,14 @@ func (g *Game) optionsMenuSize() (int, int) {
 			maxW = w
 		}
 	}
-	w := maxW + 4
-	h := (len(labels)+1)*menuSpacing() + 4
+	w := maxW + uiScaled(4)
+	h := (len(labels)+1)*menuSpacing() + uiScaled(4)
 	return w, h
 }
 
 func (g *Game) optionsMenuRect() image.Rectangle {
 	w, h := g.optionsMenuSize()
-	x := g.optionsRect().Min.X - w - 10
+	x := g.optionsRect().Min.X - w - uiScaled(10)
 	if x < 0 {
 		x = 0
 	}
@@ -63,17 +65,18 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	w, h := g.optionsMenuSize()
 	img := ebiten.NewImage(w, h)
 	drawFrame(img, image.Rect(0, 0, w, h))
-	drawText(img, OptionsMenuTitle, 6, 6, false)
-	y := 6 + menuSpacing()
+	pad := uiScaled(6)
+	drawText(img, OptionsMenuTitle, pad, pad, false)
+	y := pad + menuSpacing()
 
 	drawToggle := func(label string, enabled bool) {
-		btn := image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
+		btn := image.Rect(uiScaled(4), y-uiScaled(4), w-uiScaled(4), y-uiScaled(4)+menuButtonHeight())
 		drawButton(img, btn, enabled)
 		lh := menuButtonHeight() - 5
 		if notoFont != nil {
 			lh = notoFont.Metrics().Height.Ceil()
 		}
-		drawText(img, label, btn.Min.X+6, btn.Min.Y+(menuButtonHeight()-lh)/2, false)
+		drawText(img, label, btn.Min.X+pad, btn.Min.Y+(menuButtonHeight()-lh)/2, false)
 		y += menuSpacing()
 	}
 
@@ -82,29 +85,44 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	drawToggle("Use Item Numbers", g.useNumbers)
 
 	label := "Font Size"
-	drawText(img, label, 6, y, false)
+	drawText(img, label, pad, y, false)
 	tw, _ := textDimensions(label)
-	bx := 6 + tw + 6
-	minus := image.Rect(bx, y-4, bx+20, y-4+menuButtonHeight())
-	plus := image.Rect(bx+24, y-4, bx+44, y-4+menuButtonHeight())
+	bx := pad + tw + pad
+	minus := image.Rect(bx, y-uiScaled(4), bx+uiScaled(20), y-uiScaled(4)+menuButtonHeight())
+	plus := image.Rect(bx+uiScaled(24), y-uiScaled(4), bx+uiScaled(44), y-uiScaled(4)+menuButtonHeight())
 	drawButton(img, minus, false)
 	drawPlusMinus(img, minus, true)
 	drawButton(img, plus, false)
 	drawPlusMinus(img, plus, false)
 	sizeStr := fmt.Sprintf("%.0fpt", fontSize)
-	drawText(img, sizeStr, plus.Max.X+6, y, false)
+	drawText(img, sizeStr, plus.Max.X+pad, y, false)
 	y += menuSpacing()
 
 	label = "Icon Size"
-	drawText(img, label, 6, y, false)
+	drawText(img, label, pad, y, false)
 	tw, _ = textDimensions(label)
-	bx = 6 + tw + 6
-	minus = image.Rect(bx, y-4, bx+20, y-4+menuButtonHeight())
-	plus = image.Rect(bx+24, y-4, bx+44, y-4+menuButtonHeight())
+	bx = pad + tw + pad
+	minus = image.Rect(bx, y-uiScaled(4), bx+uiScaled(20), y-uiScaled(4)+menuButtonHeight())
+	plus = image.Rect(bx+uiScaled(24), y-uiScaled(4), bx+uiScaled(44), y-uiScaled(4)+menuButtonHeight())
 	drawButton(img, minus, false)
 	drawPlusMinus(img, minus, true)
 	drawButton(img, plus, false)
 	drawPlusMinus(img, plus, false)
+	y += menuSpacing()
+
+	// UI Scale buttons
+	label = "UI Scale"
+	drawText(img, label, pad, y, false)
+	tw, _ = textDimensions(label)
+	bx = pad + tw + pad
+	minus = image.Rect(bx, y-uiScaled(4), bx+uiScaled(20), y-uiScaled(4)+menuButtonHeight())
+	plus = image.Rect(bx+uiScaled(24), y-uiScaled(4), bx+uiScaled(44), y-uiScaled(4)+menuButtonHeight())
+	drawButton(img, minus, false)
+	drawPlusMinus(img, minus, true)
+	drawButton(img, plus, false)
+	drawPlusMinus(img, plus, false)
+	scaleStr := fmt.Sprintf("%.0f%%", uiScale*100)
+	drawText(img, scaleStr, plus.Max.X+pad, y, false)
 	y += menuSpacing()
 
 	drawToggle("Textures", g.textures)
@@ -113,19 +131,19 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	drawToggle("Linear Filtering", g.linearFilter)
 
 	fps := fmt.Sprintf("FPS: %.1f", ebiten.ActualFPS())
-	drawText(img, fps, 6, y, false)
+	drawText(img, fps, pad, y, false)
 	y += menuSpacing()
 
-	drawText(img, "Version: "+ClientVersion, 6, y, false)
+	drawText(img, "Version: "+ClientVersion, pad, y, false)
 	y += menuSpacing()
 
-	btn := image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
+	btn := image.Rect(uiScaled(4), y-uiScaled(4), w-uiScaled(4), y-uiScaled(4)+menuButtonHeight())
 	drawButton(img, btn, true)
 	lh := menuButtonHeight() - 5
 	if notoFont != nil {
 		lh = notoFont.Metrics().Height.Ceil()
 	}
-	drawText(img, "Close", btn.Min.X+6, btn.Min.Y+(menuButtonHeight()-lh)/2, false)
+	drawText(img, "Close", btn.Min.X+pad, btn.Min.Y+(menuButtonHeight()-lh)/2, false)
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(rect.Min.X), float64(rect.Min.Y))
@@ -142,10 +160,10 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	mx = x
 	my = y
 	w, _ := g.optionsMenuSize()
-	y = 6 + menuSpacing()
+	y = uiScaled(6) + menuSpacing()
 
 	// Show Item Names
-	r := image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
+	r := image.Rect(uiScaled(4), y-uiScaled(4), w-uiScaled(4), y-uiScaled(4)+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.showItemNames = !g.showItemNames
 		g.needsRedraw = true
@@ -154,7 +172,7 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	y += menuSpacing()
 
 	// Show Legends
-	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
+	r = image.Rect(uiScaled(4), y-uiScaled(4), w-uiScaled(4), y-uiScaled(4)+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.showLegend = !g.showLegend
 		g.needsRedraw = true
@@ -163,7 +181,7 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	y += menuSpacing()
 
 	// Use Item Numbers
-	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
+	r = image.Rect(uiScaled(4), y-uiScaled(4), w-uiScaled(4), y-uiScaled(4)+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.useNumbers = !g.useNumbers
 		g.needsRedraw = true
@@ -173,9 +191,9 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 
 	// Font Size buttons
 	labelW, _ := textDimensions("Font Size")
-	bx := 6 + labelW + 6
-	minus := image.Rect(bx, y-4, bx+20, y-4+menuButtonHeight())
-	plus := image.Rect(bx+24, y-4, bx+44, y-4+menuButtonHeight())
+	bx := uiScaled(6) + labelW + uiScaled(6)
+	minus := image.Rect(bx, y-uiScaled(4), bx+uiScaled(20), y-uiScaled(4)+menuButtonHeight())
+	plus := image.Rect(bx+uiScaled(24), y-uiScaled(4), bx+uiScaled(44), y-uiScaled(4)+menuButtonHeight())
 	if minus.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		decreaseFontSize()
 		if max := g.maxBiomeScroll(); max == 0 {
@@ -210,9 +228,9 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 
 	// Icon Size buttons
 	labelW, _ = textDimensions("Icon Size")
-	bx = 6 + labelW + 6
-	minus = image.Rect(bx, y-4, bx+20, y-4+menuButtonHeight())
-	plus = image.Rect(bx+24, y-4, bx+44, y-4+menuButtonHeight())
+	bx = uiScaled(6) + labelW + uiScaled(6)
+	minus = image.Rect(bx, y-uiScaled(4), bx+uiScaled(20), y-uiScaled(4)+menuButtonHeight())
+	plus = image.Rect(bx+uiScaled(24), y-uiScaled(4), bx+uiScaled(44), y-uiScaled(4)+menuButtonHeight())
 	if minus.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		if g.iconScale > 0.25 {
 			g.iconScale -= 0.25
@@ -227,8 +245,27 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	}
 	y += menuSpacing()
 
+	// UI Scale buttons
+	labelW, _ = textDimensions("UI Scale")
+	bx = uiScaled(6) + labelW + uiScaled(6)
+	minus = image.Rect(bx, y-uiScaled(4), bx+uiScaled(20), y-uiScaled(4)+menuButtonHeight())
+	plus = image.Rect(bx+uiScaled(24), y-uiScaled(4), bx+uiScaled(44), y-uiScaled(4)+menuButtonHeight())
+	if minus.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		if uiScale > 0.5 {
+			setUIScale(uiScale - 0.1)
+		}
+		g.needsRedraw = true
+		return true
+	}
+	if plus.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		setUIScale(uiScale + 0.1)
+		g.needsRedraw = true
+		return true
+	}
+	y += menuSpacing()
+
 	// Textures
-	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
+	r = image.Rect(uiScaled(4), y-uiScaled(4), w-uiScaled(4), y-uiScaled(4)+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.textures = !g.textures
 		g.needsRedraw = true
@@ -237,7 +274,7 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	y += menuSpacing()
 
 	// Vsync
-	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
+	r = image.Rect(uiScaled(4), y-uiScaled(4), w-uiScaled(4), y-uiScaled(4)+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.vsync = !g.vsync
 		ebiten.SetVsyncEnabled(g.vsync)
@@ -247,7 +284,7 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	y += menuSpacing()
 
 	// Power Saver
-	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
+	r = image.Rect(uiScaled(4), y-uiScaled(4), w-uiScaled(4), y-uiScaled(4)+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.smartRender = !g.smartRender
 		g.needsRedraw = true
@@ -256,7 +293,7 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	y += menuSpacing()
 
 	// Linear Filtering
-	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
+	r = image.Rect(uiScaled(4), y-uiScaled(4), w-uiScaled(4), y-uiScaled(4)+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.linearFilter = !g.linearFilter
 		g.needsRedraw = true
@@ -271,7 +308,7 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	y += menuSpacing()
 
 	// Close
-	r = image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
+	r = image.Rect(uiScaled(4), y-uiScaled(4), w-uiScaled(4), y-uiScaled(4)+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.showOptions = false
 		g.needsRedraw = true

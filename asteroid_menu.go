@@ -18,10 +18,10 @@ func (g *Game) asteroidArrowRect() image.Rectangle {
 	}
 	text := "Asteroid: " + name
 	w, _ := textDimensions(text)
-	x := g.width/2 + w/2 + 4
+	x := g.width/2 + w/2 + uiScaled(4)
 	size := int(float64(12) * fontScale())
-	baseline := seedBaseline() + notoFont.Metrics().Height.Ceil() + 4
-	y := baseline + notoFont.Metrics().Descent.Ceil() + 4 - size/2
+	baseline := seedBaseline() + notoFont.Metrics().Height.Ceil() + uiScaled(4)
+	y := baseline + notoFont.Metrics().Descent.Ceil() + uiScaled(4) - size/2
 	return image.Rect(x, y, x+size, y+size)
 }
 
@@ -34,7 +34,7 @@ func (g *Game) asteroidInfoRect() image.Rectangle {
 	}
 	sw, sh := textDimensions(g.coord)
 	sx := g.width/2 - sw/2
-	seedRect := image.Rect(sx-2, seedBaseline()-2, sx+sw+2, seedBaseline()-2+sh+4)
+	seedRect := image.Rect(sx-uiScaled(2), seedBaseline()-uiScaled(2), sx+sw+uiScaled(2), seedBaseline()-uiScaled(2)+sh+uiScaled(4))
 
 	name := g.asteroidID
 	if name == "" {
@@ -43,12 +43,12 @@ func (g *Game) asteroidInfoRect() image.Rectangle {
 	astText := "Asteroid: " + name
 	aw, ah := textDimensions(astText)
 	ax := g.width/2 - aw/2
-	astBase := seedBaseline() + notoFont.Metrics().Height.Ceil() + 4
-	astRect := image.Rect(ax-2, astBase-2, ax+aw+2, astBase-2+ah+4)
+	astBase := seedBaseline() + notoFont.Metrics().Height.Ceil() + uiScaled(4)
+	astRect := image.Rect(ax-uiScaled(2), astBase-uiScaled(2), ax+aw+uiScaled(2), astBase-uiScaled(2)+ah+uiScaled(4))
 
 	rect := seedRect.Union(astRect)
 	rect = rect.Union(g.asteroidArrowRect())
-	return image.Rect(rect.Min.X-2, rect.Min.Y-2, rect.Max.X+2, rect.Max.Y+2)
+	return image.Rect(rect.Min.X-uiScaled(2), rect.Min.Y-uiScaled(2), rect.Max.X+uiScaled(2), rect.Max.Y+uiScaled(2))
 }
 
 func drawDownArrow(dst *ebiten.Image, rect image.Rectangle, up bool) {
@@ -101,8 +101,8 @@ func (g *Game) asteroidMenuSize() (int, int) {
 	// Add extra space for the checkmark and some padding so
 	// longer names don't butt up against the right edge of the menu.
 	// Include an extra character width of padding for clarity.
-	w := maxW + 28 + LabelCharWidth
-	h := (len(g.asteroids)+1)*menuSpacing() + 4
+	w := maxW + uiScaled(28) + LabelCharWidth
+	h := (len(g.asteroids)+1)*menuSpacing() + uiScaled(4)
 	return w, h
 }
 
@@ -116,7 +116,7 @@ func (g *Game) asteroidMenuRect() image.Rectangle {
 	if x+w > g.width {
 		x = g.width - w
 	}
-	y := ar.Max.Y + 4
+	y := ar.Max.Y + uiScaled(4)
 	if y+h > g.height {
 		y = g.height - h
 	}
@@ -148,16 +148,17 @@ func (g *Game) drawAsteroidMenu(dst *ebiten.Image) {
 	w, h := g.asteroidMenuSize()
 	img := ebiten.NewImage(w, h)
 	drawFrame(img, image.Rect(0, 0, w, h))
-	drawText(img, AsteroidMenuTitle, 6, 6, false)
-	y := 6 + menuSpacing() - int(g.asteroidScroll)
+	pad := uiScaled(6)
+	drawText(img, AsteroidMenuTitle, pad, pad, false)
+	y := pad + menuSpacing() - int(g.asteroidScroll)
 	for _, a := range g.asteroids {
-		btn := image.Rect(4, y-4, w-4, y-4+menuButtonHeight())
+		btn := image.Rect(uiScaled(4), y-uiScaled(4), w-uiScaled(4), y-uiScaled(4)+menuButtonHeight())
 		drawButton(img, btn, a.ID == g.asteroidID)
 		if a.ID == g.asteroidID {
-			ck := image.Rect(btn.Min.X+4, btn.Min.Y+4, btn.Min.X+16, btn.Min.Y+16)
+			ck := image.Rect(btn.Min.X+uiScaled(4), btn.Min.Y+uiScaled(4), btn.Min.X+uiScaled(16), btn.Min.Y+uiScaled(16))
 			drawCheck(img, ck)
 		}
-		drawText(img, a.ID, btn.Min.X+20, btn.Min.Y+4, false)
+		drawText(img, a.ID, btn.Min.X+uiScaled(20), btn.Min.Y+uiScaled(4), false)
 		y += menuSpacing()
 	}
 	op := &ebiten.DrawImageOptions{}
@@ -175,9 +176,9 @@ func (g *Game) clickAsteroidMenu(mx, my int) bool {
 	mx = x
 	my = y
 	w, _ := g.asteroidMenuSize()
-	yPos := 6 + menuSpacing()
+	yPos := uiScaled(6) + menuSpacing()
 	for i, a := range g.asteroids {
-		r := image.Rect(4, yPos-4, w-4, yPos-4+menuButtonHeight())
+		r := image.Rect(uiScaled(4), yPos-uiScaled(4), w-uiScaled(4), yPos-uiScaled(4)+menuButtonHeight())
 		if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.showAstMenu = false
 			g.asteroidScroll = 0

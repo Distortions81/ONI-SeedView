@@ -117,9 +117,9 @@ type loadedIcon struct {
 	img  *ebiten.Image
 }
 
-func (g *Game) uiScale() float64 { return 1.0 }
+func (g *Game) uiScale() float64 { return uiScale }
 
-func (g *Game) iconSize() int { return HelpIconSize }
+func (g *Game) iconSize() int { return uiScaled(HelpIconSize) }
 
 func (g *Game) filterMode() ebiten.Filter {
 	if g.linearFilter {
@@ -161,14 +161,14 @@ func (g *Game) drawTooltip(dst *ebiten.Image, text string, rect image.Rectangle,
 
 func (g *Game) helpRect() image.Rectangle {
 	size := g.iconSize()
-	x := g.width - size - HelpMargin
-	y := g.height - size - HelpMargin
+	x := g.width - size - uiScaled(HelpMargin)
+	y := g.height - size - uiScaled(HelpMargin)
 	return image.Rect(x, y, x+size, y+size)
 }
 
 func helpMenuSize() (int, int) {
 	w, h := textDimensions(helpMessage)
-	return w + 4, h + 4
+	return w + uiScaled(4), h + uiScaled(4)
 }
 
 func (g *Game) helpMenuRect() image.Rectangle {
@@ -191,20 +191,20 @@ func (g *Game) helpMenuRect() image.Rectangle {
 func (g *Game) helpCloseRect() image.Rectangle {
 	size := g.iconSize()
 	r := g.helpMenuRect()
-	return image.Rect(r.Max.X-size-2, r.Min.Y+2, r.Max.X-2, r.Min.Y+size+2)
+	return image.Rect(r.Max.X-size-uiScaled(2), r.Min.Y+uiScaled(2), r.Max.X-uiScaled(2), r.Min.Y+size+uiScaled(2))
 }
 
 func (g *Game) geyserRect() image.Rectangle {
 	size := g.iconSize()
-	x := g.width - size*3 - HelpMargin*3
-	y := g.height - size - HelpMargin
+	x := g.width - size*3 - uiScaled(HelpMargin*3)
+	y := g.height - size - uiScaled(HelpMargin)
 	return image.Rect(x, y, x+size, y+size)
 }
 
 func (g *Game) geyserCloseRect() image.Rectangle {
 	size := g.iconSize()
-	x := g.width - size - HelpMargin
-	y := HelpMargin
+	x := g.width - size - uiScaled(HelpMargin)
+	y := uiScaled(HelpMargin)
 	return image.Rect(x, y, x+size, y+size)
 }
 
@@ -213,7 +213,8 @@ func (g *Game) bottomTrayRect() image.Rectangle {
 	r = r.Union(g.geyserRect())
 	r = r.Union(g.screenshotRect())
 	r = r.Union(g.helpRect())
-	return image.Rect(r.Min.X-4, r.Min.Y-4, r.Max.X+4, r.Max.Y+4)
+	m := uiScaled(4)
+	return image.Rect(r.Min.X-m, r.Min.Y-m, r.Max.X+m, r.Max.Y+m)
 }
 
 func (g *Game) biomeLegendRect() image.Rectangle {
@@ -232,8 +233,8 @@ func (g *Game) itemLegendRect() image.Rectangle {
 	}
 	w := g.legendImage.Bounds().Dx()
 	h := g.legendImage.Bounds().Dy()
-	x := g.width - w - 12
-	y := 10 - int(g.itemScroll)
+	x := g.width - w - uiScaled(12)
+	y := uiScaled(10) - int(g.itemScroll)
 	return image.Rect(x, y, x+w, y+h)
 }
 

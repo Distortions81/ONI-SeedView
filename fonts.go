@@ -64,29 +64,29 @@ func fontScale() float64 { return fontSize / baseFontSize }
 
 func rowSpacing() int {
 	if notoFont != nil {
-		return notoFont.Metrics().Height.Ceil() + 8
+		return notoFont.Metrics().Height.Ceil() + uiScaled(8)
 	}
 	return int(float64(LegendRowSpacing) * fontScale())
 }
 
 func menuButtonHeight() int {
 	if notoFont != nil {
-		return notoFont.Metrics().Height.Ceil() + 5
+		return notoFont.Metrics().Height.Ceil() + uiScaled(5)
 	}
 	return int(float64(22) * fontScale())
 }
 
 func menuSpacing() int {
 	if notoFont != nil {
-		return menuButtonHeight() + 4
+		return menuButtonHeight() + uiScaled(4)
 	}
 	return int(float64(26) * fontScale())
 }
 
 func seedBaseline() int {
-	return 10
+	return uiScaled(10)
 }
 
 func init() {
-	setFontSize(fontSize)
+	setUIScale(1.0)
 }
