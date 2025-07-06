@@ -30,7 +30,7 @@ func init() {
 		{"Mouse wheel or +/-", "zoom in and out"},
 		{"Drag with the mouse/touch", "pan"},
 		{"Pinch with two fingers", "zoom on touch"},
-		{"Click or tap geysers/POIs", "show details"},
+		{"Click or tap geysers/POIs", "center and show details"},
 		{"Tap legend entries", "highlight items"},
 		{"Camera icon", "open screenshot menu"},
 		{"Geyser-icon", "list all geysers"},
@@ -1627,6 +1627,31 @@ iconsLoop:
 			g.dragging = false
 			g.showGeyserList = true
 			g.needsRedraw = true
+		} else if justPressed {
+			if info, ix, iy, icon, found := g.itemAt(mx, my); found {
+				g.camX += float64(g.width/2 - ix)
+				g.camY += float64(g.height/2 - iy)
+				g.clampCamera()
+
+				if max := g.maxBiomeScroll(); g.biomeScroll > max {
+					g.biomeScroll = max
+				}
+				if g.biomeScroll < 0 {
+					g.biomeScroll = 0
+				}
+				if max := g.maxItemScroll(); g.itemScroll > max {
+					g.itemScroll = max
+				}
+				if g.itemScroll < 0 {
+					g.itemScroll = 0
+				}
+
+				g.infoText = info
+				g.infoIcon = icon
+				g.showInfo = true
+				g.infoPinned = true
+				g.needsRedraw = true
+			}
 		}
 	}
 
