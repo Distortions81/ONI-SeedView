@@ -204,11 +204,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			astName := fmt.Sprintf("Asteroid: %s", aName)
 
 			x := g.width / 2
-			drawTextWithBGScale(screen, astName, x, 30, 1, true)
+			astBase := seedBaseline() + notoFont.Metrics().Height.Ceil() + 4
+			drawTextWithBGScale(screen, astName, x, astBase, 1, true)
 			ar := g.asteroidArrowRect()
 			drawDownArrow(screen, ar, g.showAstMenu)
-
-			drawTextWithBGScale(screen, label, x, 10, 1, true)
+			drawTextWithBGScale(screen, label, x, seedBaseline(), 1, true)
 		}
 
 		if g.showLegend {

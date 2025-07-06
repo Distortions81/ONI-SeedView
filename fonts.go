@@ -84,6 +84,10 @@ func menuSpacing() int {
 	return int(float64(26) * fontScale())
 }
 
+func seedBaseline() int {
+	return 10
+}
+
 func init() {
 	setFontSize(fontSize)
 }
