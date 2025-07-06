@@ -94,8 +94,8 @@ func drawTextWithBG(dst *ebiten.Image, text string, x, y int) {
 			width = len(l)
 		}
 	}
-	height := len(lines) * 16
-	vector.DrawFilledRect(dst, float32(x-2), float32(y-2), float32(width*6+4), float32(height+4), color.RGBA{0, 0, 0, 128}, false)
+	height := len(lines) * 20
+	vector.DrawFilledRect(dst, float32(x-2), float32(y-2), float32(width*LabelCharWidth+4), float32(height+4), color.RGBA{0, 0, 0, 128}, false)
 	drawText(dst, text, x, y)
 }
 
@@ -111,8 +111,8 @@ func drawTextWithBGScale(dst *ebiten.Image, text string, x, y int, scale float64
 			width = len(l)
 		}
 	}
-	height := len(lines) * 16
-	w := width*6 + 4
+	height := len(lines) * 20
+	w := width*LabelCharWidth + 4
 	h := height + 4
 	img := ebiten.NewImage(w, h)
 	vector.DrawFilledRect(img, 0, 0, float32(w), float32(h), color.RGBA{0, 0, 0, 128}, false)
@@ -131,10 +131,10 @@ func drawTextWithBGBorder(dst *ebiten.Image, text string, x, y int, border color
 			width = len(l)
 		}
 	}
-	height := len(lines) * 16
+	height := len(lines) * 20
 	bx := x - 2
 	by := y - 2
-	bw := width*6 + 4
+	bw := width*LabelCharWidth + 4
 	bh := height + 4
 	vector.DrawFilledRect(dst, float32(bx-1), float32(by-1), float32(bw+2), float32(bh+2), border, false)
 	vector.DrawFilledRect(dst, float32(bx), float32(by), float32(bw), float32(bh), color.RGBA{0, 0, 0, 128}, false)
@@ -153,8 +153,8 @@ func drawTextWithBGBorderScale(dst *ebiten.Image, text string, x, y int, border 
 			width = len(l)
 		}
 	}
-	height := len(lines) * 16
-	w := width*6 + 4
+	height := len(lines) * 20
+	w := width*LabelCharWidth + 4
 	h := height + 4
 	img := ebiten.NewImage(w+2, h+2)
 	vector.DrawFilledRect(img, 0, 0, float32(w+2), float32(h+2), border, false)
@@ -175,7 +175,7 @@ func (g *Game) drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image,
 		}
 	}
 	txtW := width * LabelCharWidth
-	txtH := len(lines) * 16
+	txtH := len(lines) * 20
 	iconW, iconH := 0, 0
 	if icon != nil {
 		iconW = InfoIconSize
@@ -213,7 +213,7 @@ func (g *Game) drawInfoRow(dst *ebiten.Image, text string, icon *ebiten.Image, x
 		}
 	}
 	txtW := width * LabelCharWidth
-	txtH := len(lines) * 16
+	txtH := len(lines) * 20
 	iconW, iconH := 0, 0
 	if icon != nil {
 		iconW = InfoIconSize
@@ -261,7 +261,7 @@ func textDimensions(text string) (int, int) {
 				width = len(l)
 			}
 		}
-		return width * LabelCharWidth, len(lines) * 16
+		return width * LabelCharWidth, len(lines) * 20
 	}
 	lines := strings.Split(text, "\n")
 	width := 0
@@ -285,7 +285,7 @@ func infoPanelSize(text string, icon *ebiten.Image) (int, int) {
 		}
 	}
 	txtW := width * LabelCharWidth
-	txtH := len(lines) * 16
+	txtH := len(lines) * 20
 	iconW, iconH := 0, 0
 	if icon != nil {
 		iconW = InfoIconSize
@@ -310,7 +310,7 @@ func infoRowSize(text string, icon *ebiten.Image) (int, int) {
 		}
 	}
 	txtW := width * LabelCharWidth
-	txtH := len(lines) * 16
+	txtH := len(lines) * 20
 	iconW, iconH := 0, 0
 	if icon != nil {
 		iconW = InfoIconSize
@@ -440,7 +440,7 @@ func buildLegendImage(biomes []BiomePath) (*ebiten.Image, []string) {
 		}
 	}
 
-	width := 30 + maxLen*6 + 5
+	width := 30 + maxLen*LabelCharWidth + 5
 	height := LegendRowSpacing*(len(names)+2) + 7
 
 	img := ebiten.NewImage(width, height)
@@ -506,7 +506,7 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 				maxLen = len(e)
 			}
 		}
-		width := maxLen*6 + 10
+		width := maxLen*LabelCharWidth + 10
 		height := LegendRowSpacing*(len(g.legendEntries)+2) + 7
 		img := ebiten.NewImage(width, height)
 		img.Fill(color.RGBA{0, 30, 30, 77})
