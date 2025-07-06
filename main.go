@@ -904,7 +904,8 @@ type Game struct {
 	linearFilter  bool
 	halfRes       bool
 	autoLowRes    bool
-	lowFPSStart   time.Time
+	lowFPSAccum   time.Duration
+	lastFPSTick   time.Time
 
 	noColor   bool
 	ssNoColor bool
@@ -1187,21 +1188,32 @@ iconsLoop:
 		g.skipClickTicks--
 	}
 
+	now := time.Now()
+	if g.lastFPSTick.IsZero() {
+		g.lastFPSTick = now
+	}
+	delta := now.Sub(g.lastFPSTick)
+	if delta > 200*time.Millisecond {
+		delta = 200 * time.Millisecond
+	}
+	g.lastFPSTick = now
+
 	if g.autoLowRes && !g.halfRes && g.ssPending == 0 && !g.screenshotMode {
 		if ebiten.ActualFPS() < 15 {
-			if g.lowFPSStart.IsZero() {
-				g.lowFPSStart = time.Now()
-			} else if time.Since(g.lowFPSStart) > 2*time.Second {
+			g.lowFPSAccum += delta
+			if g.lowFPSAccum > 2*time.Second {
 				g.textures = false
 				g.linearFilter = false
 				g.vsync = false
 				ebiten.SetVsyncEnabled(g.vsync)
 				g.needsRedraw = true
-				g.lowFPSStart = time.Time{}
+				g.lowFPSAccum = 0
 			}
 		} else {
-			g.lowFPSStart = time.Time{}
+			g.lowFPSAccum = 0
 		}
+	} else {
+		g.lowFPSAccum = 0
 	}
 
 	if g.showGeyserList {
