@@ -137,6 +137,20 @@ func drawTextWithBGBorderScale(dst *ebiten.Image, text string, x, y int, border 
 	dst.DrawImage(img, op)
 }
 
+func drawTextScale(dst *ebiten.Image, text string, x, y int, scale float64) {
+	if scale == 1.0 {
+		drawText(dst, text, x, y)
+		return
+	}
+	w, h := textDimensions(text)
+	img := ebiten.NewImage(w, h)
+	drawText(img, text, 0, 0)
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(scale, scale)
+	op.GeoM.Translate(float64(x), float64(y))
+	dst.DrawImage(img, op)
+}
+
 func (g *Game) drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int, scale float64) {
 	txtW, txtH := textDimensions(text)
 	iconW, iconH := 0, 0
@@ -361,7 +375,7 @@ func buildLegendImage(biomes []BiomePath) (*ebiten.Image, []string) {
 	height := spacing*(len(names)+2) + 7
 
 	img := ebiten.NewImage(width, height)
-	img.Fill(color.RGBA{0, 30, 30, 77})
+	img.Fill(color.RGBA{0, 0, 0, 77})
 
 	y := 10
 	drawTextWithBG(img, "Biomes", 5, y)
@@ -433,7 +447,7 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 		width := maxW + 10
 		height := spacing*(len(g.legendEntries)+2) + 7
 		img := ebiten.NewImage(width, height)
-		img.Fill(color.RGBA{0, 30, 30, 77})
+		img.Fill(color.RGBA{0, 0, 0, 77})
 		y := 10
 		drawTextWithBG(img, "Items", 5, y)
 		y += spacing
@@ -456,6 +470,8 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 	op.GeoM.Scale(scale, scale)
 	op.GeoM.Translate(math.Round(x), math.Round(y))
 	dst.DrawImage(g.legendImage, op)
+	lh := float64(g.legendImage.Bounds().Dy()) * scale
+	drawFrame(dst, image.Rect(int(math.Round(x)), int(math.Round(y)), int(math.Round(x+w)), int(math.Round(y+lh))))
 	if g.selectedItem >= 0 {
 		spacing := float64(rowSpacing())
 		hy := y + (10+spacing*float64(g.selectedItem+1))*scale
@@ -1934,6 +1950,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			opLegend.GeoM.Scale(scale, scale)
 			opLegend.GeoM.Translate(0, -g.biomeScroll)
 			screen.DrawImage(g.legend, opLegend)
+			lw := int(math.Round(float64(g.legend.Bounds().Dx()) * scale))
+			lh := int(math.Round(float64(g.legend.Bounds().Dy()) * scale))
+			ly := int(math.Round(-g.biomeScroll))
+			drawFrame(screen, image.Rect(0, ly, lw, ly+lh))
 			if g.selectedBiome >= 0 {
 				spacing := float64(rowSpacing())
 				y0 := math.Round((10+spacing+spacing*float64(g.selectedBiome))*scale - g.biomeScroll)
@@ -2186,7 +2206,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		if g.showHelp && !g.screenshotMode {
 			scale := g.uiScale()
 			rect := g.helpMenuRect()
-			drawTextWithBGScale(screen, helpMessage, rect.Min.X, rect.Min.Y, scale)
+			drawFrame(screen, rect)
+			drawTextScale(screen, helpMessage, rect.Min.X+2, rect.Min.Y+2, scale)
 			cr := g.helpCloseRect()
 			drawCloseButton(screen, cr)
 		}
