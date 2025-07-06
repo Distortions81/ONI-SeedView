@@ -19,13 +19,14 @@ func (g *Game) optionsRect() image.Rectangle {
 func (g *Game) optionsMenuSize() (int, int) {
 	labels := []string{
 		OptionsMenuTitle,
-		"Textures",
-		"Vsync",
 		"Show Item Names",
 		"Show Legends",
 		"Use Item Numbers",
+		"Font Size [-] [+]",
 		"Icon Size [-] [+]",
-		"Smart Rendering",
+		"Textures",
+		"Vsync",
+		"Power Saver",
 		"Linear Filtering",
 		"FPS: 60.0",
 		"Version: " + ClientVersion,
@@ -74,13 +75,11 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 		y += OptionsMenuSpacing
 	}
 
-	drawToggle("Textures", g.textures)
-	drawToggle("Vsync", g.vsync)
 	drawToggle("Show Item Names", g.showItemNames)
 	drawToggle("Show Legends", g.showLegend)
 	drawToggle("Use Item Numbers", g.useNumbers)
 
-	label := "Icon Size"
+	label := "Font Size"
 	drawText(img, label, 6, y)
 	tw, _ := textDimensions(label)
 	bx := 6 + tw + 6
@@ -92,7 +91,21 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	drawPlusMinus(img, plus, false)
 	y += OptionsMenuSpacing
 
-	drawToggle("Smart Rendering", g.smartRender)
+	label = "Icon Size"
+	drawText(img, label, 6, y)
+	tw, _ = textDimensions(label)
+	bx = 6 + tw + 6
+	minus = image.Rect(bx, y-4, bx+20, y-4+22)
+	plus = image.Rect(bx+24, y-4, bx+44, y-4+22)
+	drawButton(img, minus, false)
+	drawPlusMinus(img, minus, true)
+	drawButton(img, plus, false)
+	drawPlusMinus(img, plus, false)
+	y += OptionsMenuSpacing
+
+	drawToggle("Textures", g.textures)
+	drawToggle("Vsync", g.vsync)
+	drawToggle("Power Saver", g.smartRender)
 	drawToggle("Linear Filtering", g.linearFilter)
 
 	fps := fmt.Sprintf("FPS: %.1f", ebiten.ActualFPS())
@@ -125,27 +138,8 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	w, _ := g.optionsMenuSize()
 	y = 6 + OptionsMenuSpacing
 
-	// Textures
-	r := image.Rect(4, y-4, w-4, y-4+22)
-	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-		g.textures = !g.textures
-		g.needsRedraw = true
-		return true
-	}
-	y += OptionsMenuSpacing
-
-	// Vsync
-	r = image.Rect(4, y-4, w-4, y-4+22)
-	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-		g.vsync = !g.vsync
-		ebiten.SetVsyncEnabled(g.vsync)
-		g.needsRedraw = true
-		return true
-	}
-	y += OptionsMenuSpacing
-
 	// Show Item Names
-	r = image.Rect(4, y-4, w-4, y-4+22)
+	r := image.Rect(4, y-4, w-4, y-4+22)
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.showItemNames = !g.showItemNames
 		g.needsRedraw = true
@@ -171,11 +165,48 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	}
 	y += OptionsMenuSpacing
 
-	// Icon Size buttons
-	labelW, _ := textDimensions("Icon Size")
+	// Font Size buttons
+	labelW, _ := textDimensions("Font Size")
 	bx := 6 + labelW + 6
 	minus := image.Rect(bx, y-4, bx+20, y-4+22)
 	plus := image.Rect(bx+24, y-4, bx+44, y-4+22)
+	if minus.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		decreaseFontSize()
+		if max := g.maxBiomeScroll(); max == 0 {
+			g.biomeScroll = 0
+		} else if g.biomeScroll > max {
+			g.biomeScroll = max
+		}
+		if max := g.maxItemScroll(); max == 0 {
+			g.itemScroll = 0
+		} else if g.itemScroll > max {
+			g.itemScroll = max
+		}
+		g.needsRedraw = true
+		return true
+	}
+	if plus.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		increaseFontSize()
+		if max := g.maxBiomeScroll(); max == 0 {
+			g.biomeScroll = 0
+		} else if g.biomeScroll > max {
+			g.biomeScroll = max
+		}
+		if max := g.maxItemScroll(); max == 0 {
+			g.itemScroll = 0
+		} else if g.itemScroll > max {
+			g.itemScroll = max
+		}
+		g.needsRedraw = true
+		return true
+	}
+	y += OptionsMenuSpacing
+
+	// Icon Size buttons
+	labelW, _ = textDimensions("Icon Size")
+	bx = 6 + labelW + 6
+	minus = image.Rect(bx, y-4, bx+20, y-4+22)
+	plus = image.Rect(bx+24, y-4, bx+44, y-4+22)
 	if minus.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		if g.iconScale > 0.25 {
 			g.iconScale -= 0.25
@@ -190,7 +221,26 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	}
 	y += OptionsMenuSpacing
 
-	// Smart Rendering
+	// Textures
+	r = image.Rect(4, y-4, w-4, y-4+22)
+	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		g.textures = !g.textures
+		g.needsRedraw = true
+		return true
+	}
+	y += OptionsMenuSpacing
+
+	// Vsync
+	r = image.Rect(4, y-4, w-4, y-4+22)
+	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		g.vsync = !g.vsync
+		ebiten.SetVsyncEnabled(g.vsync)
+		g.needsRedraw = true
+		return true
+	}
+	y += OptionsMenuSpacing
+
+	// Power Saver
 	r = image.Rect(4, y-4, w-4, y-4+22)
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.smartRender = !g.smartRender

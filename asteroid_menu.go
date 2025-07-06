@@ -66,13 +66,14 @@ func drawCheck(dst *ebiten.Image, rect image.Rectangle) {
 }
 
 func (g *Game) asteroidMenuSize() (int, int) {
-	maxW := len(AsteroidMenuTitle)
+	maxW, _ := textDimensions(AsteroidMenuTitle)
 	for _, a := range g.asteroids {
-		if len(a.ID) > maxW {
-			maxW = len(a.ID)
+		w, _ := textDimensions(a.ID)
+		if w > maxW {
+			maxW = w
 		}
 	}
-	w := maxW*LabelCharWidth + 24
+	w := maxW + 24
 	h := (len(g.asteroids)+1)*AsteroidMenuSpacing + 4
 	return w, h
 }
