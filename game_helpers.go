@@ -51,8 +51,6 @@ type Game struct {
 	lastWheel         time.Time
 	loading           bool
 	status            string
-	iconsToLoad       []string
-	iconLoadIndex     int
 	coord             string
 	mobile            bool
 	showInfo          bool
@@ -324,6 +322,11 @@ func abs(a int) int {
 }
 
 func (g *Game) startIconLoader(names []string) {
-	g.iconsToLoad = append([]string(nil), names...)
-	g.iconLoadIndex = 0
+	for _, name := range names {
+		img, _ := loadImageFile(name)
+		if g.icons != nil {
+			g.icons[name] = img
+		}
+	}
+	g.needsRedraw = true
 }

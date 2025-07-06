@@ -15,7 +15,6 @@ func (g *Game) Update() error {
 	const panSpeed = PanSpeed
 
 	g.checkRedrawTriggers()
-	g.handleIconLoading()
 	g.processScreenshot()
 
 	oldX, oldY, oldZoom := g.camX, g.camY, g.zoom
