@@ -123,11 +123,11 @@ const.go    # Miscellaneous constants and configuration
 ```
 
 Unit tests live alongside the code (`main_test.go`, `zoom_test.go`). Format the
-Go files and run the tests with the `test` build tag:
+Go files and run the tests normally:
 
 ```bash
 gofmt -w *.go
-go test -tags test ./...
+go test ./...
 ```
 
 ## Minimizing the Font
