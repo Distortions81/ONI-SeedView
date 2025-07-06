@@ -172,7 +172,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 					if useNumbers {
 						formatted = strconv.Itoa(g.legendMap["p"+name])
 					}
-					labels = append(labels, label{formatted, int(x), int(y+h/2) + 2, labelClr})
+					if g.showItemNames || useNumbers {
+						labels = append(labels, label{formatted, int(x), int(y+h/2) + 2, labelClr})
+					}
 					continue
 				}
 			}
@@ -184,7 +186,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if useNumbers {
 				formatted = strconv.Itoa(g.legendMap["p"+name])
 			}
-			labels = append(labels, label{formatted, int(x), int(y) + 4, labelClr})
+			if g.showItemNames || useNumbers {
+				labels = append(labels, label{formatted, int(x), int(y) + 4, labelClr})
+			}
 		}
 
 		for _, l := range labels {
