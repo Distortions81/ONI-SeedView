@@ -25,7 +25,7 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
 * A help icon displays the available controls at any time. An X button closes the overlay.
 * A gear icon opens an options menu for toggling textures, Vsync,
   item labels, legends, number labels, smart rendering, half-resolution
-  mode, automatic low-res switching and linear filtering. You can also
+  mode, and linear filtering. You can also
   adjust icon size and view the current FPS.
 * A **Magnify Text** option toggles enlarged UI text for accessibility.
 * Crosshairs at the center show the current world coordinates,

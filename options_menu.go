@@ -29,7 +29,6 @@ func (g *Game) optionsMenuSize() (int, int) {
 		"Icon Size [-] [+]",
 		"Smart Rendering",
 		"Half Resolution",
-		"Auto Low-Res",
 		"Linear Filtering",
 		"FPS: 60.0",
 		"Version: " + ClientVersion,
@@ -99,7 +98,6 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 
 	drawToggle("Smart Rendering", g.smartRender)
 	drawToggle("Half Resolution", g.halfRes)
-	drawToggle("Auto Low-Quality", g.autoLowRes)
 	drawToggle("Linear Filtering", g.linearFilter)
 
 	fps := fmt.Sprintf("FPS: %.1f", ebiten.ActualFPS())
@@ -229,15 +227,6 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	r = image.Rect(4, y-4, w-4, y-4+22)
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.halfRes = !g.halfRes
-		g.needsRedraw = true
-		return true
-	}
-	y += OptionsMenuSpacing
-
-	// Auto Low-Res
-	r = image.Rect(4, y-4, w-4, y-4+22)
-	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-		g.autoLowRes = !g.autoLowRes
 		g.needsRedraw = true
 		return true
 	}
