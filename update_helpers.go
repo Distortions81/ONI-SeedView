@@ -31,20 +31,14 @@ func (g *Game) checkRedrawTriggers() {
 }
 
 func (g *Game) handleIconLoading() {
-	for g.iconResults != nil {
-		select {
-		case li, ok := <-g.iconResults:
-			if !ok {
-				g.iconResults = nil
-				continue
-			}
-			if g.icons != nil {
-				g.icons[li.name] = li.img
-			}
-			g.needsRedraw = true
-		default:
-			return
+	if g.iconLoadIndex < len(g.iconsToLoad) {
+		name := g.iconsToLoad[g.iconLoadIndex]
+		img, _ := loadImageFile(name)
+		if g.icons != nil {
+			g.icons[name] = img
 		}
+		g.iconLoadIndex++
+		g.needsRedraw = true
 	}
 }
 
