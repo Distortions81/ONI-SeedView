@@ -5,7 +5,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/nfnt/bmp"
+	"golang.org/x/image/bmp"
 	"image"
 	"image/color"
 	"time"

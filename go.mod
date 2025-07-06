@@ -5,11 +5,8 @@ go 1.24.3
 require (
 	github.com/fxamacker/cbor/v2 v2.8.0
 	github.com/hajimehoshi/ebiten/v2 v2.8.8
-       golang.org/x/image v0.20.0
-       github.com/nfnt/bmp v0.0.0
+	golang.org/x/image v0.20.0
 )
-
-replace github.com/nfnt/bmp => ./bmp
 
 require (
 	github.com/ebitengine/gomobile v0.0.0-20240911145611-4856209ac325 // indirect
