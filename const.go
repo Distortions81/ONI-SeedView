@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	ClientVersion    = "v0.0.5-2507052355"
+	ClientVersion    = "v0.0.5-2507060015"
 	BaseURL          = "https://ingest.mapsnotincluded.org/coordinate/"
 	AcceptCBORHeader = "application/cbor"
 	PanSpeed         = 15
@@ -41,7 +41,7 @@ const (
 	InfoIconScale         = 0.3
 	InfoIconSize          = 32
 	InfoPanelAlpha        = 200
-	TouchDragThreshold    = 10
+	TouchDragThreshold    = 20
 	ScreenshotMenuSpacing = 26
 	ScreenshotMenuTitle   = "Image quality:"
 	ScreenshotSaveLabel   = "Save Screenshot"
