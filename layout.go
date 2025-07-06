@@ -2,11 +2,20 @@ package main
 
 import (
 	"math"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	screenW := outsideWidth
 	screenH := outsideHeight
+
+	scale := ebiten.Monitor().DeviceScaleFactor()
+	if !g.hidpi {
+		scale = 1
+	}
+	base := math.Min(float64(screenW)*scale/float64(DefaultWidth), float64(screenH)*scale/float64(DefaultHeight))
+	setUIBaseScale(base)
 
 	/*
 		if !g.screenshotMode {

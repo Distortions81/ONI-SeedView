@@ -15,20 +15,19 @@ func (g *Game) optionsRect() image.Rectangle {
 }
 
 func (g *Game) optionsMenuSize() (int, int) {
-	fontLabel := fmt.Sprintf("Font Size [-] [+] %.0fpt", fontSize)
 	uiLabel := fmt.Sprintf("UI Scale [-] [+] %.0f%%", uiScale*100)
 	labels := []string{
 		OptionsMenuTitle,
 		"Show Item Names",
 		"Show Legends",
 		"Use Item Numbers",
-		fontLabel,
 		"Icon Size [-] [+]",
 		uiLabel,
 		"Textures",
 		"Vsync",
 		"Power Saver",
 		"Linear Filtering",
+		"HiDPI Mode",
 		"FPS: 60.0",
 		"Version: " + ClientVersion,
 		"Close",
@@ -82,21 +81,7 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	drawToggle("Show Legends", g.showLegend)
 	drawToggle("Use Item Numbers", g.useNumbers)
 
-	label := "Font Size"
-	drawText(img, label, pad, y, false)
-	tw, _ := textDimensions(label)
-	bx := pad + tw + pad
-	minus := image.Rect(bx, y-uiScaled(4), bx+uiScaled(20), y-uiScaled(4)+menuButtonHeight())
-	plus := image.Rect(bx+uiScaled(24), y-uiScaled(4), bx+uiScaled(44), y-uiScaled(4)+menuButtonHeight())
-	drawButton(img, minus, false)
-	drawPlusMinus(img, minus, true)
-	drawButton(img, plus, false)
-	drawPlusMinus(img, plus, false)
-	sizeStr := fmt.Sprintf("%.0fpt", fontSize)
-	drawText(img, sizeStr, plus.Max.X+pad, y, false)
-	y += menuSpacing()
-
-	label = "Icon Size"
+	label := "Icon Size"
 	drawText(img, label, pad, y, false)
 	tw, _ = textDimensions(label)
 	bx = pad + tw + pad
@@ -127,6 +112,7 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	drawToggle("Vsync", g.vsync)
 	drawToggle("Power Saver", g.smartRender)
 	drawToggle("Linear Filtering", g.linearFilter)
+	drawToggle("HiDPI Mode", g.hidpi)
 
 	fps := fmt.Sprintf("FPS: %.1f", ebiten.ActualFPS())
 	drawText(img, fps, pad, y, false)
@@ -187,38 +173,20 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	}
 	y += menuSpacing()
 
-	// Font Size buttons
-	labelW, _ := textDimensions("Font Size")
+	// Icon Size buttons
+	labelW, _ := textDimensions("Icon Size")
 	bx := uiScaled(6) + labelW + uiScaled(6)
 	minus := image.Rect(bx, y-uiScaled(4), bx+uiScaled(20), y-uiScaled(4)+menuButtonHeight())
 	plus := image.Rect(bx+uiScaled(24), y-uiScaled(4), bx+uiScaled(44), y-uiScaled(4)+menuButtonHeight())
 	if minus.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-		decreaseFontSize()
-		if max := g.maxBiomeScroll(); max == 0 {
-			g.biomeScroll = 0
-		} else if g.biomeScroll > max {
-			g.biomeScroll = max
-		}
-		if max := g.maxItemScroll(); max == 0 {
-			g.itemScroll = 0
-		} else if g.itemScroll > max {
-			g.itemScroll = max
+		if g.iconScale > 0.25 {
+			g.iconScale -= 0.25
 		}
 		g.needsRedraw = true
 		return true
 	}
 	if plus.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-		increaseFontSize()
-		if max := g.maxBiomeScroll(); max == 0 {
-			g.biomeScroll = 0
-		} else if g.biomeScroll > max {
-			g.biomeScroll = max
-		}
-		if max := g.maxItemScroll(); max == 0 {
-			g.itemScroll = 0
-		} else if g.itemScroll > max {
-			g.itemScroll = max
-		}
+		g.iconScale += 0.25
 		g.needsRedraw = true
 		return true
 	}
@@ -294,6 +262,15 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	r = image.Rect(uiScaled(4), y-uiScaled(4), w-uiScaled(4), y-uiScaled(4)+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.linearFilter = !g.linearFilter
+		g.needsRedraw = true
+		return true
+	}
+	y += menuSpacing()
+
+	// HiDPI Mode
+	r = image.Rect(uiScaled(4), y-uiScaled(4), w-uiScaled(4), y-uiScaled(4)+menuButtonHeight())
+	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		g.hidpi = !g.hidpi
 		g.needsRedraw = true
 		return true
 	}

@@ -47,6 +47,7 @@ func main() {
 		iconScale:         1.0,
 		smartRender:       true,
 		linearFilter:      true,
+		hidpi:             true,
 		ssQuality:         1,
 		hoverBiome:        -1,
 		hoverItem:         -1,
