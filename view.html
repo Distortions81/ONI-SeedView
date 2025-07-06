@@ -83,12 +83,15 @@
             chunks.push(value);
             received += value.length;
             if (total) {
-              document.getElementById("progress").value = (received / total) * 100;
+              const percent = (received / total) * 100;
+              document.getElementById("progress").value = percent;
+              document.getElementById("speed").textContent = percent.toFixed(0) + "%";
             }
-            const elapsed = (performance.now() - start) / 1000;
-            document.getElementById("speed").textContent =
-              (received / 1024 / (elapsed || 1)).toFixed(1) + " kB/s";
           }
+          if (total) {
+            document.getElementById("progress").value = 100;
+          }
+          document.getElementById("speed").textContent = "Loading application.";
           buf = new Uint8Array(received);
           let pos = 0;
           for (const chunk of chunks) {
@@ -98,6 +101,10 @@
           buf = buf.buffer;
         } else {
           buf = await resp.arrayBuffer();
+          if (total) {
+            document.getElementById("progress").value = 100;
+          }
+          document.getElementById("speed").textContent = "Loading application.";
         }
         const decompressed = pako.ungzip(new Uint8Array(buf)).buffer;
         return WebAssembly.instantiate(decompressed, go.importObject);
