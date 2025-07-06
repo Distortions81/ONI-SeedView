@@ -1255,7 +1255,11 @@ iconsLoop:
 			g.touchUI = true
 		} else {
 			pt := image.Rect(x, y, x+1, y+1)
-			if g.helpRect().Overlaps(pt) || g.screenshotRect().Overlaps(pt) ||
+			if g.helpRect().Overlaps(pt) {
+				g.showHelp = !g.showHelp
+				g.needsRedraw = true
+				g.touchUI = true
+			} else if g.screenshotRect().Overlaps(pt) ||
 				g.geyserRect().Overlaps(pt) || g.optionsRect().Overlaps(pt) {
 				g.touchUI = true
 			} else {
@@ -1426,8 +1430,8 @@ iconsLoop:
 			} else if g.optionsRect().Overlaps(pt) {
 				g.showOptions = true
 				g.needsRedraw = true
-			} else if g.helpRect().Overlaps(pt) {
-				g.showHelp = !g.showHelp
+			} else if g.showHelp && !g.helpRect().Overlaps(pt) {
+				g.showHelp = false
 				g.needsRedraw = true
 			} else if g.geyserRect().Overlaps(pt) {
 				g.camX = oldX
