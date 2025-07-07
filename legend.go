@@ -85,6 +85,7 @@ func (g *Game) initObjectLegend() {
 func (g *Game) invalidateLegends() {
 	g.legend = nil
 	g.legendImage = nil
+	g.geyserItems = nil
 }
 
 func (g *Game) drawNumberLegend(dst *ebiten.Image) {
@@ -132,20 +133,11 @@ func (g *Game) drawNumberLegend(dst *ebiten.Image) {
 	}
 }
 
-func (g *Game) drawGeyserList(dst *ebiten.Image) {
-	vector.DrawFilledRect(dst, 0, 0, float32(g.width), float32(g.height), color.RGBA{0, 0, 0, 255}, false)
-	cr := g.geyserCloseRect()
-	drawCloseButton(dst, cr)
-
-	spacing := 10
-	type item struct {
-		text string
-		icon *ebiten.Image
-		w    int
-		h    int
+func (g *Game) buildGeyserItems() {
+	if g.geyserItems != nil && len(g.geyserItems) == len(g.geysers) {
+		return
 	}
-	items := make([]item, len(g.geysers))
-	maxW := 0
+	g.geyserItems = make([]geyserListItem, len(g.geysers))
 	for i, gy := range g.geysers {
 		ic := (*ebiten.Image)(nil)
 		if n := iconForGeyser(gy.ID); n != "" {
@@ -153,10 +145,22 @@ func (g *Game) drawGeyserList(dst *ebiten.Image) {
 		}
 		txt := displayGeyser(gy.ID) + "\n" + formatGeyserInfo(gy)
 		w, h := infoRowSize(txt, ic)
-		if w > maxW {
-			maxW = w
+		g.geyserItems[i] = geyserListItem{text: txt, icon: ic, w: w, h: h}
+	}
+}
+
+func (g *Game) drawGeyserList(dst *ebiten.Image) {
+	vector.DrawFilledRect(dst, 0, 0, float32(g.width), float32(g.height), color.RGBA{0, 0, 0, 255}, false)
+	cr := g.geyserCloseRect()
+	drawCloseButton(dst, cr)
+
+	spacing := uiScaled(geyserRowSpace)
+	g.buildGeyserItems()
+	maxW := 0
+	for _, it := range g.geyserItems {
+		if it.w > maxW {
+			maxW = it.w
 		}
-		items[i] = item{text: txt, icon: ic, w: w, h: h}
 	}
 	cols := 1
 	if maxW+spacing > 0 {
@@ -165,9 +169,9 @@ func (g *Game) drawGeyserList(dst *ebiten.Image) {
 			cols = 1
 		}
 	}
-	rows := (len(items) + cols - 1) / cols
+	rows := (len(g.geyserItems) + cols - 1) / cols
 	rowHeights := make([]int, rows)
-	for i, it := range items {
+	for i, it := range g.geyserItems {
 		r := i / cols
 		if it.h > rowHeights[r] {
 			rowHeights[r] = it.h
@@ -176,14 +180,17 @@ func (g *Game) drawGeyserList(dst *ebiten.Image) {
 	y := spacing - int(g.geyserScroll)
 	idx := 0
 	for r := 0; r < rows; r++ {
+		rowH := rowHeights[r]
 		x := spacing
-		for c := 0; c < cols && idx < len(items); c++ {
-			it := items[idx]
-			g.drawInfoRow(dst, it.text, it.icon, x, y)
+		for c := 0; c < cols && idx < len(g.geyserItems); c++ {
+			it := g.geyserItems[idx]
+			if y+rowH > 0 && y < g.height && x+it.w > 0 && x < g.width {
+				g.drawInfoRow(dst, it.text, it.icon, x, y)
+			}
 			x += maxW + spacing
 			idx++
 		}
-		y += rowHeights[r] + spacing
+		y += rowH + spacing
 	}
 
 	if max := g.maxGeyserScroll(); max > 0 {
@@ -204,24 +211,13 @@ func (g *Game) drawGeyserList(dst *ebiten.Image) {
 }
 
 func (g *Game) maxGeyserScroll() float64 {
-	spacing := 10
-	type item struct {
-		w int
-		h int
-	}
-	items := make([]item, len(g.geysers))
+	spacing := uiScaled(geyserRowSpace)
+	g.buildGeyserItems()
 	maxW := 0
-	for i, gy := range g.geysers {
-		ic := (*ebiten.Image)(nil)
-		if n := iconForGeyser(gy.ID); n != "" {
-			ic = g.icons[n]
+	for _, it := range g.geyserItems {
+		if it.w > maxW {
+			maxW = it.w
 		}
-		txt := displayGeyser(gy.ID) + "\n" + formatGeyserInfo(gy)
-		w, h := infoRowSize(txt, ic)
-		if w > maxW {
-			maxW = w
-		}
-		items[i] = item{w: w, h: h}
 	}
 	cols := 1
 	if maxW+spacing > 0 {
@@ -230,12 +226,12 @@ func (g *Game) maxGeyserScroll() float64 {
 			cols = 1
 		}
 	}
-	rows := (len(items) + cols - 1) / cols
+	rows := (len(g.geyserItems) + cols - 1) / cols
 	if rows == 0 {
 		return 0
 	}
 	rowHeights := make([]int, rows)
-	for i, it := range items {
+	for i, it := range g.geyserItems {
 		r := i / cols
 		if it.h > rowHeights[r] {
 			rowHeights[r] = it.h
@@ -245,11 +241,12 @@ func (g *Game) maxGeyserScroll() float64 {
 	for _, h := range rowHeights {
 		total += h + spacing
 	}
-	max := total - rowHeights[rows-1] - spacing
+	extra := rowHeights[rows-1] + spacing
+	max := float64(total - g.height + extra)
 	if max < 0 {
 		max = 0
 	}
-	return float64(max)
+	return max
 }
 
 func (g *Game) adjustGeyserScroll(delta float64) {

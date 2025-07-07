@@ -77,30 +77,25 @@ func (g *Game) drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image,
 }
 
 func (g *Game) drawInfoRow(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int) {
-	txtW, txtH := textDimensions(text)
+	_, txtH := textDimensions(text)
 	iconW, iconH := 0, 0
 	if icon != nil {
 		iconW = uiScaled(InfoIconSize)
 		iconH = uiScaled(InfoIconSize)
 	}
-	gap := uiScaled(4)
-	w := txtW + iconW + gap
+	gap := uiScaled(10)
 	h := txtH
 	if iconH > txtH {
 		h = iconH
 	}
-	img := ebiten.NewImage(w, h)
 	if icon != nil {
 		opIcon := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 		sc := float64(uiScaled(InfoIconSize)) / math.Max(float64(icon.Bounds().Dx()), float64(icon.Bounds().Dy()))
 		opIcon.GeoM.Scale(sc, sc)
-		opIcon.GeoM.Translate(0, float64(h-iconH)/2)
-		img.DrawImage(icon, opIcon)
+		opIcon.GeoM.Translate(float64(x), float64(y+(h-iconH)/2))
+		dst.DrawImage(icon, opIcon)
 	}
-	drawText(img, text, iconW+gap, (h-txtH)/2, false)
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(x), float64(y))
-	dst.DrawImage(img, op)
+	drawText(dst, text, x+iconW+gap, y+(h-txtH)/2, false)
 }
 
 func infoPanelSize(text string, icon *ebiten.Image) (int, int) {
