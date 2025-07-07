@@ -1,15 +1,24 @@
 package main
 
 import (
+	"fmt"
 	"image"
+	"os"
 	"runtime"
+	"runtime/debug"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
-func (g *Game) Update() error {
+func (g *Game) Update() (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("update panic: %v", r)
+			fmt.Fprintf(os.Stderr, "%v\n%s\n", err, debug.Stack())
+		}
+	}()
 	const panSpeed = PanSpeed
 
 	g.checkRedrawTriggers()

@@ -3,13 +3,20 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"runtime"
+	"runtime/debug"
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Fprintf(os.Stderr, "panic: %v\n%s\n", r, debug.Stack())
+		}
+	}()
 	coord := flag.String("coord", "V-FRST-C-1331877-0-0-0", "seed coordinate")
 	screenshot := flag.String("screenshot", "", "path to save a PNG screenshot and exit")
 	flag.Parse()
