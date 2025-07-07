@@ -47,12 +47,14 @@ func main() {
 		iconScale:         1.0,
 		smartRender:       true,
 		linearFilter:      true,
+		hidpi:             true,
 		ssQuality:         1,
 		hoverBiome:        -1,
 		hoverItem:         -1,
 		selectedBiome:     -1,
 		selectedItem:      -1,
 	}
+	setHiDPI(game.hidpi)
 	registerFontChange(game.invalidateLegends)
 	loadGameData(game, *coord, asteroidIDVal)
 	if *screenshot != "" {

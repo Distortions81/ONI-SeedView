@@ -30,7 +30,7 @@ func loadFont(size float64) font.Face {
 			panic("failed to parse font: " + err.Error())
 		}
 	}
-	const dpi = 72
+	dpi := 72.0 * getHiDPIScale()
 	face, err := opentype.NewFace(fontParsed, &opentype.FaceOptions{Size: size, DPI: dpi, Hinting: font.HintingFull})
 	if err != nil {
 		panic("failed to create font face: " + err.Error())

@@ -92,6 +92,7 @@ type Game struct {
 	iconScale     float64
 	smartRender   bool
 	linearFilter  bool
+	hidpi         bool
 
 	noColor   bool
 	ssNoColor bool
