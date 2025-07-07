@@ -49,8 +49,10 @@ const (
 	ScreenshotBWLabel     = "Black and White"
 	ScreenshotCancelLabel = "Cancel"
 	GeyserRowSpacing      = 60
-	OptionsMenuTitle      = "Options:"
-	AsteroidMenuTitle     = "Asteroids:"
+	// ScrollBarWidth specifies the width of pseudo scroll bars.
+	ScrollBarWidth    = 6
+	OptionsMenuTitle  = "Options:"
+	AsteroidMenuTitle = "Asteroids:"
 
 	// BiomeTextureScale controls the repetition of biome textures.
 	// Smaller values result in more repetitions.

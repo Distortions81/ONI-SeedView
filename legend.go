@@ -185,6 +185,15 @@ func (g *Game) drawGeyserList(dst *ebiten.Image) {
 		}
 		y += rowHeights[r] + spacing
 	}
+
+	if max := g.maxGeyserScroll(); max > 0 {
+		barW := uiScaled(ScrollBarWidth)
+		barX := g.width - barW - uiScaled(2)
+		h := float64(g.height)
+		barH := h * h / (h + max)
+		barY := (g.geyserScroll / max) * (h - barH)
+		vector.DrawFilledRect(dst, float32(barX), float32(barY), float32(barW), float32(barH), overlayColor, false)
+	}
 }
 
 func (g *Game) maxGeyserScroll() float64 {
