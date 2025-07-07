@@ -287,7 +287,7 @@ func (g *Game) maxItemScroll() float64 {
 }
 
 func (g *Game) itemPanelVisible() bool {
-	return g.showLegend && g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
+	return g.showLegend && g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode && !g.noColor
 }
 
 func (g *Game) updateHover(mx, my int) {
@@ -295,7 +295,7 @@ func (g *Game) updateHover(mx, my int) {
 	prevItem := g.hoverItem
 	g.hoverBiome = -1
 	g.hoverItem = -1
-	if !g.showLegend {
+	if !g.showLegend || g.noColor {
 		if prevBiome != -1 || prevItem != -1 {
 			g.needsRedraw = true
 		}
@@ -376,7 +376,7 @@ func (g *Game) updateIconHover(mx, my int) {
 }
 
 func (g *Game) clickLegend(mx, my int) bool {
-	if !g.showLegend {
+	if !g.showLegend || g.noColor {
 		return false
 	}
 	if g.bottomTrayRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {

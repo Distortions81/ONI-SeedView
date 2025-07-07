@@ -11,6 +11,19 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+func desaturateImage(img *image.RGBA) {
+	const r = 0.299
+	const g = 0.587
+	const b = 0.114
+	pix := img.Pix
+	for i := 0; i < len(pix); i += 4 {
+		gray := uint8(float64(pix[i])*r + float64(pix[i+1])*g + float64(pix[i+2])*b)
+		pix[i] = gray
+		pix[i+1] = gray
+		pix[i+2] = gray
+	}
+}
+
 func (g *Game) screenshotRect() image.Rectangle {
 	size := g.iconSize()
 	x := g.width - size*2 - uiScaled(HelpMargin*2)
@@ -151,10 +164,10 @@ func (g *Game) saveScreenshot() {
 	scale := ScreenshotScales[g.ssQuality]
 	width := int(float64(g.astWidth) * 2 * scale)
 	height := int(float64(g.astHeight) * 2 * scale)
-	oldBW := g.noColor
-	g.noColor = g.ssNoColor
 	img := g.captureScreenshot(width, height, scale)
-	g.noColor = oldBW
+	if g.ssNoColor {
+		desaturateImage(img)
+	}
 	var buf bytes.Buffer
 	_ = bmp.Encode(&buf, img)
 	name := fmt.Sprintf("%s-%s.bmp", g.coord, time.Now().Format("20060102-150405"))
@@ -178,8 +191,8 @@ func (g *Game) captureScreenshot(w, h int, zoom float64) *image.RGBA {
 	g.camX = 0
 	g.camY = 0
 	g.screenshotMode = true
-	oldSize := fontSize
-	setFontSize(screenshotFontSize)
+	oldScale := uiScale
+	setUIScale(4.0)
 	img := ebiten.NewImage(w, h)
 	g.needsRedraw = true
 	g.Draw(img)
@@ -187,7 +200,7 @@ func (g *Game) captureScreenshot(w, h int, zoom float64) *image.RGBA {
 	pix := make([]byte, 4*b.Dx()*b.Dy())
 	img.ReadPixels(pix)
 	rgba := &image.RGBA{Pix: pix, Stride: 4 * b.Dx(), Rect: b}
-	setFontSize(oldSize)
+	setUIScale(oldScale)
 	g.screenshotMode = false
 	g.width = ow
 	g.height = oh

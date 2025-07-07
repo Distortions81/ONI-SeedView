@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	"golang.org/x/image/bmp"
 	"image"
 	"image/color"
 	"math"
 	"os"
 	"time"
+
+	"golang.org/x/image/bmp"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
@@ -68,17 +69,19 @@ func (g *Game) drawUI(screen *ebiten.Image) {
 
 	g.needsRedraw = false
 	g.lastDraw = time.Now()
-	if g.noColor {
-		if g.grayImage == nil || g.grayImage.Bounds().Dx() != g.width || g.grayImage.Bounds().Dy() != g.height {
-			g.grayImage = ebiten.NewImage(g.width, g.height)
+	/*
+		if g.noColor {
+			if g.grayImage == nil || g.grayImage.Bounds().Dx() != g.width || g.grayImage.Bounds().Dy() != g.height {
+				g.grayImage = ebiten.NewImage(g.width, g.height)
+			}
+			g.grayImage.Clear()
+			g.grayImage.DrawImage(screen, nil)
+			screen.Clear()
+			op := &ebiten.DrawImageOptions{}
+			op.ColorM = grayColorM
+			screen.DrawImage(g.grayImage, op)
 		}
-		g.grayImage.Clear()
-		g.grayImage.DrawImage(screen, nil)
-		screen.Clear()
-		op := &ebiten.DrawImageOptions{}
-		op.ColorM = grayColorM
-		screen.DrawImage(g.grayImage, op)
-	}
+	*/
 }
 
 func (g *Game) captureScreen(screen *ebiten.Image) {

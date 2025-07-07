@@ -60,20 +60,22 @@ func (g *Game) drawInfoPanel(dst *ebiten.Image, text string, icon *ebiten.Image,
 		h = iconH
 	}
 	h += uiScaled(8)
-	img := ebiten.NewImage(w, h)
-	vector.DrawFilledRect(img, 0, 0, float32(w), float32(h), color.RGBA{0, 0, 0, InfoPanelAlpha}, false)
-	vector.StrokeRect(img, 0.5, 0.5, float32(w)-1, float32(h)-1, 1, buttonBorderColor, false)
+
+	ox := x - uiScaled(4)
+	oy := y - uiScaled(4)
+
+	vector.DrawFilledRect(dst, float32(ox), float32(oy), float32(w), float32(h), color.RGBA{0, 0, 0, InfoPanelAlpha}, false)
+	vector.StrokeRect(dst, float32(ox)+0.5, float32(oy)+0.5, float32(w)-1, float32(h)-1, 1, buttonBorderColor, false)
+
 	if icon != nil {
 		opIcon := &ebiten.DrawImageOptions{Filter: g.filterMode()}
 		scaleIcon := float64(uiScaled(InfoIconSize)) / math.Max(float64(icon.Bounds().Dx()), float64(icon.Bounds().Dy()))
 		opIcon.GeoM.Scale(scaleIcon, scaleIcon)
-		opIcon.GeoM.Translate(uiScaledF(4), float64(h-iconH)/2)
-		img.DrawImage(icon, opIcon)
+		opIcon.GeoM.Translate(float64(ox+uiScaled(4)), float64(oy)+float64(h-iconH)/2)
+		dst.DrawImage(icon, opIcon)
 	}
-	drawText(img, text, iconW+gap+uiScaled(4), uiScaled(4), false)
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(x-uiScaled(4)), float64(y-uiScaled(4)))
-	dst.DrawImage(img, op)
+
+	drawText(dst, text, ox+iconW+gap+uiScaled(4), oy+uiScaled(4), false)
 }
 
 func (g *Game) drawInfoRow(dst *ebiten.Image, text string, icon *ebiten.Image, x, y int) {
