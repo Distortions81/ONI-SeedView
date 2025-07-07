@@ -190,7 +190,13 @@ func (g *Game) Update() error {
 			}
 		} else if g.showOptions {
 			if justPressed {
-				if !g.clickOptionsMenu(mx, my) {
+				if g.optionsRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+					if time.Since(g.lastOptionsClick) >= MenuToggleDelay {
+						g.showOptions = false
+					}
+					g.lastOptionsClick = time.Now()
+					g.needsRedraw = true
+				} else if !g.clickOptionsMenu(mx, my) {
 					if !g.optionsMenuRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) && !g.optionsRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 						g.showOptions = false
 						g.needsRedraw = true
@@ -204,6 +210,7 @@ func (g *Game) Update() error {
 					g.noColor = false
 				}
 			} else {
+				g.closeMenus()
 				g.showShotMenu = true
 				g.noColor = g.ssNoColor
 			}
@@ -215,6 +222,7 @@ func (g *Game) Update() error {
 					g.showOptions = false
 				}
 			} else {
+				g.closeMenus()
 				g.showOptions = true
 			}
 			g.lastOptionsClick = time.Now()
@@ -225,6 +233,7 @@ func (g *Game) Update() error {
 					g.showAstMenu = false
 				}
 			} else {
+				g.closeMenus()
 				g.showAstMenu = true
 			}
 			g.lastAsteroidClick = time.Now()
@@ -237,6 +246,7 @@ func (g *Game) Update() error {
 					g.showGeyserList = false
 				}
 			} else {
+				g.closeMenus()
 				g.camX = oldX
 				g.camY = oldY
 				g.dragging = false

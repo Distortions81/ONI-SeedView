@@ -329,6 +329,15 @@ func abs(a int) int {
 	return a
 }
 
+func (g *Game) closeMenus() {
+	g.showShotMenu = false
+	g.showAstMenu = false
+	g.showOptions = false
+	g.showGeyserList = false
+	g.showHelp = false
+	g.noColor = false
+}
+
 func (g *Game) startIconLoader(names []string) {
 	for _, name := range names {
 		img, _ := loadImageFile(name)
