@@ -48,7 +48,6 @@ const (
 	ScreenshotSavedLabel  = "Saved!"
 	ScreenshotBWLabel     = "Black and White"
 	ScreenshotCancelLabel = "Cancel"
-	GeyserRowSpacing      = 60
 	// ScrollBarWidth specifies the width of pseudo scroll bars.
 	ScrollBarWidth    = 6
 	OptionsMenuTitle  = "Options:"
