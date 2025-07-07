@@ -34,13 +34,13 @@ func (g *Game) handleTouchGestures(oldX, oldY float64) {
 				g.geyserRect().Overlaps(pt) || g.optionsRect().Overlaps(pt) {
 				g.touchUI = true
 			} else {
-				if g.legend != nil && g.showLegend {
+				if g.legend != nil && g.showLegend && !g.noColor {
 					if g.biomeLegendRect().Overlaps(pt) {
 						g.touchUI = true
 					}
 				}
 				useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
-				if !g.touchUI && useNumbers && g.legendImage != nil && g.showLegend {
+				if !g.touchUI && useNumbers && g.legendImage != nil && g.showLegend && !g.noColor {
 					if g.itemLegendRect().Overlaps(pt) {
 						g.touchUI = true
 					}
@@ -62,7 +62,7 @@ func (g *Game) handleTouchGestures(oldX, oldY float64) {
 				if g.showGeyserList {
 					g.adjustGeyserScroll(-float64(dy))
 				} else {
-					if g.legend != nil && g.showLegend {
+					if g.legend != nil && g.showLegend && !g.noColor {
 						pt := image.Rect(g.touchStartX, g.touchStartY, g.touchStartX+1, g.touchStartY+1)
 						if g.biomeLegendRect().Overlaps(pt) {
 							g.biomeScroll -= float64(dy)
@@ -76,7 +76,7 @@ func (g *Game) handleTouchGestures(oldX, oldY float64) {
 						}
 					}
 					useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
-					if useNumbers && g.legendImage != nil && g.showLegend {
+					if useNumbers && g.legendImage != nil && g.showLegend && !g.noColor {
 						pt := image.Rect(g.touchStartX, g.touchStartY, g.touchStartX+1, g.touchStartY+1)
 						if g.itemLegendRect().Overlaps(pt) {
 							g.itemScroll -= float64(dy)
@@ -112,14 +112,14 @@ func (g *Game) handleTouchGestures(oldX, oldY float64) {
 					g.geyserRect().Overlaps(pt) || g.optionsRect().Overlaps(pt) {
 					g.touchUI = true
 				} else {
-					if g.legend != nil && g.showLegend {
+					if g.legend != nil && g.showLegend && !g.noColor {
 						pt := image.Rect(x, y, x+1, y+1)
 						if g.biomeLegendRect().Overlaps(pt) {
 							g.touchUI = true
 						}
 					}
 					useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
-					if !g.touchUI && useNumbers && g.legendImage != nil && g.showLegend {
+					if !g.touchUI && useNumbers && g.legendImage != nil && g.showLegend && !g.noColor {
 						pt := image.Rect(x, y, x+1, y+1)
 						if g.itemLegendRect().Overlaps(pt) {
 							g.touchUI = true

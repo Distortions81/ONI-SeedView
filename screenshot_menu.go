@@ -178,8 +178,8 @@ func (g *Game) captureScreenshot(w, h int, zoom float64) *image.RGBA {
 	g.camX = 0
 	g.camY = 0
 	g.screenshotMode = true
-	oldSize := fontSize
-	setFontSize(screenshotFontSize)
+	oldScale := uiScale
+	setUIScale(4.0)
 	img := ebiten.NewImage(w, h)
 	g.needsRedraw = true
 	g.Draw(img)
@@ -187,7 +187,7 @@ func (g *Game) captureScreenshot(w, h int, zoom float64) *image.RGBA {
 	pix := make([]byte, 4*b.Dx()*b.Dy())
 	img.ReadPixels(pix)
 	rgba := &image.RGBA{Pix: pix, Stride: 4 * b.Dx(), Rect: b}
-	setFontSize(oldSize)
+	setUIScale(oldScale)
 	g.screenshotMode = false
 	g.width = ow
 	g.height = oh

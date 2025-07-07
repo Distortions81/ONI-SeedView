@@ -230,7 +230,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			drawText(screen, label, x, seedBaseline(), true)
 		}
 
-		if g.showLegend {
+		if g.showLegend && !g.noColor {
 			if g.legend == nil {
 				g.legend, g.legendBiomes = buildLegendImage(g.biomes)
 			}
