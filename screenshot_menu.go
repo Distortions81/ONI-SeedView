@@ -39,16 +39,20 @@ func (g *Game) screenshotMenuSize() (int, int) {
 
 func (g *Game) screenshotMenuRect() image.Rectangle {
 	w, h := g.screenshotMenuSize()
+	pad := uiScaled(2)
 	x := g.screenshotRect().Min.X - w - uiScaled(10)
-	if x < 0 {
-		x = 0
+	if x < pad {
+		x = pad
+	}
+	if x+w > g.width-pad {
+		x = g.width - w - pad
 	}
 	y := g.screenshotRect().Min.Y - h
-	if y < 0 {
-		y = 0
+	if y < pad {
+		y = pad
 	}
-	if y+h > g.height {
-		y = g.height - h
+	if y+h > g.height-pad {
+		y = g.height - h - pad
 	}
 	return image.Rect(x, y, x+w, y+h)
 }

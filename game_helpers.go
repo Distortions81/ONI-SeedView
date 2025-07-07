@@ -179,16 +179,20 @@ func helpMenuSize() (int, int) {
 func (g *Game) helpMenuRect() image.Rectangle {
 	w, h := helpMenuSize()
 	r := g.helpRect()
+	pad := uiScaled(2)
 	x := r.Max.X - w
-	if x < 0 {
-		x = 0
+	if x < pad {
+		x = pad
 	}
-	if x+w > g.width {
-		x = g.width - w
+	if x+w > g.width-pad {
+		x = g.width - w - pad
 	}
 	y := r.Min.Y - h
-	if y < 0 {
-		y = 0
+	if y < pad {
+		y = pad
+	}
+	if y+h > g.height-pad {
+		y = g.height - h - pad
 	}
 	return image.Rect(x, y, x+w, y+h)
 }

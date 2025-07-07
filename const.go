@@ -49,8 +49,10 @@ const (
 	ScreenshotBWLabel     = "Black and White"
 	ScreenshotCancelLabel = "Cancel"
 	GeyserRowSpacing      = 60
-	OptionsMenuTitle      = "Options:"
-	AsteroidMenuTitle     = "Asteroids:"
+	// ScrollBarWidth specifies the width of pseudo scroll bars.
+	ScrollBarWidth    = 6
+	OptionsMenuTitle  = "Options:"
+	AsteroidMenuTitle = "Asteroids:"
 
 	// BiomeTextureScale controls the repetition of biome textures.
 	// Smaller values result in more repetitions.
@@ -112,4 +114,6 @@ var (
 	legendBGColor       = color.RGBA{0, 0, 0, 77}
 	overlayColor        = color.RGBA{0, 0, 0, 180}
 	backgroundColor     = color.RGBA{30, 30, 30, 255}
+	scrollBarColor      = color.RGBA{0, 128, 255, 255}
+	scrollBarTrackColor = color.RGBA{200, 200, 200, 255}
 )
