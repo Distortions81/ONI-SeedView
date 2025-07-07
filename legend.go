@@ -45,7 +45,7 @@ func buildLegendImage(biomes []BiomePath) (*ebiten.Image, []string) {
 		if !ok {
 			clr = color.RGBA{60, 60, 60, 255}
 		}
-		vector.DrawFilledRect(img, 5, float32(y), 20, 10, clr, false)
+		vector.DrawFilledRect(img, 5, float32(y), float32(uiScaledF(20)), float32(uiScaledF(10)), clr, false)
 		drawTextWithBGBorder(img, displayBiome(name), 30, y, clr, false)
 		y += spacing
 	}
