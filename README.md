@@ -15,7 +15,7 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
 * The empty space around the asteroid now uses a repeating space texture.
 * Biome texture mapping is documented in [BIOME_TEXTURES.md](BIOME_TEXTURES.md).
 * Supports running in headless environments using `Xvfb`.
-* Click the camera icon to capture screenshots. A menu lets you pick an image quality from 2K to 8K and includes a "Black and White" toggle for printing or color-blind accessibility.
+* Click the camera icon to capture screenshots. A menu lets you pick from Low, Medium or High quality and includes a "Black and White" toggle for printing or color-blind accessibility.
 * Hover over geyser or POI icons to show an information panel. Clicking or tapping centers the item and pins it in place while panning.
 * Hover over the bottom icons for tooltips describing their actions. Tooltips automatically stay within the window bounds.
 * A help icon displays the available controls at any time. An X button closes the overlay.
@@ -52,8 +52,8 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
    ```
 
 3. **Build and run** – Execute the program with a seed coordinate. All required
-   image assets are embedded so no additional downloads are needed. The window
-   defaults to 1280×720 but can be resized.
+    image assets are embedded so no additional downloads are needed. The window
+    defaults to 1200×1200 but can be resized.
 
    ```bash
    go run . -coord SNDST-A-7-0-0-0
@@ -99,7 +99,7 @@ the environments are:
 ## Saving Screenshots
 
 Click the camera icon to open the screenshot menu. Choose a quality level
-(2K–8K) and the current view is written to a BMP named after the seed.
+(Low–High) and the current view is written to a BMP named after the seed.
 After clicking **Save Screenshot** the button briefly shows *Taking Screenshot...*
 with a red outline before the menu closes automatically.
 You can also generate a screenshot non-interactively:
@@ -114,9 +114,10 @@ go run . -coord SNDST-A-7-0-0-0 -screenshot myshot.bmp
 objects/    # Embedded image files used by the viewer
 scripts/    # Helper scripts for building, asset download and headless execution
 data/       # Fonts used at runtime
-main.go     # Program entry point and startup logic
-loop.go     # Update, draw and layout methods
-display.go  # Icon selection and drawing helpers
+main.go           # Program entry point and startup logic
+update.go         # Game update and draw routines
+update_helpers.go # Helper functions for update logic
+display.go        # Icon selection and drawing helpers
 parse.go    # Functions for decoding biome path strings
 colors.go   # Color definitions for different biomes
 const.go    # Miscellaneous constants and configuration
@@ -132,7 +133,7 @@ go test ./...
 
 ## Minimizing the Font
 
-The embedded `NotoSansMono.ttf` is about 1.7&nbsp;MB. Run the helper script to
+The embedded `NotoSansMono.ttf` is about 60&nbsp;KB. Run the helper script to
 subset it to the ASCII range and shrink the binary size:
 
 ```bash
