@@ -12,6 +12,7 @@ import (
 func main() {
 	coord := flag.String("coord", "SNDST-A-7-0-0-0", "seed coordinate")
 	screenshot := flag.String("screenshot", "", "path to save a PNG screenshot and exit")
+	hidpiFlag := flag.Bool("hidpi", true, "enable HiDPI rendering (browser only)")
 	flag.Parse()
 	asteroidIDVal := ""
 	asteroidSpecified := false
@@ -47,7 +48,7 @@ func main() {
 		iconScale:         1.0,
 		smartRender:       true,
 		linearFilter:      true,
-		hidpi:             true,
+		hidpi:             *hidpiFlag,
 		ssQuality:         1,
 		hoverBiome:        -1,
 		hoverItem:         -1,
@@ -71,7 +72,8 @@ func main() {
 	ebiten.SetWindowTitle("Geysers - " + *coord)
 	ebiten.SetScreenClearedEveryFrame(false)
 	ebiten.SetVsyncEnabled(game.vsync)
-	if err := ebiten.RunGame(game); err != nil {
+	op := &ebiten.RunGameOptions{DisableHiDPI: !game.hidpi}
+	if err := ebiten.RunGameWithOptions(game, op); err != nil {
 		fmt.Println("Error running game:", err)
 	}
 }

@@ -58,6 +58,7 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
    ```bash
    go run . -coord SNDST-A-7-0-0-0
    ```
+   Add `-hidpi=false` to disable HiDPI rendering in supporting browsers.
 
 ## Running Headless
 

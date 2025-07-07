@@ -27,7 +27,6 @@ func (g *Game) optionsMenuSize() (int, int) {
 		"Vsync",
 		"Power Saver",
 		"Linear Filtering",
-		"HiDPI",
 		"FPS: 60.0",
 		"Version: " + ClientVersion,
 		"Close",
@@ -112,7 +111,6 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	drawToggle("Vsync", g.vsync)
 	drawToggle("Power Saver", g.smartRender)
 	drawToggle("Linear Filtering", g.linearFilter)
-	drawToggle("HiDPI", g.hidpi)
 
 	fps := fmt.Sprintf("FPS: %.1f", ebiten.ActualFPS())
 	drawText(img, fps, pad, y, false)
@@ -243,16 +241,6 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	r = image.Rect(uiScaled(4), y-uiScaled(4), w-uiScaled(4), y-uiScaled(4)+menuButtonHeight())
 	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		g.linearFilter = !g.linearFilter
-		g.needsRedraw = true
-		return true
-	}
-	y += menuSpacing()
-
-	// HiDPI
-	r = image.Rect(uiScaled(4), y-uiScaled(4), w-uiScaled(4), y-uiScaled(4)+menuButtonHeight())
-	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-		g.hidpi = !g.hidpi
-		setHiDPI(g.hidpi)
 		g.needsRedraw = true
 		return true
 	}
