@@ -20,13 +20,11 @@ Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data
 * Hover over the bottom icons for tooltips describing their actions. Tooltips automatically stay within the window bounds.
 * A help icon displays the available controls at any time. An X button closes the overlay.
 * A gear icon opens an options menu for toggling features like textures, Vsync, power saver mode and linear filtering along with item labels, legends and number labels. You can also adjust icon size and UI scale and view the current FPS.
-* Crosshairs at the center show the current world coordinates, useful for lining up precise screenshots.
+* Crosshairs at the center show the current world coordinates, or show item info on mobile.
 * Click the down-arrow next to the asteroid name to choose another asteroid.
 * A geyser icon opens a scrollable list of all geysers present on the map.
 * Newly loaded asteroids automatically center and zoom to fit the view.
 * Biome and item legend panels scroll when they extend past the window height, with extra space so items near the bottom can clear the icons.
-* Icons load asynchronously so the map is usable immediately.
-* The screen refreshes automatically when the window is restored and once a second to prevent blank displays.
 
 ## Controls
 
@@ -133,8 +131,8 @@ go test ./...
 
 ## Minimizing the Font
 
-The embedded `NotoSansMono.ttf` is about 60&nbsp;KB. Run the helper script to
-subset it to the ASCII range and shrink the binary size:
+If you change the .ttf, run the helper script to
+subset it to the ASCII range and remove extra face versions and shrink the binary size:
 
 ```bash
 python3 scripts/minimize_font.py data/NotoSansMono.ttf data/NotoSansMono.ttf
