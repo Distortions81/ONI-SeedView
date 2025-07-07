@@ -101,7 +101,8 @@ the environments are:
 Click the camera icon to open the screenshot menu. Choose a quality level
 (2K–8K) and the current view is written to a BMP named after the seed.
 After clicking **Save Screenshot** the button briefly shows *Taking Screenshot...*
-with a red outline before the menu closes automatically.
+with a red outline before the menu closes automatically. When the **Black and
+White** toggle is enabled the screenshot is saved as an 8-bit grayscale image.
 You can also generate a screenshot non-interactively:
 
 ```bash
