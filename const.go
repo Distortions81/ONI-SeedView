@@ -60,6 +60,11 @@ const (
 	// in WASM to account for faster scroll events.
 	WheelThrottle = 75 * time.Millisecond
 
+	// MenuToggleDelay is the minimum time between clicking an icon and being
+	// able to close the associated menu again. This prevents instant double
+	// toggles from accidental double-clicks.
+	MenuToggleDelay = 250 * time.Millisecond
+
 	// WebAssetBase specifies the path used to fetch image assets
 	// when running in WebAssembly. The assets should be served
 	// relative to the page URL.

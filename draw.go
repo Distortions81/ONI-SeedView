@@ -219,12 +219,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			aName = truncateString(aName, 32)
 			astName := fmt.Sprintf("Asteroid: %s", aName)
 
+			rect := g.asteroidInfoRect()
+			vector.DrawFilledRect(screen, float32(rect.Min.X), float32(rect.Min.Y), float32(rect.Dx()), float32(rect.Dy()), color.RGBA{0, 0, 0, 128}, false)
+
 			x := g.width / 2
 			astBase := seedBaseline() + notoFont.Metrics().Height.Ceil() + 4
-			drawTextWithBGScale(screen, astName, x, astBase, 1, true)
+			drawText(screen, astName, x, astBase, true)
 			ar := g.asteroidArrowRect()
 			drawDownArrow(screen, ar, g.showAstMenu)
-			drawTextWithBGScale(screen, label, x, seedBaseline(), 1, true)
+			drawText(screen, label, x, seedBaseline(), true)
 		}
 
 		if g.showLegend {

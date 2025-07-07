@@ -97,6 +97,12 @@ type Game struct {
 	noColor   bool
 	ssNoColor bool
 	grayImage *ebiten.Image
+
+	lastHelpClick     time.Time
+	lastShotClick     time.Time
+	lastOptionsClick  time.Time
+	lastGeyserClick   time.Time
+	lastAsteroidClick time.Time
 }
 
 type label struct {
