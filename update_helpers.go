@@ -34,6 +34,7 @@ func (g *Game) processScreenshot() {
 			g.saveScreenshot()
 			g.ssSaved = time.Now()
 			g.showShotMenu = false
+			g.noColor = false
 			g.skipClickTicks = 1
 		}
 		g.ssPending--
