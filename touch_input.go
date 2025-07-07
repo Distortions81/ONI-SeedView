@@ -39,8 +39,8 @@ func (g *Game) handleTouchGestures(oldX, oldY float64) {
 						g.touchUI = true
 					}
 				}
-				useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
-				if !g.touchUI && useNumbers && g.legendImage != nil && g.showLegend && !g.noColor {
+				useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode && !g.noColor
+				if !g.touchUI && useNumbers && g.legendImage != nil && g.showLegend {
 					if g.itemLegendRect().Overlaps(pt) {
 						g.touchUI = true
 					}
@@ -75,8 +75,8 @@ func (g *Game) handleTouchGestures(oldX, oldY float64) {
 							g.updateHover(x, y)
 						}
 					}
-					useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
-					if useNumbers && g.legendImage != nil && g.showLegend && !g.noColor {
+					useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode && !g.noColor
+					if useNumbers && g.legendImage != nil && g.showLegend {
 						pt := image.Rect(g.touchStartX, g.touchStartY, g.touchStartX+1, g.touchStartY+1)
 						if g.itemLegendRect().Overlaps(pt) {
 							g.itemScroll -= float64(dy)
@@ -118,8 +118,8 @@ func (g *Game) handleTouchGestures(oldX, oldY float64) {
 							g.touchUI = true
 						}
 					}
-					useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
-					if !g.touchUI && useNumbers && g.legendImage != nil && g.showLegend && !g.noColor {
+					useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode && !g.noColor
+					if !g.touchUI && useNumbers && g.legendImage != nil && g.showLegend {
 						pt := image.Rect(x, y, x+1, y+1)
 						if g.itemLegendRect().Overlaps(pt) {
 							g.touchUI = true

@@ -53,7 +53,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		labels := []label{}
 		var highlightGeysers []Geyser
 		var highlightPOIs []PointOfInterest
-		useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode && g.showItemNames
+		useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode && !g.noColor && g.showItemNames
 		if g.legendMap == nil {
 			g.initObjectLegend()
 		}
@@ -244,7 +244,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				w := math.Round(float64(g.legend.Bounds().Dx()))
 				vector.StrokeRect(screen, 0.5, float32(y0)-4, float32(w)-1, float32(h)-1, 2, highlightColor, false)
 			}
-			if useNumbers && !g.screenshotMode {
+			if useNumbers {
 				g.drawNumberLegend(screen)
 			}
 		}
