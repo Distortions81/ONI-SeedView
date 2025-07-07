@@ -31,3 +31,14 @@ func textDimensions(str string) (int, int) {
 	lineHeight := notoFont.Metrics().Height.Ceil()
 	return width, lineHeight * len(lines)
 }
+
+func truncateString(s string, max int) string {
+	if len([]rune(s)) <= max {
+		return s
+	}
+	runes := []rune(s)
+	if max <= 3 {
+		return string(runes[:max])
+	}
+	return string(runes[:max-3]) + "..."
+}

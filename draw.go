@@ -65,10 +65,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			} else if !ok {
 				clr = color.RGBA{60, 60, 60, 255}
 			}
+			if g.noColor {
+				clr = color.White
+			}
 			highlight := g.selectedBiome >= 0 && g.selectedBiome < len(g.legendBiomes) && g.legendBiomes[g.selectedBiome] == bp.Name
 			texClr := clr
 			if !g.noColor && g.selectedBiome >= 0 && !highlight {
-				texClr = color.RGBA{100, 100, 100, texClr.A}
+				texClr = color.RGBA{255, 255, 255, texClr.A}
 			}
 			if g.textures {
 				if tex := g.biomeTextures[bp.Name]; tex != nil {
@@ -79,7 +82,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			} else {
 				drawBiome(screen, bp.Polygons, texClr, g.camX, g.camY, g.zoom)
 			}
-			outlineClr := color.RGBA{255, 255, 255, 128}
+			outlineClr := color.RGBA{255, 255, 255, 255}
 			drawBiomeOutline(screen, bp.Polygons, g.camX, g.camY, g.zoom, outlineClr)
 		}
 		for _, gy := range g.geysers {
@@ -213,6 +216,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if aName == "" {
 				aName = "Unknown"
 			}
+			aName = truncateString(aName, 32)
 			astName := fmt.Sprintf("Asteroid: %s", aName)
 
 			x := g.width / 2

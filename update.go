@@ -169,6 +169,7 @@ func (g *Game) Update() error {
 				if !g.clickScreenshotMenu(mx, my) {
 					if !g.screenshotMenuRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) && !g.screenshotRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 						g.showShotMenu = false
+						g.noColor = false
 						g.needsRedraw = true
 					}
 				}
@@ -184,6 +185,7 @@ func (g *Game) Update() error {
 			}
 		} else if justPressed && g.screenshotRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.showShotMenu = true
+			g.noColor = g.ssNoColor
 			g.needsRedraw = true
 		} else if justPressed && g.optionsRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.showOptions = true
