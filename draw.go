@@ -21,9 +21,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		screen.Fill(backgroundColor)
 		if g.textures && g.biomeTextures != nil {
 			if tex := g.biomeTextures["Space"]; tex != nil {
-				clr := color.RGBA{255, 255, 255, 255}
-				if c, ok := biomeColors["Space"]; ok {
-					clr = c
+				clr := color.White
+				if !g.noColor {
+					if c, ok := biomeColors["Space"]; ok {
+						clr = c
+					}
 				}
 				rect := [][]Point{{
 					{0, 0},
@@ -33,11 +35,17 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				}}
 				drawBiomeTextured(screen, rect, tex, clr, g.camX, g.camY, g.zoom, g.filterMode())
 			} else if clr, ok := biomeColors["Space"]; ok {
+				if g.noColor {
+					clr = color.White
+				}
 				vector.DrawFilledRect(screen, float32(g.camX), float32(g.camY),
 					float32(float64(g.astWidth)*2*g.zoom),
 					float32(float64(g.astHeight)*2*g.zoom), clr, false)
 			}
 		} else if clr, ok := biomeColors["Space"]; ok {
+			if g.noColor {
+				clr = color.White
+			}
 			vector.DrawFilledRect(screen, float32(g.camX), float32(g.camY),
 				float32(float64(g.astWidth)*2*g.zoom),
 				float32(float64(g.astHeight)*2*g.zoom), clr, false)
@@ -52,7 +60,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		for _, bp := range g.biomes {
 			clr, ok := biomeColors[bp.Name]
-			if !ok {
+			if g.noColor {
+				clr = color.White
+			} else if !ok {
 				clr = color.RGBA{60, 60, 60, 255}
 			}
 			if g.noColor {
@@ -60,11 +70,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 			highlight := g.selectedBiome >= 0 && g.selectedBiome < len(g.legendBiomes) && g.legendBiomes[g.selectedBiome] == bp.Name
 			texClr := clr
-			if g.noColor {
-				texClr = color.White
-			}
-			if g.selectedBiome >= 0 && !highlight {
-				texClr = color.RGBA{100, 100, 100, texClr.A}
+			if !g.noColor && g.selectedBiome >= 0 && !highlight {
+				texClr = color.RGBA{255, 255, 255, texClr.A}
 			}
 			if g.textures {
 				if tex := g.biomeTextures[bp.Name]; tex != nil {
@@ -75,7 +82,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			} else {
 				drawBiome(screen, bp.Polygons, texClr, g.camX, g.camY, g.zoom)
 			}
-			outlineClr := color.RGBA{255, 255, 255, 128}
+			outlineClr := color.RGBA{255, 255, 255, 255}
 			drawBiomeOutline(screen, bp.Polygons, g.camX, g.camY, g.zoom, outlineClr)
 		}
 		for _, gy := range g.geysers {
