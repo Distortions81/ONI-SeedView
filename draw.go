@@ -71,7 +71,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			highlight := g.selectedBiome >= 0 && g.selectedBiome < len(g.legendBiomes) && g.legendBiomes[g.selectedBiome] == bp.Name
 			texClr := clr
 			if !g.noColor && g.selectedBiome >= 0 && !highlight {
-				texClr = color.RGBA{255, 255, 255, texClr.A}
+				texClr = color.RGBA{128, 128, 128, 255}
 			}
 			if g.textures {
 				if tex := g.biomeTextures[bp.Name]; tex != nil {
@@ -82,7 +82,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			} else {
 				drawBiome(screen, bp.Polygons, texClr, g.camX, g.camY, g.zoom)
 			}
-			outlineClr := color.RGBA{255, 255, 255, 255}
+			outlineClr := colorWhite
 			drawBiomeOutline(screen, bp.Polygons, g.camX, g.camY, g.zoom, outlineClr)
 		}
 		for _, gy := range g.geysers {
