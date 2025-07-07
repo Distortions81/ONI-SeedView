@@ -21,7 +21,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		screen.Fill(backgroundColor)
 		if g.textures && g.biomeTextures != nil {
 			if tex := g.biomeTextures["Space"]; tex != nil {
-				clr := color.White
+				clr := colorWhite
 				if !g.noColor {
 					if c, ok := biomeColors["Space"]; ok {
 						clr = c
@@ -36,7 +36,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				drawBiomeTextured(screen, rect, tex, clr, g.camX, g.camY, g.zoom, g.filterMode())
 			} else if clr, ok := biomeColors["Space"]; ok {
 				if g.noColor {
-					clr = color.White
+					clr = colorWhite
 				}
 				vector.DrawFilledRect(screen, float32(g.camX), float32(g.camY),
 					float32(float64(g.astWidth)*2*g.zoom),
@@ -44,7 +44,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 		} else if clr, ok := biomeColors["Space"]; ok {
 			if g.noColor {
-				clr = color.White
+				clr = colorWhite
 			}
 			vector.DrawFilledRect(screen, float32(g.camX), float32(g.camY),
 				float32(float64(g.astWidth)*2*g.zoom),
@@ -61,12 +61,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		for _, bp := range g.biomes {
 			clr, ok := biomeColors[bp.Name]
 			if g.noColor {
-				clr = color.White
+				clr = colorWhite
 			} else if !ok {
 				clr = color.RGBA{60, 60, 60, 255}
 			}
 			if g.noColor {
-				clr = color.White
+				clr = colorWhite
 			}
 			highlight := g.selectedBiome >= 0 && g.selectedBiome < len(g.legendBiomes) && g.legendBiomes[g.selectedBiome] == bp.Name
 			texClr := clr

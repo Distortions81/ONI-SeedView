@@ -7,6 +7,10 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+var (
+	colorWhite = color.RGBA{255, 255, 255, 255}
+)
+
 func darkenColor(c color.RGBA, factor float64) color.RGBA {
 	return color.RGBA{
 		R: uint8(float64(c.R) * factor),
