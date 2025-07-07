@@ -155,8 +155,14 @@ func (g *Game) saveScreenshot() {
 	g.noColor = g.ssNoColor
 	img := g.captureScreenshot(width, height, scale)
 	g.noColor = oldBW
+
+	var out image.Image = img
+	if g.ssNoColor {
+		out = rgbaToGray(img)
+	}
+
 	var buf bytes.Buffer
-	_ = bmp.Encode(&buf, img)
+	_ = bmp.Encode(&buf, out)
 	name := fmt.Sprintf("%s-%s.bmp", g.coord, time.Now().Format("20060102-150405"))
 	_ = saveImageData(name, buf.Bytes())
 }
@@ -200,4 +206,21 @@ func (g *Game) captureScreenshot(w, h int, zoom float64) *image.RGBA {
 	g.showShotMenu = menu
 	g.needsRedraw = true
 	return rgba
+}
+
+func rgbaToGray(src *image.RGBA) *image.Gray {
+	dst := image.NewGray(src.Bounds())
+	for y := 0; y < src.Rect.Dy(); y++ {
+		sp := src.Pix[y*src.Stride:]
+		dp := dst.Pix[y*dst.Stride:]
+		for x := 0; x < src.Rect.Dx(); x++ {
+			i := x * 4
+			r := sp[i]
+			gr := sp[i+1]
+			b := sp[i+2]
+			yv := (299*uint16(r) + 587*uint16(gr) + 114*uint16(b) + 500) / 1000
+			dp[x] = uint8(yv)
+		}
+	}
+	return dst
 }
