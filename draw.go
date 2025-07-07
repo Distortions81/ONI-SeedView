@@ -209,6 +209,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if aName == "" {
 				aName = "Unknown"
 			}
+			aName = truncateString(aName, 32)
 			astName := fmt.Sprintf("Asteroid: %s", aName)
 
 			x := g.width / 2
