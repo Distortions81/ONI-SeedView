@@ -11,8 +11,7 @@ import (
 var notoTTF []byte
 
 const (
-	baseFontSize       = 11.0
-	screenshotFontSize = 32.0
+	baseFontSize = 11.0
 )
 
 var (
