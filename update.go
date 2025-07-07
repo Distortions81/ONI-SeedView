@@ -89,7 +89,7 @@ func (g *Game) Update() error {
 			g.adjustGeyserScroll(-float64(wheelY) * 10)
 		} else {
 			handled := false
-			useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
+			useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode && !g.noColor
 			if g.legend != nil && g.showLegend && !g.noColor {
 				lw := g.legend.Bounds().Dx()
 				lh := g.legend.Bounds().Dy()

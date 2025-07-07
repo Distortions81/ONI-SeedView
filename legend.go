@@ -322,7 +322,7 @@ func (g *Game) updateHover(mx, my int) {
 			}
 		}
 	}
-	useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
+	useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode && !g.noColor
 	if useNumbers && g.legendImage != nil {
 		w := g.legendImage.Bounds().Dx()
 		x0 := g.width - w - 12
@@ -404,7 +404,7 @@ func (g *Game) clickLegend(mx, my int) bool {
 			}
 		}
 	}
-	useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
+	useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode && !g.noColor
 	if useNumbers && g.legendImage != nil {
 		w := g.legendImage.Bounds().Dx()
 		x0 := g.width - w - 12
