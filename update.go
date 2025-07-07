@@ -1,5 +1,3 @@
-//go:build !test
-
 package main
 
 import (
@@ -15,18 +13,18 @@ func (g *Game) Update() error {
 	const panSpeed = PanSpeed
 
 	g.checkRedrawTriggers()
-	g.handleIconLoading()
 	g.processScreenshot()
 
+	oldX, oldY, oldZoom := g.camX, g.camY, g.zoom
+
 	if g.handleGeyserListInput() {
+		g.handleTouchGestures(oldX, oldY)
 		return nil
 	}
 
 	if g.handleAsteroidMenuInput() {
 		return nil
 	}
-
-	oldX, oldY, oldZoom := g.camX, g.camY, g.zoom
 
 	// Keyboard panning
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) || ebiten.IsKeyPressed(ebiten.KeyA) {
@@ -92,7 +90,7 @@ func (g *Game) Update() error {
 		} else {
 			handled := false
 			useNumbers := g.useNumbers && g.zoom < LegendZoomThreshold && !g.screenshotMode
-			if g.legend != nil {
+			if g.legend != nil && g.showLegend {
 				lw := g.legend.Bounds().Dx()
 				lh := g.legend.Bounds().Dy()
 				if lh > g.height && mxTmp >= 0 && mxTmp < lw {
@@ -108,7 +106,7 @@ func (g *Game) Update() error {
 					handled = true
 				}
 			}
-			if !handled && useNumbers && g.legendImage != nil {
+			if !handled && useNumbers && g.legendImage != nil && g.showLegend {
 				lw := g.legendImage.Bounds().Dx()
 				lh := g.legendImage.Bounds().Dy()
 				x0 := g.width - lw - 12

@@ -1,5 +1,3 @@
-//go:build !test
-
 package main
 
 import (
@@ -20,15 +18,17 @@ func (g *Game) drawUI(screen *ebiten.Image) {
 		cx := g.width / 2
 		cy := g.height / 2
 		crossClr := color.RGBA{255, 255, 255, 30}
-		vector.StrokeLine(screen, float32(cx-CrosshairSize), float32(cy), float32(cx+CrosshairSize), float32(cy), 1, crossClr, true)
-		vector.StrokeLine(screen, float32(cx), float32(cy-CrosshairSize), float32(cx), float32(cy+CrosshairSize), 1, crossClr, true)
+		size := uiScaled(CrosshairSize)
+		thickness := uiScaled(1)
+		vector.StrokeLine(screen, float32(cx-size), float32(cy), float32(cx+size), float32(cy), float32(thickness), crossClr, true)
+		vector.StrokeLine(screen, float32(cx), float32(cy-size), float32(cx), float32(cy+size), float32(thickness), crossClr, true)
 		if g.showItemNames {
 			worldX := int(math.Round(((float64(cx) - g.camX) / g.zoom) / 2))
 			worldY := int(math.Round(((float64(cy) - g.camY) / g.zoom) / 2))
 			coords := fmt.Sprintf("X: %d Y: %d", worldX, worldY)
 			lh := notoFont.Metrics().Height.Ceil()
-			y := g.height - lh - 8
-			drawTextWithBGScale(screen, coords, 5, y, 1, false)
+			y := g.height - lh - uiScaled(8)
+			drawTextWithBGScale(screen, coords, uiScaled(5), y, 1, false)
 		}
 	}
 
@@ -45,7 +45,7 @@ func (g *Game) drawUI(screen *ebiten.Image) {
 			panelH = iconH
 		}
 		tx := g.width/2 - panelW/2
-		ty := g.height - panelH - 30
+		ty := g.height - panelH - uiScaled(30)
 		g.drawInfoPanel(screen, g.infoText, g.infoIcon, tx, ty)
 	}
 

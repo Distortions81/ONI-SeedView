@@ -1,5 +1,3 @@
-//go:build !test
-
 package main
 
 import (
@@ -25,26 +23,8 @@ func (g *Game) checkRedrawTriggers() {
 		g.needsRedraw = true
 	}
 	g.wasMinimized = minimized
-	if time.Since(g.lastDraw) >= time.Second {
+	if time.Since(g.lastDraw) >= time.Second*3 {
 		g.needsRedraw = true
-	}
-}
-
-func (g *Game) handleIconLoading() {
-	for g.iconResults != nil {
-		select {
-		case li, ok := <-g.iconResults:
-			if !ok {
-				g.iconResults = nil
-				continue
-			}
-			if g.icons != nil {
-				g.icons[li.name] = li.img
-			}
-			g.needsRedraw = true
-		default:
-			return
-		}
 	}
 }
 

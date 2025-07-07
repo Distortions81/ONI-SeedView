@@ -1,5 +1,3 @@
-//go:build !test
-
 package main
 
 import (
@@ -32,7 +30,7 @@ func loadFont(size float64) font.Face {
 			panic("failed to parse font: " + err.Error())
 		}
 	}
-	const dpi = 72
+	dpi := 72.0 * getHiDPIScale()
 	face, err := opentype.NewFace(fontParsed, &opentype.FaceOptions{Size: size, DPI: dpi, Hinting: font.HintingFull})
 	if err != nil {
 		panic("failed to create font face: " + err.Error())
@@ -64,29 +62,29 @@ func fontScale() float64 { return fontSize / baseFontSize }
 
 func rowSpacing() int {
 	if notoFont != nil {
-		return notoFont.Metrics().Height.Ceil() + 8
+		return notoFont.Metrics().Height.Ceil() + uiScaled(8)
 	}
 	return int(float64(LegendRowSpacing) * fontScale())
 }
 
 func menuButtonHeight() int {
 	if notoFont != nil {
-		return notoFont.Metrics().Height.Ceil() + 5
+		return notoFont.Metrics().Height.Ceil() + uiScaled(5)
 	}
 	return int(float64(22) * fontScale())
 }
 
 func menuSpacing() int {
 	if notoFont != nil {
-		return menuButtonHeight() + 4
+		return menuButtonHeight() + uiScaled(4)
 	}
 	return int(float64(26) * fontScale())
 }
 
 func seedBaseline() int {
-	return 10
+	return uiScaled(10)
 }
 
 func init() {
-	setFontSize(fontSize)
+	setUIScale(1.0)
 }
