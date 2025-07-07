@@ -208,19 +208,20 @@ func (g *Game) captureScreenshot(w, h int, zoom float64) *image.RGBA {
 	return rgba
 }
 
-func rgbaToGray(src *image.RGBA) *image.Gray {
-	dst := image.NewGray(src.Bounds())
+func rgbaToGray(src *image.RGBA) *image.RGBA {
 	for y := 0; y < src.Rect.Dy(); y++ {
 		sp := src.Pix[y*src.Stride:]
-		dp := dst.Pix[y*dst.Stride:]
 		for x := 0; x < src.Rect.Dx(); x++ {
 			i := x * 4
 			r := sp[i]
 			g := sp[i+1]
 			b := sp[i+2]
 			yv := (299*uint16(r) + 587*uint16(g) + 114*uint16(b) + 500) / 1000
-			dp[x] = uint8(yv)
+			yb := uint8(yv)
+			sp[i] = yb
+			sp[i+1] = yb
+			sp[i+2] = yb
 		}
 	}
-	return dst
+	return src
 }
