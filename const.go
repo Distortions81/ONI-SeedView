@@ -112,7 +112,7 @@ var (
 	frameColor          = color.RGBA{0, 0, 0, 192}
 	bottomTrayColor     = frameColor
 	highlightColor      = color.RGBA{255, 0, 0, 255}
-	legendBGColor       = color.RGBA{0, 0, 0, 77}
+	legendBGColor       = color.RGBA{0, 0, 0, 128}
 	overlayColor        = color.RGBA{0, 0, 0, 180}
 	backgroundColor     = color.RGBA{30, 30, 30, 255}
 	scrollBarColor      = color.RGBA{0, 128, 255, 255}
