@@ -172,10 +172,10 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	y += menuSpacing()
 
 	// Icon Size buttons
-	labelW, _ = textDimensions("Icon Size")
-	bx = uiScaled(6) + labelW + uiScaled(6)
-	minus = image.Rect(bx, y-uiScaled(4), bx+uiScaled(20), y-uiScaled(4)+menuButtonHeight())
-	plus = image.Rect(bx+uiScaled(24), y-uiScaled(4), bx+uiScaled(44), y-uiScaled(4)+menuButtonHeight())
+	labelW, _ := textDimensions("Icon Size")
+	bx := uiScaled(6) + labelW + uiScaled(6)
+	minus := image.Rect(bx, y-uiScaled(4), bx+uiScaled(20), y-uiScaled(4)+menuButtonHeight())
+	plus := image.Rect(bx+uiScaled(24), y-uiScaled(4), bx+uiScaled(44), y-uiScaled(4)+menuButtonHeight())
 	if minus.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		if g.iconScale > 0.25 {
 			g.iconScale -= 0.25
