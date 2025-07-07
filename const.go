@@ -76,7 +76,7 @@ const (
 
 var LegendZoomThreshold = math.Pow(WheelZoomFactor, LegendZoomExponent)
 
-var ScreenshotQualities = []string{"Low (3K)", "Medium (6K)", "High (8K)"}
+var ScreenshotQualities = []string{"Low", "Medium", "High"}
 
 var ScreenshotScales = []float64{4.0, 8.0, 10.0}
 
