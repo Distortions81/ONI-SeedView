@@ -5,8 +5,9 @@ import (
 )
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	screenW := outsideWidth
-	screenH := outsideHeight
+	scale := getHiDPIScale()
+	screenW := int(float64(outsideWidth) * scale)
+	screenH := int(float64(outsideHeight) * scale)
 
 	/*
 		if !g.screenshotMode {
