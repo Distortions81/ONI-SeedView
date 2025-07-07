@@ -55,8 +55,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if !ok {
 				clr = color.RGBA{60, 60, 60, 255}
 			}
+			if g.noColor {
+				clr = color.White
+			}
 			highlight := g.selectedBiome >= 0 && g.selectedBiome < len(g.legendBiomes) && g.legendBiomes[g.selectedBiome] == bp.Name
 			texClr := clr
+			if g.noColor {
+				texClr = color.White
+			}
 			if g.selectedBiome >= 0 && !highlight {
 				texClr = color.RGBA{100, 100, 100, texClr.A}
 			}

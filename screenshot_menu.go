@@ -20,7 +20,7 @@ func (g *Game) screenshotRect() image.Rectangle {
 
 func (g *Game) screenshotMenuSize() (int, int) {
 	labels := append([]string{ScreenshotMenuTitle}, ScreenshotQualities...)
-	labels = append(labels, ScreenshotBWLabel, ScreenshotSaveLabel, ScreenshotCloseLabel)
+	labels = append(labels, ScreenshotBWLabel, ScreenshotSaveLabel, ScreenshotCancelLabel)
 	itemCount := len(labels)
 	allLabels := append([]string(nil), labels...)
 	allLabels = append(allLabels, ScreenshotTakingLabel, ScreenshotSavedLabel)
@@ -32,7 +32,8 @@ func (g *Game) screenshotMenuSize() (int, int) {
 		}
 	}
 	w := maxW + uiScaled(4)
-	h := (itemCount+1)*menuSpacing() + uiScaled(4)
+	// Extra spacing after quality options and the B&W toggle
+	h := (itemCount+2)*menuSpacing() + uiScaled(6)
 	return w, h
 }
 
@@ -67,7 +68,7 @@ func (g *Game) drawScreenshotMenu(dst *ebiten.Image) {
 		label = ScreenshotSavedLabel
 	}
 	items := append([]string(nil), ScreenshotQualities...)
-	items = append(items, ScreenshotBWLabel, label, ScreenshotCloseLabel)
+	items = append(items, ScreenshotBWLabel, label, ScreenshotCancelLabel)
 	y := pad + menuSpacing()
 	for i, it := range items {
 		btn := image.Rect(uiScaled(4), y-uiScaled(4), w-uiScaled(4), y-uiScaled(4)+menuButtonHeight())
@@ -111,7 +112,7 @@ func (g *Game) clickScreenshotMenu(mx, my int) bool {
 	mx = x
 	my = y
 	items := append([]string(nil), ScreenshotQualities...)
-	items = append(items, ScreenshotBWLabel, ScreenshotSaveLabel, ScreenshotCloseLabel)
+	items = append(items, ScreenshotBWLabel, ScreenshotSaveLabel, ScreenshotCancelLabel)
 	y = uiScaled(6) + menuSpacing()
 	w, _ := g.screenshotMenuSize()
 	for i := range items {
@@ -122,12 +123,14 @@ func (g *Game) clickScreenshotMenu(mx, my int) bool {
 				g.ssQuality = i
 			case len(ScreenshotQualities):
 				g.ssNoColor = !g.ssNoColor
+				g.noColor = g.ssNoColor
 			case len(ScreenshotQualities) + 1:
 				if g.ssPending == 0 {
 					g.ssPending = 2
 				}
 			case len(ScreenshotQualities) + 2:
 				g.showShotMenu = false
+				g.noColor = false
 			}
 			g.needsRedraw = true
 			return true

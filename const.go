@@ -47,7 +47,7 @@ const (
 	ScreenshotTakingLabel = "Taking Screenshot..."
 	ScreenshotSavedLabel  = "Saved!"
 	ScreenshotBWLabel     = "Black and White"
-	ScreenshotCloseLabel  = "Close"
+	ScreenshotCancelLabel = "Cancel"
 	GeyserRowSpacing      = 60
 	OptionsMenuTitle      = "Options:"
 	AsteroidMenuTitle     = "Asteroids:"
