@@ -56,9 +56,7 @@ func (g *Game) handleGeyserListInput() bool {
 	if mx >= 0 && mx < g.width && my >= 0 && my < g.height {
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 			if g.geyserRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-				if time.Since(g.lastGeyserClick) >= MenuToggleDelay {
-					g.showGeyserList = false
-				}
+				g.showGeyserList = false
 				g.lastGeyserClick = time.Now()
 				g.needsRedraw = true
 			} else if g.geyserCloseRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
@@ -71,9 +69,7 @@ func (g *Game) handleGeyserListInput() bool {
 		x, y := ebiten.TouchPosition(id)
 		if x >= 0 && x < g.width && y >= 0 && y < g.height {
 			if g.geyserRect().Overlaps(image.Rect(x, y, x+1, y+1)) {
-				if time.Since(g.lastGeyserClick) >= MenuToggleDelay {
-					g.showGeyserList = false
-				}
+				g.showGeyserList = false
 				g.lastGeyserClick = time.Now()
 				g.needsRedraw = true
 			} else if g.geyserCloseRect().Overlaps(image.Rect(x, y, x+1, y+1)) {
@@ -97,9 +93,7 @@ func (g *Game) handleAsteroidMenuInput() bool {
 	if mx >= 0 && mx < g.width && my >= 0 && my < g.height {
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 			if g.asteroidInfoRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-				if time.Since(g.lastAsteroidClick) >= MenuToggleDelay {
-					g.showAstMenu = false
-				}
+				g.showAstMenu = false
 				g.lastAsteroidClick = time.Now()
 				g.needsRedraw = true
 			} else if !g.clickAsteroidMenu(mx, my) {
@@ -114,9 +108,7 @@ func (g *Game) handleAsteroidMenuInput() bool {
 		x, y := ebiten.TouchPosition(id)
 		if x >= 0 && x < g.width && y >= 0 && y < g.height {
 			if g.asteroidInfoRect().Overlaps(image.Rect(x, y, x+1, y+1)) {
-				if time.Since(g.lastAsteroidClick) >= MenuToggleDelay {
-					g.showAstMenu = false
-				}
+				g.showAstMenu = false
 				g.lastAsteroidClick = time.Now()
 				g.needsRedraw = true
 			} else if !g.clickAsteroidMenu(x, y) {

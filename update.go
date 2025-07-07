@@ -159,13 +159,7 @@ func (g *Game) Update() error {
 		}
 		g.lastMouseX, g.lastMouseY = mx, my
 		if justPressed && g.helpRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-			if g.showHelp {
-				if time.Since(g.lastHelpClick) >= MenuToggleDelay {
-					g.showHelp = false
-				}
-			} else {
-				g.showHelp = true
-			}
+			g.showHelp = !g.showHelp
 			g.lastHelpClick = time.Now()
 			g.needsRedraw = true
 		} else if g.showHelp && justPressed && g.helpCloseRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
@@ -174,10 +168,8 @@ func (g *Game) Update() error {
 		} else if g.showShotMenu {
 			if justPressed {
 				if g.screenshotRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-					if time.Since(g.lastShotClick) >= MenuToggleDelay {
-						g.showShotMenu = false
-						g.noColor = false
-					}
+					g.showShotMenu = false
+					g.noColor = false
 					g.lastShotClick = time.Now()
 					g.needsRedraw = true
 				} else if !g.clickScreenshotMenu(mx, my) {
@@ -191,9 +183,7 @@ func (g *Game) Update() error {
 		} else if g.showOptions {
 			if justPressed {
 				if g.optionsRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-					if time.Since(g.lastOptionsClick) >= MenuToggleDelay {
-						g.showOptions = false
-					}
+					g.showOptions = false
 					g.lastOptionsClick = time.Now()
 					g.needsRedraw = true
 				} else if !g.clickOptionsMenu(mx, my) {
@@ -205,10 +195,8 @@ func (g *Game) Update() error {
 			}
 		} else if justPressed && g.screenshotRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			if g.showShotMenu {
-				if time.Since(g.lastShotClick) >= MenuToggleDelay {
-					g.showShotMenu = false
-					g.noColor = false
-				}
+				g.showShotMenu = false
+				g.noColor = false
 			} else {
 				g.closeMenus()
 				g.showShotMenu = true
@@ -218,9 +206,7 @@ func (g *Game) Update() error {
 			g.needsRedraw = true
 		} else if justPressed && g.optionsRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			if g.showOptions {
-				if time.Since(g.lastOptionsClick) >= MenuToggleDelay {
-					g.showOptions = false
-				}
+				g.showOptions = false
 			} else {
 				g.closeMenus()
 				g.showOptions = true
@@ -229,22 +215,16 @@ func (g *Game) Update() error {
 			g.needsRedraw = true
 		} else if justPressed && g.asteroidInfoRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			if g.showAstMenu {
-				if time.Since(g.lastAsteroidClick) >= MenuToggleDelay {
-					g.showAstMenu = false
-				}
+				g.showAstMenu = false
 			} else {
 				g.closeMenus()
 				g.showAstMenu = true
 			}
 			g.lastAsteroidClick = time.Now()
 			g.needsRedraw = true
-		} else if justPressed && g.clickLegend(mx, my) {
-			// handled in clickLegend
 		} else if justPressed && g.geyserRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			if g.showGeyserList {
-				if time.Since(g.lastGeyserClick) >= MenuToggleDelay {
-					g.showGeyserList = false
-				}
+				g.showGeyserList = false
 			} else {
 				g.closeMenus()
 				g.camX = oldX
@@ -254,6 +234,8 @@ func (g *Game) Update() error {
 			}
 			g.lastGeyserClick = time.Now()
 			g.needsRedraw = true
+		} else if justPressed && g.clickLegend(mx, my) {
+			// handled in clickLegend
 		} else if justPressed {
 			if info, ix, iy, icon, found := g.itemAt(mx, my); found {
 				g.camX += float64(g.width/2 - ix)

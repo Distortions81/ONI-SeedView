@@ -366,6 +366,9 @@ func (g *Game) clickLegend(mx, my int) bool {
 	if !g.showLegend {
 		return false
 	}
+	if g.bottomTrayRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		return false
+	}
 	handled := false
 	if g.legend != nil && len(g.legendBiomes) > 0 {
 		w := g.legend.Bounds().Dx()
