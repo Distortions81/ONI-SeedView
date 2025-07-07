@@ -39,6 +39,7 @@ type Game struct {
 	legendColors      []color.RGBA
 	legendImage       *ebiten.Image
 	legendBiomes      []string
+	geyserItems       []geyserListItem
 	hoverBiome        int
 	hoverItem         int
 	selectedBiome     int
@@ -120,6 +121,13 @@ type touchPoint struct {
 type loadedIcon struct {
 	name string
 	img  *ebiten.Image
+}
+
+type geyserListItem struct {
+	text string
+	icon *ebiten.Image
+	w    int
+	h    int
 }
 
 func (g *Game) uiScale() float64 { return uiScale }

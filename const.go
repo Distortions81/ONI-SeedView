@@ -48,7 +48,6 @@ const (
 	ScreenshotSavedLabel  = "Saved!"
 	ScreenshotBWLabel     = "Black and White"
 	ScreenshotCancelLabel = "Cancel"
-	GeyserRowSpacing      = 60
 	// ScrollBarWidth specifies the width of pseudo scroll bars.
 	ScrollBarWidth    = 6
 	OptionsMenuTitle  = "Options:"
@@ -71,6 +70,8 @@ const (
 	// when running in WebAssembly. The assets should be served
 	// relative to the page URL.
 	WebAssetBase = "objects/"
+
+	geyserRowSpace = 30
 )
 
 var LegendZoomThreshold = math.Pow(WheelZoomFactor, LegendZoomExponent)
