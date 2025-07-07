@@ -154,7 +154,7 @@ func (g *Game) drawGeyserList(dst *ebiten.Image) {
 	cr := g.geyserCloseRect()
 	drawCloseButton(dst, cr)
 
-	spacing := uiScaled(10)
+	spacing := uiScaled(geyserRowSpace)
 	g.buildGeyserItems()
 	maxW := 0
 	for _, it := range g.geyserItems {
@@ -211,7 +211,7 @@ func (g *Game) drawGeyserList(dst *ebiten.Image) {
 }
 
 func (g *Game) maxGeyserScroll() float64 {
-	spacing := uiScaled(10)
+	spacing := uiScaled(geyserRowSpace)
 	g.buildGeyserItems()
 	maxW := 0
 	for _, it := range g.geyserItems {

@@ -70,6 +70,8 @@ const (
 	// when running in WebAssembly. The assets should be served
 	// relative to the page URL.
 	WebAssetBase = "objects/"
+
+	geyserRowSpace = 30
 )
 
 var LegendZoomThreshold = math.Pow(WheelZoomFactor, LegendZoomExponent)
