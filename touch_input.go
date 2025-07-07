@@ -174,35 +174,52 @@ func (g *Game) handleTouchGestures(oldX, oldY float64) {
 					g.needsRedraw = true
 				}
 			} else if g.showShotMenu {
-				if !g.clickScreenshotMenu(mx, my) {
+				if g.screenshotRect().Overlaps(pt) {
+					g.showShotMenu = false
+					g.noColor = false
+					g.needsRedraw = true
+				} else if !g.clickScreenshotMenu(mx, my) {
 					if !g.screenshotMenuRect().Overlaps(pt) && !g.screenshotRect().Overlaps(pt) {
 						g.showShotMenu = false
 						g.needsRedraw = true
 					}
 				}
 			} else if g.showOptions {
-				if !g.clickOptionsMenu(mx, my) {
+				if g.optionsRect().Overlaps(pt) {
+					g.showOptions = false
+					g.needsRedraw = true
+				} else if !g.clickOptionsMenu(mx, my) {
 					if !g.optionsMenuRect().Overlaps(pt) && !g.optionsRect().Overlaps(pt) {
 						g.showOptions = false
 						g.needsRedraw = true
 					}
 				}
 			} else if g.screenshotRect().Overlaps(pt) {
+				g.closeMenus()
 				g.showShotMenu = true
+				g.noColor = g.ssNoColor
 				g.needsRedraw = true
 			} else if g.optionsRect().Overlaps(pt) {
+				g.closeMenus()
 				g.showOptions = true
 				g.needsRedraw = true
 			} else if g.asteroidInfoRect().Overlaps(pt) {
+				g.closeMenus()
 				g.showAstMenu = true
 				g.needsRedraw = true
 			} else if g.helpRect().Overlaps(pt) {
-				g.showHelp = !g.showHelp
+				if g.showHelp {
+					g.showHelp = false
+				} else {
+					g.closeMenus()
+					g.showHelp = true
+				}
 				g.needsRedraw = true
 			} else if g.showHelp && g.helpCloseRect().Overlaps(pt) {
 				g.showHelp = false
 				g.needsRedraw = true
 			} else if g.geyserRect().Overlaps(pt) {
+				g.closeMenus()
 				g.camX = oldX
 				g.camY = oldY
 				g.dragging = false
