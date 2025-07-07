@@ -34,6 +34,7 @@ func (g *Game) processScreenshot() {
 			g.saveScreenshot()
 			g.ssSaved = time.Now()
 			g.showShotMenu = false
+			g.noColor = false
 			g.skipClickTicks = 1
 		}
 		g.ssPending--
@@ -54,7 +55,11 @@ func (g *Game) handleGeyserListInput() bool {
 	mx, my := ebiten.CursorPosition()
 	if mx >= 0 && mx < g.width && my >= 0 && my < g.height {
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-			if g.geyserCloseRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+			if g.geyserRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+				g.showGeyserList = false
+				g.lastGeyserClick = time.Now()
+				g.needsRedraw = true
+			} else if g.geyserCloseRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 				g.showGeyserList = false
 				g.needsRedraw = true
 			}
@@ -63,7 +68,11 @@ func (g *Game) handleGeyserListInput() bool {
 	for _, id := range inpututil.AppendJustPressedTouchIDs(nil) {
 		x, y := ebiten.TouchPosition(id)
 		if x >= 0 && x < g.width && y >= 0 && y < g.height {
-			if g.geyserCloseRect().Overlaps(image.Rect(x, y, x+1, y+1)) {
+			if g.geyserRect().Overlaps(image.Rect(x, y, x+1, y+1)) {
+				g.showGeyserList = false
+				g.lastGeyserClick = time.Now()
+				g.needsRedraw = true
+			} else if g.geyserCloseRect().Overlaps(image.Rect(x, y, x+1, y+1)) {
 				g.showGeyserList = false
 				g.needsRedraw = true
 			}
@@ -83,7 +92,11 @@ func (g *Game) handleAsteroidMenuInput() bool {
 	mx, my := ebiten.CursorPosition()
 	if mx >= 0 && mx < g.width && my >= 0 && my < g.height {
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-			if !g.clickAsteroidMenu(mx, my) {
+			if g.asteroidInfoRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+				g.showAstMenu = false
+				g.lastAsteroidClick = time.Now()
+				g.needsRedraw = true
+			} else if !g.clickAsteroidMenu(mx, my) {
 				if !g.asteroidMenuRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) && !g.asteroidInfoRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 					g.showAstMenu = false
 					g.needsRedraw = true
@@ -94,7 +107,11 @@ func (g *Game) handleAsteroidMenuInput() bool {
 	for _, id := range inpututil.AppendJustPressedTouchIDs(nil) {
 		x, y := ebiten.TouchPosition(id)
 		if x >= 0 && x < g.width && y >= 0 && y < g.height {
-			if !g.clickAsteroidMenu(x, y) {
+			if g.asteroidInfoRect().Overlaps(image.Rect(x, y, x+1, y+1)) {
+				g.showAstMenu = false
+				g.lastAsteroidClick = time.Now()
+				g.needsRedraw = true
+			} else if !g.clickAsteroidMenu(x, y) {
 				if !g.asteroidMenuRect().Overlaps(image.Rect(x, y, x+1, y+1)) && !g.asteroidInfoRect().Overlaps(image.Rect(x, y, x+1, y+1)) {
 					g.showAstMenu = false
 					g.needsRedraw = true

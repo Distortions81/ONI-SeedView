@@ -26,7 +26,7 @@ func buildLegendImage(biomes []BiomePath) (*ebiten.Image, []string) {
 	for _, name := range names {
 		w, _ := textDimensions(displayBiome(name))
 		if w > maxW {
-			maxW = w
+			maxW = uiScaled(20+10) + w
 		}
 	}
 
@@ -46,7 +46,7 @@ func buildLegendImage(biomes []BiomePath) (*ebiten.Image, []string) {
 			clr = color.RGBA{60, 60, 60, 255}
 		}
 		vector.DrawFilledRect(img, 5, float32(y), float32(uiScaledF(20)), float32(uiScaledF(10)), clr, false)
-		drawTextWithBGBorder(img, displayBiome(name), 30, y, clr, false)
+		drawTextWithBGBorder(img, displayBiome(name), uiScaled(20+10), y, clr, false)
 		y += spacing
 	}
 
@@ -184,6 +184,22 @@ func (g *Game) drawGeyserList(dst *ebiten.Image) {
 			idx++
 		}
 		y += rowHeights[r] + spacing
+	}
+
+	if max := g.maxGeyserScroll(); max > 0 {
+		barW := uiScaled(ScrollBarWidth)
+		barX := g.width - barW - uiScaled(2)
+		h := float64(g.height)
+		barH := h * h / (h + max)
+		barY := (g.geyserScroll / max) * (h - barH)
+		left := barX - uiScaled(1)
+		right := barX + barW + uiScaled(1)
+		vector.StrokeLine(dst, float32(left), 0, float32(left), float32(g.height), 1, scrollBarTrackColor, true)
+		vector.StrokeLine(dst, float32(right), 0, float32(right), float32(g.height), 1, scrollBarTrackColor, true)
+		vector.DrawFilledRect(dst, float32(barX), float32(barY), float32(barW), float32(barH), scrollBarColor, false)
+		r := float32(barW) / 2
+		vector.DrawFilledCircle(dst, float32(barX)+r, float32(barY), r, scrollBarColor, true)
+		vector.DrawFilledCircle(dst, float32(barX)+r, float32(barY)+float32(barH), r, scrollBarColor, true)
 	}
 }
 
@@ -364,6 +380,9 @@ func (g *Game) updateIconHover(mx, my int) {
 
 func (g *Game) clickLegend(mx, my int) bool {
 	if !g.showLegend {
+		return false
+	}
+	if g.bottomTrayRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 		return false
 	}
 	handled := false

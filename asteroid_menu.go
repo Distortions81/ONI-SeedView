@@ -14,10 +14,11 @@ func (g *Game) asteroidArrowRect() image.Rectangle {
 	if name == "" {
 		name = "Unknown"
 	}
+	name = truncateString(name, 32)
 	text := "Asteroid: " + name
 	w, _ := textDimensions(text)
 	x := g.width/2 + w/2 + uiScaled(4)
-	size := int(float64(12) * fontScale())
+	size := uiScaled(12)
 	baseline := seedBaseline() + notoFont.Metrics().Height.Ceil() + uiScaled(4)
 	y := baseline + notoFont.Metrics().Descent.Ceil() + uiScaled(4) - size/2
 	return image.Rect(x, y, x+size, y+size)
@@ -38,6 +39,7 @@ func (g *Game) asteroidInfoRect() image.Rectangle {
 	if name == "" {
 		name = "Unknown"
 	}
+	name = truncateString(name, 32)
 	astText := "Asteroid: " + name
 	aw, ah := textDimensions(astText)
 	ax := g.width/2 - aw/2
@@ -91,7 +93,8 @@ func drawCheck(dst *ebiten.Image, rect image.Rectangle) {
 func (g *Game) asteroidMenuSize() (int, int) {
 	maxW, _ := textDimensions(AsteroidMenuTitle)
 	for _, a := range g.asteroids {
-		w, _ := textDimensions(a.ID)
+		name := truncateString(a.ID, 64)
+		w, _ := textDimensions(name)
 		if w > maxW {
 			maxW = w
 		}
@@ -156,7 +159,8 @@ func (g *Game) drawAsteroidMenu(dst *ebiten.Image) {
 			ck := image.Rect(btn.Min.X+uiScaled(4), btn.Min.Y+uiScaled(4), btn.Min.X+uiScaled(16), btn.Min.Y+uiScaled(16))
 			drawCheck(img, ck)
 		}
-		drawText(img, a.ID, btn.Min.X+uiScaled(20), btn.Min.Y+uiScaled(4), false)
+		name := truncateString(a.ID, 64)
+		drawText(img, name, btn.Min.X+uiScaled(20), btn.Min.Y+uiScaled(4), false)
 		y += menuSpacing()
 	}
 	op := &ebiten.DrawImageOptions{}

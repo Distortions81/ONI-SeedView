@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	ClientVersion    = "v0.0.7-2507061643"
+	ClientVersion    = "v0.0.9-2507061929"
 	BaseURL          = "https://ingest.mapsnotincluded.org/coordinate/"
 	AcceptCBORHeader = "application/cbor"
 	PanSpeed         = 15
@@ -47,10 +47,12 @@ const (
 	ScreenshotTakingLabel = "Taking Screenshot..."
 	ScreenshotSavedLabel  = "Saved!"
 	ScreenshotBWLabel     = "Black and White"
-	ScreenshotCloseLabel  = "Close"
+	ScreenshotCancelLabel = "Cancel"
 	GeyserRowSpacing      = 60
-	OptionsMenuTitle      = "Options:"
-	AsteroidMenuTitle     = "Asteroids:"
+	// ScrollBarWidth specifies the width of pseudo scroll bars.
+	ScrollBarWidth    = 6
+	OptionsMenuTitle  = "Options:"
+	AsteroidMenuTitle = "Asteroids:"
 
 	// BiomeTextureScale controls the repetition of biome textures.
 	// Smaller values result in more repetitions.
@@ -59,6 +61,11 @@ const (
 	// WheelThrottle controls how often mouse wheel zoom is applied
 	// in WASM to account for faster scroll events.
 	WheelThrottle = 75 * time.Millisecond
+
+	// MenuToggleDelay is the minimum time between clicking an icon and being
+	// able to close the associated menu again. This prevents instant double
+	// toggles from accidental double-clicks.
+	MenuToggleDelay = 250 * time.Millisecond
 
 	// WebAssetBase specifies the path used to fetch image assets
 	// when running in WebAssembly. The assets should be served
@@ -107,4 +114,6 @@ var (
 	legendBGColor       = color.RGBA{0, 0, 0, 77}
 	overlayColor        = color.RGBA{0, 0, 0, 180}
 	backgroundColor     = color.RGBA{30, 30, 30, 255}
+	scrollBarColor      = color.RGBA{0, 128, 255, 255}
+	scrollBarTrackColor = color.RGBA{200, 200, 200, 255}
 )

@@ -160,22 +160,33 @@ func (g *Game) Update() error {
 		g.lastMouseX, g.lastMouseY = mx, my
 		if justPressed && g.helpRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.showHelp = !g.showHelp
+			g.lastHelpClick = time.Now()
 			g.needsRedraw = true
 		} else if g.showHelp && justPressed && g.helpCloseRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 			g.showHelp = false
 			g.needsRedraw = true
 		} else if g.showShotMenu {
 			if justPressed {
-				if !g.clickScreenshotMenu(mx, my) {
+				if g.screenshotRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+					g.showShotMenu = false
+					g.noColor = false
+					g.lastShotClick = time.Now()
+					g.needsRedraw = true
+				} else if !g.clickScreenshotMenu(mx, my) {
 					if !g.screenshotMenuRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) && !g.screenshotRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 						g.showShotMenu = false
+						g.noColor = false
 						g.needsRedraw = true
 					}
 				}
 			}
 		} else if g.showOptions {
 			if justPressed {
-				if !g.clickOptionsMenu(mx, my) {
+				if g.optionsRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+					g.showOptions = false
+					g.lastOptionsClick = time.Now()
+					g.needsRedraw = true
+				} else if !g.clickOptionsMenu(mx, my) {
 					if !g.optionsMenuRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) && !g.optionsRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 						g.showOptions = false
 						g.needsRedraw = true
@@ -183,22 +194,48 @@ func (g *Game) Update() error {
 				}
 			}
 		} else if justPressed && g.screenshotRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-			g.showShotMenu = true
+			if g.showShotMenu {
+				g.showShotMenu = false
+				g.noColor = false
+			} else {
+				g.closeMenus()
+				g.showShotMenu = true
+				g.noColor = g.ssNoColor
+			}
+			g.lastShotClick = time.Now()
 			g.needsRedraw = true
 		} else if justPressed && g.optionsRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-			g.showOptions = true
+			if g.showOptions {
+				g.showOptions = false
+			} else {
+				g.closeMenus()
+				g.showOptions = true
+			}
+			g.lastOptionsClick = time.Now()
 			g.needsRedraw = true
 		} else if justPressed && g.asteroidInfoRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-			g.showAstMenu = true
+			if g.showAstMenu {
+				g.showAstMenu = false
+			} else {
+				g.closeMenus()
+				g.showAstMenu = true
+			}
+			g.lastAsteroidClick = time.Now()
+			g.needsRedraw = true
+		} else if justPressed && g.geyserRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+			if g.showGeyserList {
+				g.showGeyserList = false
+			} else {
+				g.closeMenus()
+				g.camX = oldX
+				g.camY = oldY
+				g.dragging = false
+				g.showGeyserList = true
+			}
+			g.lastGeyserClick = time.Now()
 			g.needsRedraw = true
 		} else if justPressed && g.clickLegend(mx, my) {
 			// handled in clickLegend
-		} else if justPressed && g.geyserRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
-			g.camX = oldX
-			g.camY = oldY
-			g.dragging = false
-			g.showGeyserList = true
-			g.needsRedraw = true
 		} else if justPressed {
 			if info, ix, iy, icon, found := g.itemAt(mx, my); found {
 				g.camX += float64(g.width/2 - ix)

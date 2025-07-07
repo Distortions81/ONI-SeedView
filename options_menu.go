@@ -46,13 +46,20 @@ func (g *Game) optionsMenuSize() (int, int) {
 
 func (g *Game) optionsMenuRect() image.Rectangle {
 	w, h := g.optionsMenuSize()
+	pad := uiScaled(2)
 	x := g.optionsRect().Min.X - w - uiScaled(10)
-	if x < 0 {
-		x = 0
+	if x < pad {
+		x = pad
+	}
+	if x+w > g.width-pad {
+		x = g.width - w - pad
 	}
 	y := g.optionsRect().Min.Y - h
-	if y < 0 {
-		y = 0
+	if y < pad {
+		y = pad
+	}
+	if y+h > g.height-pad {
+		y = g.height - h - pad
 	}
 	return image.Rect(x, y, x+w, y+h)
 }

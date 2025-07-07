@@ -21,9 +21,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		screen.Fill(backgroundColor)
 		if g.textures && g.biomeTextures != nil {
 			if tex := g.biomeTextures["Space"]; tex != nil {
-				clr := color.RGBA{255, 255, 255, 255}
-				if c, ok := biomeColors["Space"]; ok {
-					clr = c
+				clr := colorWhite
+				if !g.noColor {
+					if c, ok := biomeColors["Space"]; ok {
+						clr = c
+					}
 				}
 				rect := [][]Point{{
 					{0, 0},
@@ -33,11 +35,17 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				}}
 				drawBiomeTextured(screen, rect, tex, clr, g.camX, g.camY, g.zoom, g.filterMode())
 			} else if clr, ok := biomeColors["Space"]; ok {
+				if g.noColor {
+					clr = colorWhite
+				}
 				vector.DrawFilledRect(screen, float32(g.camX), float32(g.camY),
 					float32(float64(g.astWidth)*2*g.zoom),
 					float32(float64(g.astHeight)*2*g.zoom), clr, false)
 			}
 		} else if clr, ok := biomeColors["Space"]; ok {
+			if g.noColor {
+				clr = colorWhite
+			}
 			vector.DrawFilledRect(screen, float32(g.camX), float32(g.camY),
 				float32(float64(g.astWidth)*2*g.zoom),
 				float32(float64(g.astHeight)*2*g.zoom), clr, false)
@@ -52,13 +60,18 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		for _, bp := range g.biomes {
 			clr, ok := biomeColors[bp.Name]
-			if !ok {
+			if g.noColor {
+				clr = colorWhite
+			} else if !ok {
 				clr = color.RGBA{60, 60, 60, 255}
+			}
+			if g.noColor {
+				clr = colorWhite
 			}
 			highlight := g.selectedBiome >= 0 && g.selectedBiome < len(g.legendBiomes) && g.legendBiomes[g.selectedBiome] == bp.Name
 			texClr := clr
-			if g.selectedBiome >= 0 && !highlight {
-				texClr = color.RGBA{100, 100, 100, texClr.A}
+			if !g.noColor && g.selectedBiome >= 0 && !highlight {
+				texClr = color.RGBA{128, 128, 128, 255}
 			}
 			if g.textures {
 				if tex := g.biomeTextures[bp.Name]; tex != nil {
@@ -69,7 +82,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			} else {
 				drawBiome(screen, bp.Polygons, texClr, g.camX, g.camY, g.zoom)
 			}
-			outlineClr := color.RGBA{255, 255, 255, 128}
+			outlineClr := colorWhite
 			drawBiomeOutline(screen, bp.Polygons, g.camX, g.camY, g.zoom, outlineClr)
 		}
 		for _, gy := range g.geysers {
@@ -203,14 +216,18 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if aName == "" {
 				aName = "Unknown"
 			}
+			aName = truncateString(aName, 32)
 			astName := fmt.Sprintf("Asteroid: %s", aName)
+
+			rect := g.asteroidInfoRect()
+			vector.DrawFilledRect(screen, float32(rect.Min.X), float32(rect.Min.Y), float32(rect.Dx()), float32(rect.Dy()), color.RGBA{0, 0, 0, 128}, false)
 
 			x := g.width / 2
 			astBase := seedBaseline() + notoFont.Metrics().Height.Ceil() + 4
-			drawTextWithBGScale(screen, astName, x, astBase, 1, true)
+			drawText(screen, astName, x, astBase, true)
 			ar := g.asteroidArrowRect()
 			drawDownArrow(screen, ar, g.showAstMenu)
-			drawTextWithBGScale(screen, label, x, seedBaseline(), 1, true)
+			drawText(screen, label, x, seedBaseline(), true)
 		}
 
 		if g.showLegend {
