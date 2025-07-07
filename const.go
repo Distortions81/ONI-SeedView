@@ -109,4 +109,6 @@ var (
 	legendBGColor       = color.RGBA{0, 0, 0, 77}
 	overlayColor        = color.RGBA{0, 0, 0, 180}
 	backgroundColor     = color.RGBA{30, 30, 30, 255}
+	scrollBarColor      = color.RGBA{0, 128, 255, 255}
+	scrollBarTrackColor = color.RGBA{200, 200, 200, 255}
 )

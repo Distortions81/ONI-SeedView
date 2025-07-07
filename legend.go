@@ -192,7 +192,14 @@ func (g *Game) drawGeyserList(dst *ebiten.Image) {
 		h := float64(g.height)
 		barH := h * h / (h + max)
 		barY := (g.geyserScroll / max) * (h - barH)
-		vector.DrawFilledRect(dst, float32(barX), float32(barY), float32(barW), float32(barH), overlayColor, false)
+		left := barX - uiScaled(1)
+		right := barX + barW + uiScaled(1)
+		vector.StrokeLine(dst, float32(left), 0, float32(left), float32(g.height), 1, scrollBarTrackColor, true)
+		vector.StrokeLine(dst, float32(right), 0, float32(right), float32(g.height), 1, scrollBarTrackColor, true)
+		vector.DrawFilledRect(dst, float32(barX), float32(barY), float32(barW), float32(barH), scrollBarColor, false)
+		r := float32(barW) / 2
+		vector.DrawFilledCircle(dst, float32(barX)+r, float32(barY), r, scrollBarColor, true)
+		vector.DrawFilledCircle(dst, float32(barX)+r, float32(barY)+float32(barH), r, scrollBarColor, true)
 	}
 }
 
