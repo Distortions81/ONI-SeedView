@@ -108,6 +108,8 @@ go run . -coord SNDST-A-7-0-0-0 -screenshot myshot.bmp
 
 ## Repository Layout
 
+See [layout.md](layout.md) for a detailed overview of how the project is organized.
+
 ```
 objects/    # Embedded image files used by the viewer
 scripts/    # Helper scripts for building, asset download and headless execution
