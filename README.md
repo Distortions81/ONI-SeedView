@@ -51,6 +51,8 @@ Additional help and screenshot instructions live in [docs/HELP.md](docs/HELP.md)
 
 ## Repository Layout
 
+See [layout.md](layout.md) for a detailed overview of how the project is organized.
+
 ```
 objects/    # Embedded image files
 scripts/    # Helper scripts for building and headless execution
