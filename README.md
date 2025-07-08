@@ -1,152 +1,71 @@
 # Oni-SeedView
 
-Oni-SeedView is a small utility for inspecting **Oxygen Not Included** seed data. It downloads seed information from [Maps Not Included](https://mapsnotincluded.org) and displays an interactive map of an asteroid using [Ebiten](https://ebiten.org/). The viewer renders geysers, points of interest and biome boundaries with scaling icons and a small legend. You can pan around and zoom in or out.
+Oni-SeedView is a small viewer for **Oxygen Not Included** seed data. It fetches information from [Maps Not Included](https://mapsnotincluded.org) and renders an interactive map using the [Ebiten](https://ebiten.org/) game engine.
 
 ![Screenshot](screenshot.png)
 
-## Features
+- ~4.6k lines of Go code
+- Engine: Ebiten 2
+- Major libraries: `fxamacker/cbor`, `golang.org/x/image`
 
-* Fetches seed data in [CBOR](https://en.wikipedia.org/wiki/CBOR) format from the MapsNotIncluded ingest API.
-* Smooth panning via arrow keys, **WASD** or by dragging with the mouse.
-* Touch controls for panning and pinch-to-zoom on supported devices.
-* Mouse wheel and `+`/`-` keys control zoom. The window can be resized at any time.
-* Font size automatically decreases on small screens and increases on large displays.
-* Textured biomes with a color legend and icons for geysers and points of interest.
-* The empty space around the asteroid now uses a repeating space texture.
-* Biome texture mapping is documented in [BIOME_TEXTURES.md](BIOME_TEXTURES.md).
-* Supports running in headless environments using `Xvfb`.
-* Click the camera icon to capture screenshots. A menu lets you pick from Low, Medium or High quality and includes a "Black and White" toggle for printing or color-blind accessibility.
-* Hover over geyser or POI icons to show an information panel. Clicking or tapping centers the item and pins it in place while panning.
-* Hover over the bottom icons for tooltips describing their actions. Tooltips automatically stay within the window bounds.
-* A help icon displays the available controls at any time. An X button closes the overlay.
-* A gear icon opens an options menu for toggling features like textures, Vsync, power saver mode and linear filtering along with item labels, legends and number labels. You can also adjust icon size and UI scale and view the current FPS.
-* Crosshairs at the center show the current world coordinates, or show item info on mobile.
-* Click the down-arrow next to the asteroid name to choose another asteroid.
-* A geyser icon opens a scrollable list of all geysers present on the map.
-* Newly loaded asteroids automatically center and zoom to fit the view.
-* Biome and item legend panels scroll when they extend past the window height, with extra space so items near the bottom can clear the icons.
+## Quick Start
 
-## Controls
-
-- **Arrow keys/WASD** – pan the camera.
-- **Mouse wheel or `+`/`-`** – zoom in and out.
-- **Drag with the mouse** – pan.
-- **Pinch gestures** – zoom on touch devices.
-- **Click or tap geysers/POIs** – center the item and show details in a popup.
-- **Hover or tap legend entries** – highlight and select matching objects.
-- **Camera icon** – open the screenshot menu.
-- **Geyser icon** – show a list of all geysers.
-- **Question mark** – toggle the help overlay.
-- **X button** – close the help overlay.
-- **Gear icon** – open the options menu.
-
-## Getting Started
-
-1. **Install Go** – Go 1.24 or newer is required to build the program.
-2. **Install system packages** – Building with Ebiten needs X11 and OpenGL headers. For cross-compiling Windows binaries `mingw-w64` is also required:
+1. Install Go 1.24 or newer.
+2. Install system packages:
 
    ```bash
    sudo apt-get install xorg-dev libgl1-mesa-dev mingw-w64
    ```
 
-3. **Build and run** – Execute the program with a seed coordinate. All required
-    image assets are embedded so no additional downloads are needed. The window
-    defaults to 1200×1200 but can be resized.
+3. Build and run with a seed coordinate:
 
    ```bash
    go run . -coord SNDST-A-7-0-0-0
    ```
 
-## Running Headless
+See [docs/HEADLESS.md](docs/HEADLESS.md) for running without a display and [docs/WEBASSEMBLY.md](docs/WEBASSEMBLY.md) for the web build.
 
-If you need to run the viewer on a machine without a display, install `Xvfb` and use the provided script. The script starts a virtual framebuffer so the window can be created.
+## Controls
 
-```bash
-sudo apt-get install xvfb   # one-time setup
-./scripts/run_headless.sh -coord SNDST-A-7-0-0-0
-```
+- **Arrow keys/WASD** – pan the camera.
+- **Mouse wheel or +/-** – zoom in and out.
+- **Drag with the mouse/touch** – pan.
+- **Pinch with two fingers** – zoom on touch.
+- **Click or tap geysers/POIs** – center and show details.
+- **Tap legend entries** – highlight items.
+- **Camera icon** – open screenshot menu.
+- **Geyser-icon** – list all geysers.
+- **Question mark** – toggle this help.
+- **X button** – close this help.
+- **Gear icon** – open options.
 
-## WebAssembly Build
+Additional help and screenshot instructions live in [docs/HELP.md](docs/HELP.md).
 
-Run the build script to compile the program and copy the necessary runtime files. The WebAssembly module is optimized and compressed, with the runtime JavaScript and HTML files placed in `build/`.
+## Features
 
-```bash
-./scripts/build_all.sh
-```
-
-Open `build/index.html` in a browser to enter a seed. The page has a dark themed form with Material icons and now includes an optional field to choose the asteroid ID. Valid seeds redirect to `view.html` which loads `oni-view.wasm.br` and decompresses it with [brotli-dec-wasm](https://github.com/httptoolkit/brotli-wasm).
-You can also provide the seed in the index page URL with `index.html?coord=<seed>` or `index.html#coord=<seed>` (just `#<seed>` works too) and it will forward you to the viewer automatically. You can still specify the seed coordinate directly in the viewer URL using `view.html?coord=<seed>` or `view.html#coord=<seed>`. Add `asteroid=<id>` to select a different asteroid when a seed contains multiple. When an asteroid ID is provided the viewer shows it after the seed as `Asteroid: <id>` with a small arrow for opening the asteroid list. If the ID is not valid the viewer displays the coordinates and asteroid ID with `This location does not contain Asteroid ID: <id>`. When asteroids are present they are listed under `Valid IDs:` with a newline after every third ID.
-
-## Desktop vs Web and Mobile
-
-Oni-SeedView runs on the desktop as well as in the browser. Key differences between
-the environments are:
-
-* **Desktop** – Launch the program with the `-coord` flag to select a seed.
-  Screenshot, help and geyser icons are always visible and you interact using
-  the mouse and keyboard.
-* **WebAssembly** – No command line flags are available. The viewer reads the
-  seed from the page URL using `?coord=` or `#coord=` parameters and an optional
-  `asteroid=` ID.
-* **Mobile** – When running on a mobile OS or in a mobile browser the viewer
-  disables item numbers at startup but the toolbar icons remain available.
-  Item details appear when the crosshair is centered over a geyser or POI or
-  when a POI is tapped, which also centers the item. You pan or zoom using touch
-  gestures.
-
-## Saving Screenshots
-
-Click the camera icon to open the screenshot menu. Choose a quality level
-(Low–High) and the current view is written to a BMP named after the seed.
-After clicking **Save Screenshot** the button briefly shows *Taking Screenshot...*
-with a red outline before the menu closes automatically.
-You can also generate a screenshot non-interactively:
-
-```bash
-go run . -coord SNDST-A-7-0-0-0 -screenshot myshot.bmp
-```
+- Textured biomes with icons for geysers and points of interest.
+- Smooth mouse, keyboard and touch input.
+- Screenshot capture with quality presets.
+- Options menu for toggling textures, Vsync, icon size and more.
+- Automatically centers newly loaded asteroids and scales text for any window size.
 
 ## Repository Layout
 
 ```
-objects/    # Embedded image files used by the viewer
-scripts/    # Helper scripts for building, asset download and headless execution
-data/       # Fonts used at runtime
-main.go           # Program entry point and startup logic
-update.go         # Game update and draw routines
-update_helpers.go # Helper functions for update logic
-display.go        # Icon selection and drawing helpers
-parse.go    # Functions for decoding biome path strings
-colors.go   # Color definitions for different biomes
-const.go    # Miscellaneous constants and configuration
+objects/    # Embedded image files
+scripts/    # Helper scripts for building and headless execution
+html/       # WebAssembly runtime files
+main.go     # Program entry point
+update.go   # Game update and draw routines
 ```
 
-Unit tests live alongside the code (`main_test.go`, `zoom_test.go`). Format the
-Go files and run the tests normally:
-
-```bash
-gofmt -w *.go
-go test ./...
-```
-
-## Minimizing the Font
-
-If you change the .ttf, run the helper script to
-subset it to the ASCII range and remove extra face versions and shrink the binary size:
-
-```bash
-python3 scripts/minimize_font.py data/NotoSansMono.ttf data/NotoSansMono.ttf
-```
-The script requires the `fonttools` package (`pip install fonttools`) and
-overwrites the font in place. Use `git checkout -- data/NotoSansMono.ttf` to
-restore the original file.
-
+More details on texture mapping can be found in [BIOME_TEXTURES.md](BIOME_TEXTURES.md).
+See [docs/FONT.md](docs/FONT.md) for font minimization.
 
 ## License
 
-The project is released under the MIT License. See [LICENSE](LICENSE) for full details.
+Released under the MIT License. See [LICENSE](LICENSE) for details.
 
 ## Attribution
 
-Seed information and image assets come from the [Maps Not Included](https://mapsnotincluded.org) project. Their source code repositories can be found on GitHub under [MapsNotIncluded](https://github.com/MapsNotIncluded).
-
+Seed information and image assets come from the [Maps Not Included](https://mapsnotincluded.org) project. Their repositories are on GitHub under [MapsNotIncluded](https://github.com/MapsNotIncluded).
