@@ -20,6 +20,12 @@ if ! go version 2>/dev/null | grep -q "go1.24.3"; then
     export PATH=$PATH:/usr/local/go/bin
 fi
 
+# Ensure any PATH updates take effect in the current session.
+if [ -f ~/.profile ]; then
+    # shellcheck source=/dev/null
+    source ~/.profile
+fi
+
 # Fetch Go module dependencies.
 go mod download
 
