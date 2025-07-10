@@ -10,9 +10,12 @@ This repository contains a small ebiten viewer written in Go.
   ```
 - Image assets are committed to the repo and embedded at build time, so no
   download step is required.
-- Run `./install_deps.sh` and related scripts **only** when you need the packages they install. These helpers speed up environment setup when you require tools like Go, Xvfb or the `webp` utilities.
+- Always run `scripts/install_deps.sh` after cloning the repository or when your
+  environment might be missing build tools. It installs Go, Xvfb and the `webp`
+  utilities so that you can compile and test the project without additional
+  steps.
 - If you install additional packages while working, add them to
-  `scripts/install_deps.sh` so they are included in the setup process.
+  `scripts/install_deps.sh` so the setup process stays comprehensive.
 
 Additional tasks to keep the project healthy:
  - Keep `README.md` up to date when features or build steps change.
