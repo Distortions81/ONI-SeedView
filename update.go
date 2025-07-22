@@ -5,12 +5,21 @@ import (
 	"runtime"
 	"time"
 
+	eui "EUI/eui"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 func (g *Game) Update() error {
 	const panSpeed = PanSpeed
+
+	if err := eui.Update(); err != nil {
+		return err
+	}
+	if g.ssWindow != nil {
+		g.ssWindow.Open = g.showShotMenu
+	}
 
 	g.checkRedrawTriggers()
 	g.processScreenshot()

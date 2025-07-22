@@ -6,6 +6,8 @@ import (
 	"math"
 	"time"
 
+	eui "EUI/eui"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
@@ -104,6 +106,8 @@ type Game struct {
 	lastOptionsClick  time.Time
 	lastGeyserClick   time.Time
 	lastAsteroidClick time.Time
+
+	ssWindow *eui.WindowData
 }
 
 type label struct {

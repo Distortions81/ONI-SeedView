@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	eui "EUI/eui"
+
 	"golang.org/x/image/bmp"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -66,6 +68,8 @@ func (g *Game) drawUI(screen *ebiten.Image) {
 		cr := g.helpCloseRect()
 		drawCloseButton(screen, cr)
 	}
+
+	eui.Draw(screen)
 
 	g.needsRedraw = false
 	g.lastDraw = time.Now()

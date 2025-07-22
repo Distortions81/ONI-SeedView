@@ -54,6 +54,7 @@ func main() {
 		selectedBiome:     -1,
 		selectedItem:      -1,
 	}
+	game.initEUI()
 	setHiDPI(game.hidpi)
 	registerFontChange(game.invalidateLegends)
 	loadGameData(game, *coord, asteroidIDVal)
