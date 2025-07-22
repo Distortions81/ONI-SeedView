@@ -353,23 +353,17 @@ func (g *Game) updateHover(mx, my int) {
 func (g *Game) updateIconHover(mx, my int) {
 	prev := g.hoverIcon
 	g.hoverIcon = hoverNone
-	if mx == -1 || my == -1 {
-		if prev != g.hoverIcon {
-			g.needsRedraw = true
-		}
-		return
-	}
-	pt := image.Rect(mx, my, mx+1, my+1)
-	switch {
-	case g.optionsRect().Overlaps(pt):
+
+	if g.optsBtn != nil && g.optsBtn.Hovered {
 		g.hoverIcon = hoverOptions
-	case g.geyserRect().Overlaps(pt):
+	} else if g.geyserBtn != nil && g.geyserBtn.Hovered {
 		g.hoverIcon = hoverGeysers
-	case g.screenshotRect().Overlaps(pt):
+	} else if g.ssBtn != nil && g.ssBtn.Hovered {
 		g.hoverIcon = hoverScreenshot
-	case g.helpRect().Overlaps(pt):
+	} else if g.helpBtn != nil && g.helpBtn.Hovered {
 		g.hoverIcon = hoverHelp
 	}
+
 	if prev != g.hoverIcon {
 		g.needsRedraw = true
 	}

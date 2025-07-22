@@ -178,8 +178,9 @@ func (g *Game) handleTouchGestures(oldX, oldY float64) {
 					g.showShotMenu = false
 					g.noColor = false
 					g.needsRedraw = true
-				} else if !g.clickScreenshotMenu(mx, my) {
-					if !g.screenshotMenuRect().Overlaps(pt) && !g.screenshotRect().Overlaps(pt) {
+				} else {
+					winRect := g.screenshotMenuRect()
+					if !winRect.Overlaps(pt) && !g.screenshotRect().Overlaps(pt) {
 						g.showShotMenu = false
 						g.needsRedraw = true
 					}

@@ -157,6 +157,7 @@ func loadGameData(game *Game, coord, asteroidID string) {
 		}
 	}
 	game.startIconLoader(names)
+	game.initTray()
 	game.loading = false
 	game.needsRedraw = true
 }

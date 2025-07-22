@@ -181,8 +181,9 @@ func (g *Game) Update() error {
 					g.noColor = false
 					g.lastShotClick = time.Now()
 					g.needsRedraw = true
-				} else if !g.clickScreenshotMenu(mx, my) {
-					if !g.screenshotMenuRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) && !g.screenshotRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+				} else {
+					winRect := g.screenshotMenuRect()
+					if !winRect.Overlaps(image.Rect(mx, my, mx+1, my+1)) && !g.screenshotRect().Overlaps(image.Rect(mx, my, mx+1, my+1)) {
 						g.showShotMenu = false
 						g.noColor = false
 						g.needsRedraw = true

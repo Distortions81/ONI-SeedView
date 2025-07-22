@@ -52,9 +52,6 @@ func (g *Game) drawUI(screen *ebiten.Image) {
 		g.drawInfoPanel(screen, g.infoText, g.infoIcon, tx, ty)
 	}
 
-	if g.showShotMenu {
-		g.drawScreenshotMenu(screen)
-	}
 	if g.showOptions {
 		g.drawOptionsMenu(screen)
 	}

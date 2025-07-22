@@ -107,7 +107,12 @@ type Game struct {
 	lastGeyserClick   time.Time
 	lastAsteroidClick time.Time
 
-	ssWindow *eui.WindowData
+	ssWindow  *eui.WindowData
+	tray      *eui.ItemData
+	ssBtn     *eui.ItemData
+	helpBtn   *eui.ItemData
+	optsBtn   *eui.ItemData
+	geyserBtn *eui.ItemData
 }
 
 type label struct {
