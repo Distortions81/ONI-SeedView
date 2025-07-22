@@ -2,12 +2,12 @@ package main
 
 import (
 	"math"
+
+	eui "EUI/eui"
 )
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	scale := getHiDPIScale()
-	screenW := int(float64(outsideWidth) * scale)
-	screenH := int(float64(outsideHeight) * scale)
+	screenW, screenH := eui.Layout(outsideWidth, outsideHeight)
 
 	/*
 		if !g.screenshotMode {
