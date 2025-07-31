@@ -69,19 +69,6 @@ func (g *Game) drawUI(screen *ebiten.Image) {
 
 	g.needsRedraw = false
 	g.lastDraw = time.Now()
-	/*
-		if g.noColor {
-			if g.grayImage == nil || g.grayImage.Bounds().Dx() != g.width || g.grayImage.Bounds().Dy() != g.height {
-				g.grayImage = ebiten.NewImage(g.width, g.height)
-			}
-			g.grayImage.Clear()
-			g.grayImage.DrawImage(screen, nil)
-			screen.Clear()
-			op := &ebiten.DrawImageOptions{}
-			op.ColorM = grayColorM
-			screen.DrawImage(g.grayImage, op)
-		}
-	*/
 }
 
 func (g *Game) captureScreen(screen *ebiten.Image) {
@@ -94,7 +81,7 @@ func (g *Game) captureScreen(screen *ebiten.Image) {
 	img := &image.RGBA{Pix: pixels, Stride: 4 * b.Dx(), Rect: b}
 	if f, err := os.Create(g.screenshotPath); err == nil {
 		_ = bmp.Encode(f, img)
-		f.Close()
+		_ = f.Close()
 	}
 	g.captured = true
 }

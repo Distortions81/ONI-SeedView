@@ -10,7 +10,7 @@ import (
 
 func (g *Game) handleTouchGestures(oldX, oldY float64) {
 	// Touch gestures
-	touchIDs := ebiten.TouchIDs()
+	touchIDs := ebiten.AppendTouchIDs(nil)
 	justPressedIDs := inpututil.AppendJustPressedTouchIDs(nil)
 	if g.ssPending > 0 || g.skipClickTicks > 0 {
 		touchIDs = nil

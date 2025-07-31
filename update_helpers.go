@@ -134,7 +134,7 @@ func (g *Game) drawGeyserListScreen(dst *ebiten.Image) bool {
 }
 
 func (g *Game) drawLoadingScreen(dst *ebiten.Image) bool {
-	if !(g.loading || (len(g.biomes) == 0 && g.status != "")) {
+	if !g.loading && (len(g.biomes) != 0 || g.status == "") {
 		return false
 	}
 	dst.Fill(backgroundColor)
