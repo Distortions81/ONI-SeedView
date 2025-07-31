@@ -100,23 +100,6 @@ func (g *Game) drawInfoRow(dst *ebiten.Image, text string, icon *ebiten.Image, x
 	drawText(dst, text, x+iconW+gap, y+(h-txtH)/2, false)
 }
 
-func infoPanelSize(text string, icon *ebiten.Image) (int, int) {
-	txtW, txtH := textDimensions(text)
-	iconW, iconH := 0, 0
-	if icon != nil {
-		iconW = uiScaled(InfoIconSize)
-		iconH = uiScaled(InfoIconSize)
-	}
-	gap := uiScaled(4)
-	w := txtW + iconW + gap + uiScaled(8)
-	h := txtH
-	if iconH > txtH {
-		h = iconH
-	}
-	h += uiScaled(8)
-	return w, h
-}
-
 func infoRowSize(text string, icon *ebiten.Image) (int, int) {
 	txtW, txtH := textDimensions(text)
 	iconW, iconH := 0, 0

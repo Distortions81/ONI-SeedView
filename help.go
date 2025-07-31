@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"image/color"
 	"strings"
-
-	"github.com/hajimehoshi/ebiten/v2"
 )
 
 var helpMessage string
@@ -21,24 +19,6 @@ const (
 )
 
 var errorBorderColor = color.RGBA{R: 244, G: 67, B: 54, A: 255}
-
-var grayColorM = func() ebiten.ColorM {
-	var m ebiten.ColorM
-	const r = 0.299
-	const g = 0.587
-	const b = 0.114
-	m.SetElement(0, 0, r)
-	m.SetElement(0, 1, g)
-	m.SetElement(0, 2, b)
-	m.SetElement(1, 0, r)
-	m.SetElement(1, 1, g)
-	m.SetElement(1, 2, b)
-	m.SetElement(2, 0, r)
-	m.SetElement(2, 1, g)
-	m.SetElement(2, 2, b)
-	m.SetElement(3, 3, 1)
-	return m
-}()
 
 func init() {
 	lines := [][2]string{

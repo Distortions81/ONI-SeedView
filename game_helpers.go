@@ -97,7 +97,6 @@ type Game struct {
 
 	noColor   bool
 	ssNoColor bool
-	grayImage *ebiten.Image
 
 	lastHelpClick     time.Time
 	lastShotClick     time.Time
@@ -118,19 +117,12 @@ type touchPoint struct {
 	y int
 }
 
-type loadedIcon struct {
-	name string
-	img  *ebiten.Image
-}
-
 type geyserListItem struct {
 	text string
 	icon *ebiten.Image
 	w    int
 	h    int
 }
-
-func (g *Game) uiScale() float64 { return uiScale }
 
 func (g *Game) iconSize() int { return uiScaled(HelpIconSize) }
 
@@ -139,10 +131,6 @@ func (g *Game) filterMode() ebiten.Filter {
 		return ebiten.FilterLinear
 	}
 	return ebiten.FilterNearest
-}
-
-func (g *Game) inBounds(x, y int) bool {
-	return x >= 0 && x < g.width && y >= 0 && y < g.height
 }
 
 func drawPlusMinus(dst *ebiten.Image, rect image.Rectangle, minus bool) {

@@ -3,7 +3,7 @@ package main
 import (
 	"strings"
 
-	"github.com/hajimehoshi/ebiten/v2/text"
+	"golang.org/x/image/font"
 )
 
 func textDimensions(str string) (int, int) {
@@ -23,9 +23,10 @@ func textDimensions(str string) (int, int) {
 
 	width := 0
 	for _, l := range lines {
-		b := text.BoundString(notoFont, l)
-		if b.Dx() > width {
-			width = b.Dx()
+		b, _ := font.BoundString(notoFont, l)
+		w := (b.Max.X - b.Min.X).Ceil()
+		if w > width {
+			width = w
 		}
 	}
 	lineHeight := notoFont.Metrics().Height.Ceil()

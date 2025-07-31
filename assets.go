@@ -44,7 +44,7 @@ func assetExists(name string) bool {
 	if err != nil {
 		return false
 	}
-	f.Close()
+	defer func() { _ = f.Close() }()
 	return true
 }
 
@@ -76,7 +76,7 @@ func loadImageFile(name string) (*ebiten.Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	var src image.Image
 	ext := strings.ToLower(filepath.Ext(name))
 	switch ext {

@@ -21,6 +21,3 @@ func uiScaled(v int) int {
 func uiScaledF(v float64) float64 {
 	return v * uiScale * getHiDPIScale()
 }
-
-// uiScaleFactor returns the combined UI scale including the HiDPI factor.
-func (g *Game) uiScaleFactor() float64 { return uiScale * getHiDPIScale() }

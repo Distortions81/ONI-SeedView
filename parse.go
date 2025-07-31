@@ -6,6 +6,10 @@ import (
 )
 
 // parseBiomePaths converts the raw biome path string into structured paths.
+func isNameChar(c byte) bool {
+	return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_'
+}
+
 func parseBiomePaths(data string) []BiomePath {
 	data = strings.ReplaceAll(strings.ReplaceAll(strings.TrimSpace(data), "\r", ""), "\n", " ")
 	// Locate biome names followed by a colon without using regular expressions.
@@ -15,7 +19,7 @@ func parseBiomePaths(data string) []BiomePath {
 			start := i - 1
 			for start >= 0 {
 				c := data[start]
-				if !((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_') {
+				if !isNameChar(c) {
 					break
 				}
 				start--

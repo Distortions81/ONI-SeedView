@@ -45,14 +45,6 @@ func setFontSize(size float64) {
 	}
 }
 
-func increaseFontSize() { setFontSize(fontSize + 3) }
-
-func decreaseFontSize() {
-	if fontSize > 6 {
-		setFontSize(fontSize - 3)
-	}
-}
-
 func registerFontChange(fn func()) {
 	fontChange = append(fontChange, fn)
 }
