@@ -49,7 +49,9 @@ func (g *Game) drawUI(screen *ebiten.Image) {
 		ty := g.height - panelH - uiScaled(30)
 		g.drawInfoPanel(screen, g.infoText, g.infoIcon, tx, ty)
 	}
+}
 
+func (g *Game) drawOverlayMenus(screen *ebiten.Image) {
 	if g.showShotMenu {
 		g.drawScreenshotMenu(screen)
 	}

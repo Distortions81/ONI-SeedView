@@ -429,6 +429,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 
 		g.drawUI(screen)
+		g.drawOverlayMenus(screen)
 	}
 	g.captureScreen(screen)
 
