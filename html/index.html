@@ -118,7 +118,8 @@
     <div id="message"></div>
   </div>
   <script>
-  const baseURL = "https://ingest.mapsnotincluded.org/coordinate/";
+  const primaryURL = "https://oni-worlds.stefanoltmann.de/";
+  const fallbackURL = "https://data.mapsnotincluded.org/oni-worlds/";
   function seedFromURL() {
     const search = window.location.search.slice(1);
     for (const part of search.split('&')) {
@@ -160,7 +161,15 @@
     if (!seed) return;
     document.getElementById('message').textContent = 'Checking…';
     try {
-      const resp = await fetch(baseURL + encodeURIComponent(seed));
+      let resp;
+      try {
+        resp = await fetch(primaryURL + encodeURIComponent(seed), { headers: { 'Accept': 'application/json' } });
+        if (!resp.ok) {
+          throw new Error('primary failed');
+        }
+      } catch (_) {
+        resp = await fetch(fallbackURL + encodeURIComponent(seed), { headers: { 'Accept': 'application/json' } });
+      }
       if (resp.ok) {
         if (resp.body && typeof resp.body.cancel === 'function') {
           resp.body.cancel();
