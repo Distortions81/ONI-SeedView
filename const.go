@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	ClientVersion    = "v0.0.9-2507061929"
+	ClientVersion    = "v0.1.0-2508202308"
 	BaseURL          = "https://oni-worlds.stefanoltmann.de/"
 	FallbackBaseURL  = "https://data.mapsnotincluded.org/oni-worlds/"
 	AcceptJSONHeader = "application/json"
