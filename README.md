@@ -6,7 +6,7 @@ Oni-SeedView is a small viewer for **Oxygen Not Included** seed data. It fetches
 
 - ~4.6k lines of Go code
 - Engine: Ebiten 2
-- Major libraries: `fxamacker/cbor`, `golang.org/x/image`
+- Major libraries: `golang.org/x/image`
 
 ## Quick Start
 

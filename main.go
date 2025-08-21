@@ -77,7 +77,7 @@ func main() {
 }
 
 func loadGameData(game *Game, coord, asteroidID string) {
-	cborData, err := fetchSeedCBOR(coord)
+	jsonData, err := fetchSeedJSON(coord)
 	if err != nil {
 		game.status = "Error: " + err.Error()
 		game.statusError = false
@@ -85,7 +85,7 @@ func loadGameData(game *Game, coord, asteroidID string) {
 		game.loading = false
 		return
 	}
-	seed, err := decodeSeed(cborData)
+	seed, err := decodeSeed(jsonData)
 	game.asteroids = seed.Asteroids
 	if err != nil {
 		game.status = "Error: " + err.Error()

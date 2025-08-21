@@ -9,8 +9,9 @@ import (
 
 const (
 	ClientVersion    = "v0.0.9-2507061929"
-	BaseURL          = "https://ingest.mapsnotincluded.org/coordinate/"
-	AcceptCBORHeader = "application/cbor"
+	BaseURL          = "https://oni-worlds.stefanoltmann.de/"
+	FallbackBaseURL  = "https://data.mapsnotincluded.org/oni-worlds/"
+	AcceptJSONHeader = "application/json"
 	PanSpeed         = 15
 	// CameraMargin controls how far the world can be panned
 	// beyond the visible screen in pixels.
