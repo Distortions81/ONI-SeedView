@@ -23,7 +23,7 @@ const (
 
 type Geyser struct {
 	state                 protoimpl.MessageState `protogen:"open.v1"`
-	Id                    string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id                    int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	X                     int32                  `protobuf:"varint,2,opt,name=x,proto3" json:"x,omitempty"`
 	Y                     int32                  `protobuf:"varint,3,opt,name=y,proto3" json:"y,omitempty"`
 	EmitRate              int32                  `protobuf:"varint,4,opt,name=emitRate,proto3" json:"emitRate,omitempty"`
@@ -66,11 +66,11 @@ func (*Geyser) Descriptor() ([]byte, []int) {
 	return file_data_pb_seed_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Geyser) GetId() string {
+func (x *Geyser) GetId() int32 {
 	if x != nil {
 		return x.Id
 	}
-	return ""
+	return 0
 }
 
 func (x *Geyser) GetX() int32 {
@@ -347,7 +347,7 @@ const file_data_pb_seed_proto_rawDesc = "" +
 	"\n" +
 	"\x12data/pb/seed.proto\x12\x06seedpb\"\x9a\x02\n" +
 	"\x06Geyser\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\f\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\x12\f\n" +
 	"\x01x\x18\x02 \x01(\x05R\x01x\x12\f\n" +
 	"\x01y\x18\x03 \x01(\x05R\x01y\x12\x1a\n" +
 	"\bemitRate\x18\x04 \x01(\x05R\bemitRate\x12 \n" +

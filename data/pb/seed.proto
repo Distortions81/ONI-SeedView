@@ -3,7 +3,7 @@ package seedpb;
 option go_package = "oni-view/data/pb;seedpb";
 
 message Geyser {
-  string id = 1;
+  int32 id = 1;
   int32 x = 2;
   int32 y = 3;
   int32 emitRate = 4;
