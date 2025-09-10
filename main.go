@@ -77,23 +77,30 @@ func main() {
 }
 
 func loadGameData(game *Game, coord, asteroidID string) {
-	jsonData, err := fetchSeedJSON(coord)
-	if err != nil {
-		game.status = "Error: " + err.Error()
-		game.statusError = false
-		game.needsRedraw = true
-		game.loading = false
-		return
+	data, err := fetchSeedProto(coord)
+	var seed *SeedData
+	if err == nil {
+		seed, err = decodeSeedProto(data)
 	}
-	seed, err := decodeSeed(jsonData)
+	if err != nil {
+		jsonData, jerr := fetchSeedJSON(coord)
+		if jerr != nil {
+			game.status = "Error: " + jerr.Error()
+			game.statusError = false
+			game.needsRedraw = true
+			game.loading = false
+			return
+		}
+		seed, err = decodeSeed(jsonData)
+		if err != nil {
+			game.status = "Error: " + err.Error()
+			game.statusError = false
+			game.needsRedraw = true
+			game.loading = false
+			return
+		}
+	}
 	game.asteroids = seed.Asteroids
-	if err != nil {
-		game.status = "Error: " + err.Error()
-		game.statusError = false
-		game.needsRedraw = true
-		game.loading = false
-		return
-	}
 	astIdxSel := 0
 	if game.asteroidSpecified {
 		astIdxSel = asteroidIndexByID(seed.Asteroids, asteroidID)
