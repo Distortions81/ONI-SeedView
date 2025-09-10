@@ -88,4 +88,12 @@ func TestDecodeSeedProto(t *testing.T) {
 	if len(a.BiomePaths.Paths) != 1 || a.BiomePaths.Paths[0].Name != "B1" {
 		t.Fatalf("unexpected biome paths: %+v", a.BiomePaths)
 	}
+	bp := a.BiomePaths.Paths[0]
+	if len(bp.Polygons) != 1 || len(bp.Polygons[0]) != 2 {
+		t.Fatalf("unexpected polygon count: %+v", bp.Polygons)
+	}
+	p0 := bp.Polygons[0]
+	if p0[0] != (Point{X: 1, Y: 2}) || p0[1] != (Point{X: 3, Y: 4}) {
+		t.Fatalf("unexpected polygon points: %+v", p0)
+	}
 }

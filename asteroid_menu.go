@@ -206,7 +206,7 @@ func (g *Game) loadAsteroid(ast Asteroid) {
 	g.legendColors = nil
 	g.selectedItem = -1
 	g.itemScroll = 0
-	bps := parseBiomePaths(ast.BiomePaths)
+	bps := ast.BiomePaths.Paths
 	g.geysers = ast.Geysers
 	g.pois = ast.POIs
 	g.biomes = bps
