@@ -138,7 +138,7 @@ func decodeSeedProto(protoData []byte) (*SeedData, error) {
 		}
 		for _, p := range a.PointsOfInterest {
 			ast.POIs = append(ast.POIs, PointOfInterest{
-				ID: p.Id,
+				ID: p.Id.String(),
 				X:  int(p.X),
 				Y:  int(p.Y),
 			})

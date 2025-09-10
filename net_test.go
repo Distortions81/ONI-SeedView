@@ -54,7 +54,7 @@ func TestDecodeSeedProto(t *testing.T) {
 				SizeX:            10,
 				SizeY:            20,
 				Geysers:          []*seedpb.Geyser{{Id: 0, X: 1, Y: 2}},
-				PointsOfInterest: []*seedpb.PointOfInterest{{Id: "p1", X: 3, Y: 4}},
+				PointsOfInterest: []*seedpb.PointOfInterest{{Id: seedpb.PointOfInterestType_Headquarters, X: 3, Y: 4}},
 				BiomePaths:       "3:1 2 2 2",
 			},
 		},
@@ -77,7 +77,7 @@ func TestDecodeSeedProto(t *testing.T) {
 	if len(a.Geysers) != 1 || a.Geysers[0].ID != "steam" {
 		t.Fatalf("unexpected geysers: %+v", a.Geysers)
 	}
-	if len(a.POIs) != 1 || a.POIs[0].ID != "p1" {
+	if len(a.POIs) != 1 || a.POIs[0].ID != "Headquarters" {
 		t.Fatalf("unexpected pois: %+v", a.POIs)
 	}
 	if len(a.BiomePaths.Paths) != 1 || a.BiomePaths.Paths[0].Name != "Sandstone" {

@@ -21,6 +21,100 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type PointOfInterestType int32
+
+const (
+	PointOfInterestType_Headquarters               PointOfInterestType = 0
+	PointOfInterestType_WarpConduitSender          PointOfInterestType = 1
+	PointOfInterestType_WarpConduitReceiver        PointOfInterestType = 2
+	PointOfInterestType_WarpPortal                 PointOfInterestType = 3
+	PointOfInterestType_WarpReceiver               PointOfInterestType = 4
+	PointOfInterestType_GeneShuffler               PointOfInterestType = 5
+	PointOfInterestType_MassiveHeatSink            PointOfInterestType = 6
+	PointOfInterestType_SapTree                    PointOfInterestType = 7
+	PointOfInterestType_GravitasPedestal           PointOfInterestType = 8
+	PointOfInterestType_PropSurfaceSatellite1      PointOfInterestType = 9
+	PointOfInterestType_PropSurfaceSatellite2      PointOfInterestType = 10
+	PointOfInterestType_PropSurfaceSatellite3      PointOfInterestType = 11
+	PointOfInterestType_TemporalTearOpener         PointOfInterestType = 12
+	PointOfInterestType_CryoTank                   PointOfInterestType = 13
+	PointOfInterestType_PropFacilityStatue         PointOfInterestType = 14
+	PointOfInterestType_GeothermalVentEntity       PointOfInterestType = 15
+	PointOfInterestType_GeothermalControllerEntity PointOfInterestType = 16
+	PointOfInterestType_POICeresTechUnlock         PointOfInterestType = 17
+)
+
+// Enum value maps for PointOfInterestType.
+var (
+	PointOfInterestType_name = map[int32]string{
+		0:  "Headquarters",
+		1:  "WarpConduitSender",
+		2:  "WarpConduitReceiver",
+		3:  "WarpPortal",
+		4:  "WarpReceiver",
+		5:  "GeneShuffler",
+		6:  "MassiveHeatSink",
+		7:  "SapTree",
+		8:  "GravitasPedestal",
+		9:  "PropSurfaceSatellite1",
+		10: "PropSurfaceSatellite2",
+		11: "PropSurfaceSatellite3",
+		12: "TemporalTearOpener",
+		13: "CryoTank",
+		14: "PropFacilityStatue",
+		15: "GeothermalVentEntity",
+		16: "GeothermalControllerEntity",
+		17: "POICeresTechUnlock",
+	}
+	PointOfInterestType_value = map[string]int32{
+		"Headquarters":               0,
+		"WarpConduitSender":          1,
+		"WarpConduitReceiver":        2,
+		"WarpPortal":                 3,
+		"WarpReceiver":               4,
+		"GeneShuffler":               5,
+		"MassiveHeatSink":            6,
+		"SapTree":                    7,
+		"GravitasPedestal":           8,
+		"PropSurfaceSatellite1":      9,
+		"PropSurfaceSatellite2":      10,
+		"PropSurfaceSatellite3":      11,
+		"TemporalTearOpener":         12,
+		"CryoTank":                   13,
+		"PropFacilityStatue":         14,
+		"GeothermalVentEntity":       15,
+		"GeothermalControllerEntity": 16,
+		"POICeresTechUnlock":         17,
+	}
+)
+
+func (x PointOfInterestType) Enum() *PointOfInterestType {
+	p := new(PointOfInterestType)
+	*p = x
+	return p
+}
+
+func (x PointOfInterestType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (PointOfInterestType) Descriptor() protoreflect.EnumDescriptor {
+	return file_data_pb_seed_proto_enumTypes[0].Descriptor()
+}
+
+func (PointOfInterestType) Type() protoreflect.EnumType {
+	return &file_data_pb_seed_proto_enumTypes[0]
+}
+
+func (x PointOfInterestType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use PointOfInterestType.Descriptor instead.
+func (PointOfInterestType) EnumDescriptor() ([]byte, []int) {
+	return file_data_pb_seed_proto_rawDescGZIP(), []int{0}
+}
+
 type Geyser struct {
 	state                 protoimpl.MessageState `protogen:"open.v1"`
 	Id                    int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -131,7 +225,7 @@ func (x *Geyser) GetActiveCyclesRounded() int32 {
 
 type PointOfInterest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            PointOfInterestType    `protobuf:"varint,1,opt,name=id,proto3,enum=seedpb.PointOfInterestType" json:"id,omitempty"`
 	X             int32                  `protobuf:"varint,2,opt,name=x,proto3" json:"x,omitempty"`
 	Y             int32                  `protobuf:"varint,3,opt,name=y,proto3" json:"y,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -168,11 +262,11 @@ func (*PointOfInterest) Descriptor() ([]byte, []int) {
 	return file_data_pb_seed_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *PointOfInterest) GetId() string {
+func (x *PointOfInterest) GetId() PointOfInterestType {
 	if x != nil {
 		return x.Id
 	}
-	return ""
+	return PointOfInterestType_Headquarters
 }
 
 func (x *PointOfInterest) GetX() int32 {
@@ -355,9 +449,9 @@ const file_data_pb_seed_proto_rawDesc = "" +
 	"\bidleTime\x18\x06 \x01(\x05R\bidleTime\x12\"\n" +
 	"\feruptionTime\x18\a \x01(\x05R\feruptionTime\x124\n" +
 	"\x15dormancyCyclesRounded\x18\b \x01(\x05R\x15dormancyCyclesRounded\x120\n" +
-	"\x13activeCyclesRounded\x18\t \x01(\x05R\x13activeCyclesRounded\"=\n" +
-	"\x0fPointOfInterest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\f\n" +
+	"\x13activeCyclesRounded\x18\t \x01(\x05R\x13activeCyclesRounded\"Z\n" +
+	"\x0fPointOfInterest\x12+\n" +
+	"\x02id\x18\x01 \x01(\x0e2\x1b.seedpb.PointOfInterestTypeR\x02id\x12\f\n" +
 	"\x01x\x18\x02 \x01(\x05R\x01x\x12\f\n" +
 	"\x01y\x18\x03 \x01(\x05R\x01y\"\xb9\x02\n" +
 	"\bAsteroid\x12\x0e\n" +
@@ -373,7 +467,28 @@ const file_data_pb_seed_proto_rawDesc = "" +
 	"\x10pointsOfInterest\x18\b \x03(\v2\x17.seedpb.PointOfInterestR\x10pointsOfInterest\x12(\n" +
 	"\ageysers\x18\t \x03(\v2\x0e.seedpb.GeyserR\ageysers\"9\n" +
 	"\aCluster\x12.\n" +
-	"\tasteroids\x18\a \x03(\v2\x10.seedpb.AsteroidR\tasteroidsB\x19Z\x17oni-view/data/pb;seedpbb\x06proto3"
+	"\tasteroids\x18\a \x03(\v2\x10.seedpb.AsteroidR\tasteroids*\xa4\x03\n" +
+	"\x13PointOfInterestType\x12\x10\n" +
+	"\fHeadquarters\x10\x00\x12\x15\n" +
+	"\x11WarpConduitSender\x10\x01\x12\x17\n" +
+	"\x13WarpConduitReceiver\x10\x02\x12\x0e\n" +
+	"\n" +
+	"WarpPortal\x10\x03\x12\x10\n" +
+	"\fWarpReceiver\x10\x04\x12\x10\n" +
+	"\fGeneShuffler\x10\x05\x12\x13\n" +
+	"\x0fMassiveHeatSink\x10\x06\x12\v\n" +
+	"\aSapTree\x10\a\x12\x14\n" +
+	"\x10GravitasPedestal\x10\b\x12\x19\n" +
+	"\x15PropSurfaceSatellite1\x10\t\x12\x19\n" +
+	"\x15PropSurfaceSatellite2\x10\n" +
+	"\x12\x19\n" +
+	"\x15PropSurfaceSatellite3\x10\v\x12\x16\n" +
+	"\x12TemporalTearOpener\x10\f\x12\f\n" +
+	"\bCryoTank\x10\r\x12\x16\n" +
+	"\x12PropFacilityStatue\x10\x0e\x12\x18\n" +
+	"\x14GeothermalVentEntity\x10\x0f\x12\x1e\n" +
+	"\x1aGeothermalControllerEntity\x10\x10\x12\x16\n" +
+	"\x12POICeresTechUnlock\x10\x11B\x19Z\x17oni-view/data/pb;seedpbb\x06proto3"
 
 var (
 	file_data_pb_seed_proto_rawDescOnce sync.Once
@@ -387,22 +502,25 @@ func file_data_pb_seed_proto_rawDescGZIP() []byte {
 	return file_data_pb_seed_proto_rawDescData
 }
 
+var file_data_pb_seed_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_data_pb_seed_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_data_pb_seed_proto_goTypes = []any{
-	(*Geyser)(nil),          // 0: seedpb.Geyser
-	(*PointOfInterest)(nil), // 1: seedpb.PointOfInterest
-	(*Asteroid)(nil),        // 2: seedpb.Asteroid
-	(*Cluster)(nil),         // 3: seedpb.Cluster
+	(PointOfInterestType)(0), // 0: seedpb.PointOfInterestType
+	(*Geyser)(nil),           // 1: seedpb.Geyser
+	(*PointOfInterest)(nil),  // 2: seedpb.PointOfInterest
+	(*Asteroid)(nil),         // 3: seedpb.Asteroid
+	(*Cluster)(nil),          // 4: seedpb.Cluster
 }
 var file_data_pb_seed_proto_depIdxs = []int32{
-	1, // 0: seedpb.Asteroid.pointsOfInterest:type_name -> seedpb.PointOfInterest
-	0, // 1: seedpb.Asteroid.geysers:type_name -> seedpb.Geyser
-	2, // 2: seedpb.Cluster.asteroids:type_name -> seedpb.Asteroid
-	3, // [3:3] is the sub-list for method output_type
-	3, // [3:3] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	0, // 0: seedpb.PointOfInterest.id:type_name -> seedpb.PointOfInterestType
+	2, // 1: seedpb.Asteroid.pointsOfInterest:type_name -> seedpb.PointOfInterest
+	1, // 2: seedpb.Asteroid.geysers:type_name -> seedpb.Geyser
+	3, // 3: seedpb.Cluster.asteroids:type_name -> seedpb.Asteroid
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_data_pb_seed_proto_init() }
@@ -415,13 +533,14 @@ func file_data_pb_seed_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_data_pb_seed_proto_rawDesc), len(file_data_pb_seed_proto_rawDesc)),
-			NumEnums:      0,
+			NumEnums:      1,
 			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
 		GoTypes:           file_data_pb_seed_proto_goTypes,
 		DependencyIndexes: file_data_pb_seed_proto_depIdxs,
+		EnumInfos:         file_data_pb_seed_proto_enumTypes,
 		MessageInfos:      file_data_pb_seed_proto_msgTypes,
 	}.Build()
 	File_data_pb_seed_proto = out.File
