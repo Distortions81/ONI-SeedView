@@ -14,6 +14,68 @@ import (
 
 var seedProtoBaseURL = ProtoBaseURL
 
+// geyserTypeFromID maps numeric geyser IDs to their string descriptors.
+func geyserTypeFromID(id int32) string {
+	switch id {
+	case 0:
+		return "steam"
+	case 1:
+		return "hot_hydrogen"
+	case 2:
+		return "methane"
+	case 3:
+		return "chlorine_gas"
+	case 4:
+		return "chlorine_gas_cool"
+	case 5:
+		return "hot_steam"
+	case 6:
+		return "hot_co2"
+	case 7:
+		return "hot_po2"
+	case 8:
+		return "slimy_po2"
+	case 9:
+		return "hot_water"
+	case 10:
+		return "slush_water"
+	case 11:
+		return "filthy_water"
+	case 12:
+		return "slush_salt_water"
+	case 13:
+		return "salt_water"
+	case 14:
+		return "liquid_co2"
+	case 15:
+		return "oil_drip"
+	case 16:
+		return "liquid_sulfur"
+	case 17:
+		return "molten_iron"
+	case 18:
+		return "molten_copper"
+	case 19:
+		return "molten_gold"
+	case 20:
+		return "molten_aluminum"
+	case 21:
+		return "molten_cobalt"
+	case 22:
+		return "molten_tungsten"
+	case 23:
+		return "molten_niobium"
+	case 24:
+		return "big_volcano"
+	case 25:
+		return "small_volcano"
+	case 26:
+		return "OilWell"
+	default:
+		return ""
+	}
+}
+
 // fetchSeedProto retrieves the seed data in protobuf format for a given coordinate.
 // It requests the protobuf endpoint and transparently decompresses gzip-encoded responses.
 func fetchSeedProto(coordinate string) ([]byte, error) {
@@ -63,7 +125,7 @@ func decodeSeedProto(protoData []byte) (*SeedData, error) {
 		}
 		for _, g := range a.Geysers {
 			ast.Geysers = append(ast.Geysers, Geyser{
-				ID:             g.Id,
+				ID:             geyserTypeFromID(g.Id),
 				X:              int(g.X),
 				Y:              int(g.Y),
 				EmitRate:       float64(g.EmitRate),
