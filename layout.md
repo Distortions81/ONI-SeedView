@@ -23,8 +23,8 @@ This document explains how the Oni-SeedView repository is organized. It expands 
 - `assets.go` – Loads and caches embedded images. Also converts filenames to the camel case used by some assets.
 - `colors.go` and `const.go` – Color definitions and user‑interface constants.
 - `parse.go` – Converts biome path strings into coordinate lists.
-- `types.go` – Data structures for geysers, POIs and asteroids used when decoding JSON seed data.
-- `net.go` – Performs HTTP requests to `https://oni-worlds.stefanoltmann.de` with a fallback to `https://data.mapsnotincluded.org/oni-worlds/` and decodes JSON via Go's `encoding/json`.
+- `types.go` – Data structures for geysers, POIs and asteroids.
+- `net.go` – Performs HTTP requests to `https://oni-data.stefanoltmann.de/COORDINATE/` and decodes protobuf data via Go's `google.golang.org/protobuf`.
 - `fonts.go` – Handles font loading and size adjustments.
 - `text_draw.go`, `textutil.go` – Text rendering utilities.
 - `touch_input.go`, `mobile_detect.go` – Touch gesture handling and simple mobile detection.
@@ -32,8 +32,8 @@ This document explains how the Oni-SeedView repository is organized. It expands 
 
 ## Data Flow and State
 
-Seed information is downloaded by `fetchSeedJSON` in `net.go` and decoded to the
-`SeedData` struct via `decodeSeed`. Each `Asteroid` entry stores geysers, POIs
+Seed information is downloaded by `fetchSeedProto` in `net.go` and decoded to the
+`SeedData` struct via `decodeSeedProto`. Each `Asteroid` entry stores geysers, POIs
 and biome polygon paths. Functions in `parse.go` convert those paths into
 coordinate lists. The resulting slices are stored on the `Game` struct defined
 in `game_helpers.go` along with runtime assets, camera coordinates and menu

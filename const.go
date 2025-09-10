@@ -9,10 +9,7 @@ import (
 
 const (
 	ClientVersion     = "v0.1.0-2508202308"
-	BaseURL           = "https://oni-worlds.stefanoltmann.de/"
-	FallbackBaseURL   = "https://data.mapsnotincluded.org/oni-worlds/"
 	ProtoBaseURL      = "https://oni-data.stefanoltmann.de/COORDINATE/"
-	AcceptJSONHeader  = "application/json"
 	AcceptProtoHeader = "application/protobuf"
 	GzipEncoding      = "gzip"
 	PanSpeed          = 15

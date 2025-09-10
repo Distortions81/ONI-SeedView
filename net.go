@@ -2,10 +2,10 @@ package main
 
 import (
 	"compress/gzip"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"google.golang.org/protobuf/proto"
 	seedpb "oni-view/data/pb"
@@ -13,43 +13,10 @@ import (
 
 var seedProtoBaseURL = ProtoBaseURL
 
-// fetchSeedJSON retrieves the seed data in JSON format for a given coordinate.
-// It first tries the primary URL and falls back to the secondary if needed.
-func fetchSeedJSON(coordinate string) ([]byte, error) {
-	urls := []string{
-		BaseURL + coordinate,
-		FallbackBaseURL + coordinate,
-	}
-
-	var lastErr error
-	for _, url := range urls {
-		req, _ := http.NewRequest("GET", url, nil)
-		req.Header.Set("Accept", AcceptJSONHeader)
-
-		resp, err := http.DefaultClient.Do(req)
-		if err != nil {
-			lastErr = fmt.Errorf("request failed: %v", err)
-			continue
-		}
-		body, err := io.ReadAll(resp.Body)
-		resp.Body.Close()
-		if err != nil {
-			lastErr = fmt.Errorf("read failed: %v", err)
-			continue
-		}
-		if resp.StatusCode != http.StatusOK {
-			lastErr = fmt.Errorf("unexpected status %d: %s", resp.StatusCode, body)
-			continue
-		}
-		return body, nil
-	}
-	return nil, lastErr
-}
-
 // fetchSeedProto retrieves the seed data in protobuf format for a given coordinate.
 // It requests the protobuf endpoint and transparently decompresses gzip-encoded responses.
 func fetchSeedProto(coordinate string) ([]byte, error) {
-	url := seedProtoBaseURL + coordinate
+	url := strings.Replace(seedProtoBaseURL, "COORDINATE", coordinate, 1)
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("Accept", AcceptProtoHeader)
 	req.Header.Set("Accept-Encoding", GzipEncoding)
@@ -77,15 +44,6 @@ func fetchSeedProto(coordinate string) ([]byte, error) {
 		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, body)
 	}
 	return body, nil
-}
-
-// decodeSeed parses the JSON seed data into SeedData.
-func decodeSeed(jsonData []byte) (*SeedData, error) {
-	var seed SeedData
-	if err := json.Unmarshal(jsonData, &seed); err != nil {
-		return nil, fmt.Errorf("JSON decode failed: %v", err)
-	}
-	return &seed, nil
 }
 
 // decodeSeedProto parses the protobuf seed data into SeedData.
