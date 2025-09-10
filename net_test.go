@@ -28,7 +28,7 @@ func TestFetchSeedProtoDecompressesGzip(t *testing.T) {
 	defer srv.Close()
 
 	old := seedProtoBaseURL
-	seedProtoBaseURL = srv.URL + "/"
+	seedProtoBaseURL = srv.URL + "/COORDINATE/"
 	defer func() { seedProtoBaseURL = old }()
 
 	body, err := fetchSeedProto("test")

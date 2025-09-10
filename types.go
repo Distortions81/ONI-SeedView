@@ -30,26 +30,26 @@ type BiomePath struct {
 }
 
 type BiomePathsCompact struct {
-	Paths []BiomePath `json:"paths"`
+	Paths []BiomePath
 }
 
 type Asteroid struct {
-	ID         string            `json:"id"`
-	SizeX      int               `json:"sizeX"`
-	SizeY      int               `json:"sizeY"`
-	Geysers    []Geyser          `json:"geysers"`
-	POIs       []PointOfInterest `json:"pointsOfInterest"`
-	BiomePaths BiomePathsCompact `json:"biomePaths"`
+	ID         string
+	SizeX      int
+	SizeY      int
+	Geysers    []Geyser
+	POIs       []PointOfInterest
+	BiomePaths BiomePathsCompact
 }
 
 type SeedData struct {
-	Asteroids []Asteroid `json:"asteroids"`
+	Asteroids []Asteroid
 }
 
 type nameTables struct {
-	Biomes  map[string]string `json:"biomes"`
-	Geysers map[string]string `json:"geysers"`
-	POIs    map[string]string `json:"pois"`
+	Biomes  map[string]string
+	Geysers map[string]string
+	POIs    map[string]string
 }
 
 var names = nameTables{
