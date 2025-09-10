@@ -1,11 +1,18 @@
 package main
 
 import (
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+
+	"google.golang.org/protobuf/proto"
+
+	"oni-view/seedproto"
 )
+
+var seedProtoBaseURL = ProtoBaseURL
 
 // fetchSeedJSON retrieves the seed data in JSON format for a given coordinate.
 // It first tries the primary URL and falls back to the secondary if needed.
@@ -40,6 +47,38 @@ func fetchSeedJSON(coordinate string) ([]byte, error) {
 	return nil, lastErr
 }
 
+// fetchSeedProto retrieves the seed data in protobuf format for a given coordinate.
+// It requests the protobuf endpoint and transparently decompresses gzip-encoded responses.
+func fetchSeedProto(coordinate string) ([]byte, error) {
+	url := seedProtoBaseURL + coordinate
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("Accept", AcceptProtoHeader)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	var reader io.Reader = resp.Body
+	if resp.Header.Get("Content-Encoding") == GzipEncoding {
+		gz, err := gzip.NewReader(resp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("gzip init failed: %v", err)
+		}
+		defer gz.Close()
+		reader = gz
+	}
+	body, err := io.ReadAll(reader)
+	if err != nil {
+		return nil, fmt.Errorf("read failed: %v", err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status %d: %s", resp.StatusCode, body)
+	}
+	return body, nil
+}
+
 // decodeSeed parses the JSON seed data into SeedData.
 func decodeSeed(jsonData []byte) (*SeedData, error) {
 	var seed SeedData
@@ -47,4 +86,43 @@ func decodeSeed(jsonData []byte) (*SeedData, error) {
 		return nil, fmt.Errorf("JSON decode failed: %v", err)
 	}
 	return &seed, nil
+}
+
+// decodeSeedProto parses the protobuf seed data into SeedData.
+func decodeSeedProto(protoData []byte) (*SeedData, error) {
+	var pb seedproto.SeedDataProto
+	if err := proto.Unmarshal(protoData, &pb); err != nil {
+		return nil, fmt.Errorf("protobuf decode failed: %v", err)
+	}
+	seed := &SeedData{}
+	for _, a := range pb.Asteroids {
+		ast := Asteroid{
+			ID:         a.Id,
+			SizeX:      int(a.SizeX),
+			SizeY:      int(a.SizeY),
+			BiomePaths: a.BiomePaths,
+		}
+		for _, g := range a.Geysers {
+			ast.Geysers = append(ast.Geysers, Geyser{
+				ID:             g.Id,
+				X:              int(g.X),
+				Y:              int(g.Y),
+				ActiveCycles:   g.ActiveCycles,
+				AvgEmitRate:    g.AvgEmitRate,
+				DormancyCycles: g.DormancyCycles,
+				EmitRate:       g.EmitRate,
+				EruptionTime:   g.EruptionTime,
+				IdleTime:       g.IdleTime,
+			})
+		}
+		for _, p := range a.PointsOfInterest {
+			ast.POIs = append(ast.POIs, PointOfInterest{
+				ID: p.Id,
+				X:  int(p.X),
+				Y:  int(p.Y),
+			})
+		}
+		seed.Asteroids = append(seed.Asteroids, ast)
+	}
+	return seed, nil
 }
