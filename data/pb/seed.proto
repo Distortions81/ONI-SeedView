@@ -2,34 +2,16 @@ syntax = "proto3";
 package seedpb;
 option go_package = "oni-view/data/pb;seedpb";
 
-message Point {
-  int32 x = 1;
-  int32 y = 2;
-}
-
-message Polygon {
-  repeated Point points = 1;
-}
-
-message BiomePath {
-  string name = 1;
-  repeated Polygon polygons = 2;
-}
-
-message BiomePathsCompact {
-  repeated BiomePath paths = 1;
-}
-
 message Geyser {
   string id = 1;
   int32 x = 2;
   int32 y = 3;
-  double activeCycles = 4;
-  double avgEmitRate = 5;
-  double dormancyCycles = 6;
-  double emitRate = 7;
-  double eruptionTime = 8;
-  double idleTime = 9;
+  int32 emitRate = 4;
+  int32 avgEmitRate = 5;
+  int32 idleTime = 6;
+  int32 eruptionTime = 7;
+  int32 dormancyCyclesRounded = 8;
+  int32 activeCyclesRounded = 9;
 }
 
 message PointOfInterest {
@@ -40,13 +22,16 @@ message PointOfInterest {
 
 message Asteroid {
   string id = 1;
-  int32 sizeX = 2;
-  int32 sizeY = 3;
-  repeated Geyser geysers = 4;
-  repeated PointOfInterest pointsOfInterest = 5;
-  BiomePathsCompact biomePaths = 6;
+  int32 offsetX = 2;
+  int32 offsetY = 3;
+  int32 sizeX = 4;
+  int32 sizeY = 5;
+  int32 worldTraitsBitmask = 6;
+  string biomePaths = 7;
+  repeated PointOfInterest pointsOfInterest = 8;
+  repeated Geyser geysers = 9;
 }
 
 message Cluster {
-  repeated Asteroid asteroids = 1;
+  repeated Asteroid asteroids = 7;
 }

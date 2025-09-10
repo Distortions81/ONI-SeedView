@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"google.golang.org/protobuf/proto"
@@ -65,12 +66,12 @@ func decodeSeedProto(protoData []byte) (*SeedData, error) {
 				ID:             g.Id,
 				X:              int(g.X),
 				Y:              int(g.Y),
-				ActiveCycles:   g.ActiveCycles,
-				AvgEmitRate:    g.AvgEmitRate,
-				DormancyCycles: g.DormancyCycles,
-				EmitRate:       g.EmitRate,
-				EruptionTime:   g.EruptionTime,
-				IdleTime:       g.IdleTime,
+				EmitRate:       float64(g.EmitRate),
+				AvgEmitRate:    float64(g.AvgEmitRate),
+				IdleTime:       float64(g.IdleTime),
+				EruptionTime:   float64(g.EruptionTime),
+				DormancyCycles: float64(g.DormancyCyclesRounded),
+				ActiveCycles:   float64(g.ActiveCyclesRounded),
 			})
 		}
 		for _, p := range a.PointsOfInterest {
@@ -80,27 +81,86 @@ func decodeSeedProto(protoData []byte) (*SeedData, error) {
 				Y:  int(p.Y),
 			})
 		}
-		ast.BiomePaths = convertBiomePaths(a.BiomePaths)
+		ast.BiomePaths = parseBiomePaths(a.BiomePaths)
 		seed.Asteroids = append(seed.Asteroids, ast)
 	}
 	return seed, nil
 }
 
-func convertBiomePaths(bp *seedpb.BiomePathsCompact) BiomePathsCompact {
-	if bp == nil {
+// parseBiomePaths decodes the compact biome path string format into a
+// BiomePathsCompact structure. The format uses newline-separated zone entries
+// where each line contains a numeric zone ID followed by colon-separated delta
+// encoded coordinate pairs for each polygon.
+func parseBiomePaths(s string) BiomePathsCompact {
+	if s == "" {
 		return BiomePathsCompact{}
 	}
+	zoneNames := map[int]string{
+		0:  "FrozenWastes",
+		2:  "BoggyMarsh",
+		3:  "Sandstone",
+		4:  "ToxicJungle",
+		5:  "MagmaCore",
+		6:  "OilField",
+		7:  "Space",
+		8:  "Ocean",
+		9:  "Rust",
+		10: "Forest",
+		11: "Radioactive",
+		12: "Swamp",
+		13: "Wasteland",
+		15: "Metallic",
+		16: "Barren",
+		17: "Moo",
+		18: "IceCaves",
+		19: "CarrotQuarry",
+		20: "SugarWoods",
+		21: "PrehistoricGarden",
+		22: "PrehistoricRaptor",
+		23: "PrehistoricWetlands",
+	}
+	s = strings.ReplaceAll(s, "\\n", "\n")
+	lines := strings.Split(s, "\n")
 	var paths []BiomePath
-	for _, p := range bp.Paths {
+	for _, line := range lines {
+		if line == "" {
+			continue
+		}
+		parts := strings.SplitN(line, ":", 2)
+		if len(parts) != 2 {
+			continue
+		}
+		zoneID, err := strconv.Atoi(parts[0])
+		if err != nil {
+			continue
+		}
+		zoneName, ok := zoneNames[zoneID]
+		if !ok {
+			zoneName = parts[0]
+		}
 		var polys [][]Point
-		for _, poly := range p.Polygons {
+		for _, polyStr := range strings.Split(parts[1], "|") {
+			nums := strings.Fields(polyStr)
+			if len(nums)%2 != 0 {
+				continue
+			}
 			var pts []Point
-			for _, pt := range poly.Points {
-				pts = append(pts, Point{X: int(pt.X), Y: int(pt.Y)})
+			prevX, prevY := 0, 0
+			for i := 0; i < len(nums); i += 2 {
+				dx, err1 := strconv.Atoi(nums[i])
+				dy, err2 := strconv.Atoi(nums[i+1])
+				if err1 != nil || err2 != nil {
+					continue
+				}
+				x := prevX + dx
+				y := prevY + dy
+				pts = append(pts, Point{X: x, Y: y})
+				prevX = x
+				prevY = y
 			}
 			polys = append(polys, pts)
 		}
-		paths = append(paths, BiomePath{Name: p.Name, Polygons: polys})
+		paths = append(paths, BiomePath{Name: zoneName, Polygons: polys})
 	}
 	return BiomePathsCompact{Paths: paths}
 }

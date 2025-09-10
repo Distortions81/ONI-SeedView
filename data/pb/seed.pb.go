@@ -21,216 +21,24 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type Point struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	X             int32                  `protobuf:"varint,1,opt,name=x,proto3" json:"x,omitempty"`
-	Y             int32                  `protobuf:"varint,2,opt,name=y,proto3" json:"y,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Point) Reset() {
-	*x = Point{}
-	mi := &file_data_pb_seed_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Point) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Point) ProtoMessage() {}
-
-func (x *Point) ProtoReflect() protoreflect.Message {
-	mi := &file_data_pb_seed_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Point.ProtoReflect.Descriptor instead.
-func (*Point) Descriptor() ([]byte, []int) {
-	return file_data_pb_seed_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *Point) GetX() int32 {
-	if x != nil {
-		return x.X
-	}
-	return 0
-}
-
-func (x *Point) GetY() int32 {
-	if x != nil {
-		return x.Y
-	}
-	return 0
-}
-
-type Polygon struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Points        []*Point               `protobuf:"bytes,1,rep,name=points,proto3" json:"points,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Polygon) Reset() {
-	*x = Polygon{}
-	mi := &file_data_pb_seed_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Polygon) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Polygon) ProtoMessage() {}
-
-func (x *Polygon) ProtoReflect() protoreflect.Message {
-	mi := &file_data_pb_seed_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Polygon.ProtoReflect.Descriptor instead.
-func (*Polygon) Descriptor() ([]byte, []int) {
-	return file_data_pb_seed_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *Polygon) GetPoints() []*Point {
-	if x != nil {
-		return x.Points
-	}
-	return nil
-}
-
-type BiomePath struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Polygons      []*Polygon             `protobuf:"bytes,2,rep,name=polygons,proto3" json:"polygons,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *BiomePath) Reset() {
-	*x = BiomePath{}
-	mi := &file_data_pb_seed_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *BiomePath) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*BiomePath) ProtoMessage() {}
-
-func (x *BiomePath) ProtoReflect() protoreflect.Message {
-	mi := &file_data_pb_seed_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use BiomePath.ProtoReflect.Descriptor instead.
-func (*BiomePath) Descriptor() ([]byte, []int) {
-	return file_data_pb_seed_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *BiomePath) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *BiomePath) GetPolygons() []*Polygon {
-	if x != nil {
-		return x.Polygons
-	}
-	return nil
-}
-
-type BiomePathsCompact struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Paths         []*BiomePath           `protobuf:"bytes,1,rep,name=paths,proto3" json:"paths,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *BiomePathsCompact) Reset() {
-	*x = BiomePathsCompact{}
-	mi := &file_data_pb_seed_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *BiomePathsCompact) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*BiomePathsCompact) ProtoMessage() {}
-
-func (x *BiomePathsCompact) ProtoReflect() protoreflect.Message {
-	mi := &file_data_pb_seed_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use BiomePathsCompact.ProtoReflect.Descriptor instead.
-func (*BiomePathsCompact) Descriptor() ([]byte, []int) {
-	return file_data_pb_seed_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *BiomePathsCompact) GetPaths() []*BiomePath {
-	if x != nil {
-		return x.Paths
-	}
-	return nil
-}
-
 type Geyser struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Id             string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	X              int32                  `protobuf:"varint,2,opt,name=x,proto3" json:"x,omitempty"`
-	Y              int32                  `protobuf:"varint,3,opt,name=y,proto3" json:"y,omitempty"`
-	ActiveCycles   float64                `protobuf:"fixed64,4,opt,name=activeCycles,proto3" json:"activeCycles,omitempty"`
-	AvgEmitRate    float64                `protobuf:"fixed64,5,opt,name=avgEmitRate,proto3" json:"avgEmitRate,omitempty"`
-	DormancyCycles float64                `protobuf:"fixed64,6,opt,name=dormancyCycles,proto3" json:"dormancyCycles,omitempty"`
-	EmitRate       float64                `protobuf:"fixed64,7,opt,name=emitRate,proto3" json:"emitRate,omitempty"`
-	EruptionTime   float64                `protobuf:"fixed64,8,opt,name=eruptionTime,proto3" json:"eruptionTime,omitempty"`
-	IdleTime       float64                `protobuf:"fixed64,9,opt,name=idleTime,proto3" json:"idleTime,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	Id                    string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	X                     int32                  `protobuf:"varint,2,opt,name=x,proto3" json:"x,omitempty"`
+	Y                     int32                  `protobuf:"varint,3,opt,name=y,proto3" json:"y,omitempty"`
+	EmitRate              int32                  `protobuf:"varint,4,opt,name=emitRate,proto3" json:"emitRate,omitempty"`
+	AvgEmitRate           int32                  `protobuf:"varint,5,opt,name=avgEmitRate,proto3" json:"avgEmitRate,omitempty"`
+	IdleTime              int32                  `protobuf:"varint,6,opt,name=idleTime,proto3" json:"idleTime,omitempty"`
+	EruptionTime          int32                  `protobuf:"varint,7,opt,name=eruptionTime,proto3" json:"eruptionTime,omitempty"`
+	DormancyCyclesRounded int32                  `protobuf:"varint,8,opt,name=dormancyCyclesRounded,proto3" json:"dormancyCyclesRounded,omitempty"`
+	ActiveCyclesRounded   int32                  `protobuf:"varint,9,opt,name=activeCyclesRounded,proto3" json:"activeCyclesRounded,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *Geyser) Reset() {
 	*x = Geyser{}
-	mi := &file_data_pb_seed_proto_msgTypes[4]
+	mi := &file_data_pb_seed_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -242,7 +50,7 @@ func (x *Geyser) String() string {
 func (*Geyser) ProtoMessage() {}
 
 func (x *Geyser) ProtoReflect() protoreflect.Message {
-	mi := &file_data_pb_seed_proto_msgTypes[4]
+	mi := &file_data_pb_seed_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -255,7 +63,7 @@ func (x *Geyser) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Geyser.ProtoReflect.Descriptor instead.
 func (*Geyser) Descriptor() ([]byte, []int) {
-	return file_data_pb_seed_proto_rawDescGZIP(), []int{4}
+	return file_data_pb_seed_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Geyser) GetId() string {
@@ -279,44 +87,44 @@ func (x *Geyser) GetY() int32 {
 	return 0
 }
 
-func (x *Geyser) GetActiveCycles() float64 {
-	if x != nil {
-		return x.ActiveCycles
-	}
-	return 0
-}
-
-func (x *Geyser) GetAvgEmitRate() float64 {
-	if x != nil {
-		return x.AvgEmitRate
-	}
-	return 0
-}
-
-func (x *Geyser) GetDormancyCycles() float64 {
-	if x != nil {
-		return x.DormancyCycles
-	}
-	return 0
-}
-
-func (x *Geyser) GetEmitRate() float64 {
+func (x *Geyser) GetEmitRate() int32 {
 	if x != nil {
 		return x.EmitRate
 	}
 	return 0
 }
 
-func (x *Geyser) GetEruptionTime() float64 {
+func (x *Geyser) GetAvgEmitRate() int32 {
+	if x != nil {
+		return x.AvgEmitRate
+	}
+	return 0
+}
+
+func (x *Geyser) GetIdleTime() int32 {
+	if x != nil {
+		return x.IdleTime
+	}
+	return 0
+}
+
+func (x *Geyser) GetEruptionTime() int32 {
 	if x != nil {
 		return x.EruptionTime
 	}
 	return 0
 }
 
-func (x *Geyser) GetIdleTime() float64 {
+func (x *Geyser) GetDormancyCyclesRounded() int32 {
 	if x != nil {
-		return x.IdleTime
+		return x.DormancyCyclesRounded
+	}
+	return 0
+}
+
+func (x *Geyser) GetActiveCyclesRounded() int32 {
+	if x != nil {
+		return x.ActiveCyclesRounded
 	}
 	return 0
 }
@@ -332,7 +140,7 @@ type PointOfInterest struct {
 
 func (x *PointOfInterest) Reset() {
 	*x = PointOfInterest{}
-	mi := &file_data_pb_seed_proto_msgTypes[5]
+	mi := &file_data_pb_seed_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -344,7 +152,7 @@ func (x *PointOfInterest) String() string {
 func (*PointOfInterest) ProtoMessage() {}
 
 func (x *PointOfInterest) ProtoReflect() protoreflect.Message {
-	mi := &file_data_pb_seed_proto_msgTypes[5]
+	mi := &file_data_pb_seed_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -357,7 +165,7 @@ func (x *PointOfInterest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PointOfInterest.ProtoReflect.Descriptor instead.
 func (*PointOfInterest) Descriptor() ([]byte, []int) {
-	return file_data_pb_seed_proto_rawDescGZIP(), []int{5}
+	return file_data_pb_seed_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *PointOfInterest) GetId() string {
@@ -382,20 +190,23 @@ func (x *PointOfInterest) GetY() int32 {
 }
 
 type Asteroid struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Id               string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	SizeX            int32                  `protobuf:"varint,2,opt,name=sizeX,proto3" json:"sizeX,omitempty"`
-	SizeY            int32                  `protobuf:"varint,3,opt,name=sizeY,proto3" json:"sizeY,omitempty"`
-	Geysers          []*Geyser              `protobuf:"bytes,4,rep,name=geysers,proto3" json:"geysers,omitempty"`
-	PointsOfInterest []*PointOfInterest     `protobuf:"bytes,5,rep,name=pointsOfInterest,proto3" json:"pointsOfInterest,omitempty"`
-	BiomePaths       *BiomePathsCompact     `protobuf:"bytes,6,opt,name=biomePaths,proto3" json:"biomePaths,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Id                 string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	OffsetX            int32                  `protobuf:"varint,2,opt,name=offsetX,proto3" json:"offsetX,omitempty"`
+	OffsetY            int32                  `protobuf:"varint,3,opt,name=offsetY,proto3" json:"offsetY,omitempty"`
+	SizeX              int32                  `protobuf:"varint,4,opt,name=sizeX,proto3" json:"sizeX,omitempty"`
+	SizeY              int32                  `protobuf:"varint,5,opt,name=sizeY,proto3" json:"sizeY,omitempty"`
+	WorldTraitsBitmask int32                  `protobuf:"varint,6,opt,name=worldTraitsBitmask,proto3" json:"worldTraitsBitmask,omitempty"`
+	BiomePaths         string                 `protobuf:"bytes,7,opt,name=biomePaths,proto3" json:"biomePaths,omitempty"`
+	PointsOfInterest   []*PointOfInterest     `protobuf:"bytes,8,rep,name=pointsOfInterest,proto3" json:"pointsOfInterest,omitempty"`
+	Geysers            []*Geyser              `protobuf:"bytes,9,rep,name=geysers,proto3" json:"geysers,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *Asteroid) Reset() {
 	*x = Asteroid{}
-	mi := &file_data_pb_seed_proto_msgTypes[6]
+	mi := &file_data_pb_seed_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -407,7 +218,7 @@ func (x *Asteroid) String() string {
 func (*Asteroid) ProtoMessage() {}
 
 func (x *Asteroid) ProtoReflect() protoreflect.Message {
-	mi := &file_data_pb_seed_proto_msgTypes[6]
+	mi := &file_data_pb_seed_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -420,7 +231,7 @@ func (x *Asteroid) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Asteroid.ProtoReflect.Descriptor instead.
 func (*Asteroid) Descriptor() ([]byte, []int) {
-	return file_data_pb_seed_proto_rawDescGZIP(), []int{6}
+	return file_data_pb_seed_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Asteroid) GetId() string {
@@ -428,6 +239,20 @@ func (x *Asteroid) GetId() string {
 		return x.Id
 	}
 	return ""
+}
+
+func (x *Asteroid) GetOffsetX() int32 {
+	if x != nil {
+		return x.OffsetX
+	}
+	return 0
+}
+
+func (x *Asteroid) GetOffsetY() int32 {
+	if x != nil {
+		return x.OffsetY
+	}
+	return 0
 }
 
 func (x *Asteroid) GetSizeX() int32 {
@@ -444,11 +269,18 @@ func (x *Asteroid) GetSizeY() int32 {
 	return 0
 }
 
-func (x *Asteroid) GetGeysers() []*Geyser {
+func (x *Asteroid) GetWorldTraitsBitmask() int32 {
 	if x != nil {
-		return x.Geysers
+		return x.WorldTraitsBitmask
 	}
-	return nil
+	return 0
+}
+
+func (x *Asteroid) GetBiomePaths() string {
+	if x != nil {
+		return x.BiomePaths
+	}
+	return ""
 }
 
 func (x *Asteroid) GetPointsOfInterest() []*PointOfInterest {
@@ -458,23 +290,23 @@ func (x *Asteroid) GetPointsOfInterest() []*PointOfInterest {
 	return nil
 }
 
-func (x *Asteroid) GetBiomePaths() *BiomePathsCompact {
+func (x *Asteroid) GetGeysers() []*Geyser {
 	if x != nil {
-		return x.BiomePaths
+		return x.Geysers
 	}
 	return nil
 }
 
 type Cluster struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Asteroids     []*Asteroid            `protobuf:"bytes,1,rep,name=asteroids,proto3" json:"asteroids,omitempty"`
+	Asteroids     []*Asteroid            `protobuf:"bytes,7,rep,name=asteroids,proto3" json:"asteroids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Cluster) Reset() {
 	*x = Cluster{}
-	mi := &file_data_pb_seed_proto_msgTypes[7]
+	mi := &file_data_pb_seed_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -486,7 +318,7 @@ func (x *Cluster) String() string {
 func (*Cluster) ProtoMessage() {}
 
 func (x *Cluster) ProtoReflect() protoreflect.Message {
-	mi := &file_data_pb_seed_proto_msgTypes[7]
+	mi := &file_data_pb_seed_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -499,7 +331,7 @@ func (x *Cluster) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Cluster.ProtoReflect.Descriptor instead.
 func (*Cluster) Descriptor() ([]byte, []int) {
-	return file_data_pb_seed_proto_rawDescGZIP(), []int{7}
+	return file_data_pb_seed_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *Cluster) GetAsteroids() []*Asteroid {
@@ -513,42 +345,35 @@ var File_data_pb_seed_proto protoreflect.FileDescriptor
 
 const file_data_pb_seed_proto_rawDesc = "" +
 	"\n" +
-	"\x12data/pb/seed.proto\x12\x06seedpb\"#\n" +
-	"\x05Point\x12\f\n" +
-	"\x01x\x18\x01 \x01(\x05R\x01x\x12\f\n" +
-	"\x01y\x18\x02 \x01(\x05R\x01y\"0\n" +
-	"\aPolygon\x12%\n" +
-	"\x06points\x18\x01 \x03(\v2\r.seedpb.PointR\x06points\"L\n" +
-	"\tBiomePath\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12+\n" +
-	"\bpolygons\x18\x02 \x03(\v2\x0f.seedpb.PolygonR\bpolygons\"<\n" +
-	"\x11BiomePathsCompact\x12'\n" +
-	"\x05paths\x18\x01 \x03(\v2\x11.seedpb.BiomePathR\x05paths\"\xfe\x01\n" +
+	"\x12data/pb/seed.proto\x12\x06seedpb\"\x9a\x02\n" +
 	"\x06Geyser\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\f\n" +
 	"\x01x\x18\x02 \x01(\x05R\x01x\x12\f\n" +
-	"\x01y\x18\x03 \x01(\x05R\x01y\x12\"\n" +
-	"\factiveCycles\x18\x04 \x01(\x01R\factiveCycles\x12 \n" +
-	"\vavgEmitRate\x18\x05 \x01(\x01R\vavgEmitRate\x12&\n" +
-	"\x0edormancyCycles\x18\x06 \x01(\x01R\x0edormancyCycles\x12\x1a\n" +
-	"\bemitRate\x18\a \x01(\x01R\bemitRate\x12\"\n" +
-	"\feruptionTime\x18\b \x01(\x01R\feruptionTime\x12\x1a\n" +
-	"\bidleTime\x18\t \x01(\x01R\bidleTime\"=\n" +
+	"\x01y\x18\x03 \x01(\x05R\x01y\x12\x1a\n" +
+	"\bemitRate\x18\x04 \x01(\x05R\bemitRate\x12 \n" +
+	"\vavgEmitRate\x18\x05 \x01(\x05R\vavgEmitRate\x12\x1a\n" +
+	"\bidleTime\x18\x06 \x01(\x05R\bidleTime\x12\"\n" +
+	"\feruptionTime\x18\a \x01(\x05R\feruptionTime\x124\n" +
+	"\x15dormancyCyclesRounded\x18\b \x01(\x05R\x15dormancyCyclesRounded\x120\n" +
+	"\x13activeCyclesRounded\x18\t \x01(\x05R\x13activeCyclesRounded\"=\n" +
 	"\x0fPointOfInterest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\f\n" +
 	"\x01x\x18\x02 \x01(\x05R\x01x\x12\f\n" +
-	"\x01y\x18\x03 \x01(\x05R\x01y\"\xf0\x01\n" +
+	"\x01y\x18\x03 \x01(\x05R\x01y\"\xb9\x02\n" +
 	"\bAsteroid\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
-	"\x05sizeX\x18\x02 \x01(\x05R\x05sizeX\x12\x14\n" +
-	"\x05sizeY\x18\x03 \x01(\x05R\x05sizeY\x12(\n" +
-	"\ageysers\x18\x04 \x03(\v2\x0e.seedpb.GeyserR\ageysers\x12C\n" +
-	"\x10pointsOfInterest\x18\x05 \x03(\v2\x17.seedpb.PointOfInterestR\x10pointsOfInterest\x129\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
+	"\aoffsetX\x18\x02 \x01(\x05R\aoffsetX\x12\x18\n" +
+	"\aoffsetY\x18\x03 \x01(\x05R\aoffsetY\x12\x14\n" +
+	"\x05sizeX\x18\x04 \x01(\x05R\x05sizeX\x12\x14\n" +
+	"\x05sizeY\x18\x05 \x01(\x05R\x05sizeY\x12.\n" +
+	"\x12worldTraitsBitmask\x18\x06 \x01(\x05R\x12worldTraitsBitmask\x12\x1e\n" +
 	"\n" +
-	"biomePaths\x18\x06 \x01(\v2\x19.seedpb.BiomePathsCompactR\n" +
-	"biomePaths\"9\n" +
+	"biomePaths\x18\a \x01(\tR\n" +
+	"biomePaths\x12C\n" +
+	"\x10pointsOfInterest\x18\b \x03(\v2\x17.seedpb.PointOfInterestR\x10pointsOfInterest\x12(\n" +
+	"\ageysers\x18\t \x03(\v2\x0e.seedpb.GeyserR\ageysers\"9\n" +
 	"\aCluster\x12.\n" +
-	"\tasteroids\x18\x01 \x03(\v2\x10.seedpb.AsteroidR\tasteroidsB\x19Z\x17oni-view/data/pb;seedpbb\x06proto3"
+	"\tasteroids\x18\a \x03(\v2\x10.seedpb.AsteroidR\tasteroidsB\x19Z\x17oni-view/data/pb;seedpbb\x06proto3"
 
 var (
 	file_data_pb_seed_proto_rawDescOnce sync.Once
@@ -562,30 +387,22 @@ func file_data_pb_seed_proto_rawDescGZIP() []byte {
 	return file_data_pb_seed_proto_rawDescData
 }
 
-var file_data_pb_seed_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_data_pb_seed_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_data_pb_seed_proto_goTypes = []any{
-	(*Point)(nil),             // 0: seedpb.Point
-	(*Polygon)(nil),           // 1: seedpb.Polygon
-	(*BiomePath)(nil),         // 2: seedpb.BiomePath
-	(*BiomePathsCompact)(nil), // 3: seedpb.BiomePathsCompact
-	(*Geyser)(nil),            // 4: seedpb.Geyser
-	(*PointOfInterest)(nil),   // 5: seedpb.PointOfInterest
-	(*Asteroid)(nil),          // 6: seedpb.Asteroid
-	(*Cluster)(nil),           // 7: seedpb.Cluster
+	(*Geyser)(nil),          // 0: seedpb.Geyser
+	(*PointOfInterest)(nil), // 1: seedpb.PointOfInterest
+	(*Asteroid)(nil),        // 2: seedpb.Asteroid
+	(*Cluster)(nil),         // 3: seedpb.Cluster
 }
 var file_data_pb_seed_proto_depIdxs = []int32{
-	0, // 0: seedpb.Polygon.points:type_name -> seedpb.Point
-	1, // 1: seedpb.BiomePath.polygons:type_name -> seedpb.Polygon
-	2, // 2: seedpb.BiomePathsCompact.paths:type_name -> seedpb.BiomePath
-	4, // 3: seedpb.Asteroid.geysers:type_name -> seedpb.Geyser
-	5, // 4: seedpb.Asteroid.pointsOfInterest:type_name -> seedpb.PointOfInterest
-	3, // 5: seedpb.Asteroid.biomePaths:type_name -> seedpb.BiomePathsCompact
-	6, // 6: seedpb.Cluster.asteroids:type_name -> seedpb.Asteroid
-	7, // [7:7] is the sub-list for method output_type
-	7, // [7:7] is the sub-list for method input_type
-	7, // [7:7] is the sub-list for extension type_name
-	7, // [7:7] is the sub-list for extension extendee
-	0, // [0:7] is the sub-list for field type_name
+	1, // 0: seedpb.Asteroid.pointsOfInterest:type_name -> seedpb.PointOfInterest
+	0, // 1: seedpb.Asteroid.geysers:type_name -> seedpb.Geyser
+	2, // 2: seedpb.Cluster.asteroids:type_name -> seedpb.Asteroid
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_data_pb_seed_proto_init() }
@@ -599,7 +416,7 @@ func file_data_pb_seed_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_data_pb_seed_proto_rawDesc), len(file_data_pb_seed_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
