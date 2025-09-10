@@ -135,7 +135,7 @@ func loadGameData(game *Game, coord, asteroidID string) {
 	game.selectedItem = -1
 	game.itemScroll = 0
 	game.asteroidID = ast.ID
-	bps := parseBiomePaths(ast.BiomePaths)
+	bps := ast.BiomePaths.Paths
 	game.geysers = ast.Geysers
 	game.pois = ast.POIs
 	game.biomes = bps
