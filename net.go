@@ -8,8 +8,7 @@ import (
 	"net/http"
 
 	"google.golang.org/protobuf/proto"
-
-	"oni-view/seedproto"
+	seedpb "oni-view/data/pb"
 )
 
 var seedProtoBaseURL = ProtoBaseURL
@@ -90,17 +89,16 @@ func decodeSeed(jsonData []byte) (*SeedData, error) {
 
 // decodeSeedProto parses the protobuf seed data into SeedData.
 func decodeSeedProto(protoData []byte) (*SeedData, error) {
-	var pb seedproto.SeedDataProto
+	var pb seedpb.Cluster
 	if err := proto.Unmarshal(protoData, &pb); err != nil {
 		return nil, fmt.Errorf("protobuf decode failed: %v", err)
 	}
 	seed := &SeedData{}
 	for _, a := range pb.Asteroids {
 		ast := Asteroid{
-			ID:         a.Id,
-			SizeX:      int(a.SizeX),
-			SizeY:      int(a.SizeY),
-			BiomePaths: a.BiomePaths,
+			ID:    a.Id,
+			SizeX: int(a.SizeX),
+			SizeY: int(a.SizeY),
 		}
 		for _, g := range a.Geysers {
 			ast.Geysers = append(ast.Geysers, Geyser{
@@ -122,7 +120,27 @@ func decodeSeedProto(protoData []byte) (*SeedData, error) {
 				Y:  int(p.Y),
 			})
 		}
+		ast.BiomePaths = convertBiomePaths(a.BiomePaths)
 		seed.Asteroids = append(seed.Asteroids, ast)
 	}
 	return seed, nil
+}
+
+func convertBiomePaths(bp *seedpb.BiomePathsCompact) BiomePathsCompact {
+	if bp == nil {
+		return BiomePathsCompact{}
+	}
+	var paths []BiomePath
+	for _, p := range bp.Paths {
+		var polys [][]Point
+		for _, poly := range p.Polygons {
+			var pts []Point
+			for _, pt := range poly.Points {
+				pts = append(pts, Point{X: int(pt.X), Y: int(pt.Y)})
+			}
+			polys = append(polys, pts)
+		}
+		paths = append(paths, BiomePath{Name: p.Name, Polygons: polys})
+	}
+	return BiomePathsCompact{Paths: paths}
 }

@@ -29,13 +29,17 @@ type BiomePath struct {
 	Polygons [][]Point
 }
 
+type BiomePathsCompact struct {
+	Paths []BiomePath `json:"paths"`
+}
+
 type Asteroid struct {
 	ID         string            `json:"id"`
 	SizeX      int               `json:"sizeX"`
 	SizeY      int               `json:"sizeY"`
 	Geysers    []Geyser          `json:"geysers"`
 	POIs       []PointOfInterest `json:"pointsOfInterest"`
-	BiomePaths string            `json:"biomePaths"`
+	BiomePaths BiomePathsCompact `json:"biomePaths"`
 }
 
 type SeedData struct {
