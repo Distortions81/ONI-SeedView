@@ -16,7 +16,8 @@ var seedProtoBaseURL = ProtoBaseURL
 // fetchSeedProto retrieves the seed data in protobuf format for a given coordinate.
 // It requests the protobuf endpoint and transparently decompresses gzip-encoded responses.
 func fetchSeedProto(coordinate string) ([]byte, error) {
-	url := strings.Replace(seedProtoBaseURL, "COORDINATE", coordinate, 1)
+	base := strings.TrimSuffix(seedProtoBaseURL, "/")
+	url := base + "/" + coordinate
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("Accept", AcceptProtoHeader)
 	req.Header.Set("Accept-Encoding", GzipEncoding)
