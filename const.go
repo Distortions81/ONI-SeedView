@@ -9,7 +9,7 @@ import (
 
 const (
 	ClientVersion     = "v0.1.0-2508202308"
-	ProtoBaseURL      = "https://oni-data.stefanoltmann.de/COORDINATE/"
+	ProtoBaseURL      = "https://oni-data.stefanoltmann.de/"
 	AcceptProtoHeader = "application/protobuf"
 	GzipEncoding      = "gzip"
 	PanSpeed          = 15
