@@ -28,5 +28,6 @@ the biome. The table below lists these textures along with the color defined in
 | 20 | PrehistoricWetlands | #9A863D |
 | 21 | OilField | #937E62 |
 | 22 | MagmaCore | #CC5A3D |
+| 23 | CrystalCaverns | #A0D2FF |
 
-Columns 23–26 are currently unused.
+Columns 24–26 are currently unused.

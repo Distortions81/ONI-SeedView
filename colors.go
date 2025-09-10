@@ -25,6 +25,7 @@ var biomeColors = map[string]color.RGBA{
 	"Barren":              {R: 204, G: 154, B: 61, A: 255},
 	"Space":               {R: 204, G: 204, B: 204, A: 255},
 	"FrozenWastes":        {R: 61, G: 183, B: 204, A: 255},
+	"CrystalCaverns":      {R: 160, G: 210, B: 255, A: 255},
 	"BoggyMarsh":          {R: 138, G: 204, B: 61, A: 255},
 	"ToxicJungle":         {R: 204, G: 92, B: 136, A: 255},
 	"Ocean":               {R: 61, G: 61, B: 204, A: 255},
