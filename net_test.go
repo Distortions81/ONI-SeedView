@@ -50,25 +50,12 @@ func TestDecodeSeedProto(t *testing.T) {
 	pb := &seedpb.Cluster{
 		Asteroids: []*seedpb.Asteroid{
 			{
-				Id:    "A1",
-				SizeX: 10,
-				SizeY: 20,
-				Geysers: []*seedpb.Geyser{
-					{Id: "g1", X: 1, Y: 2},
-				},
-				PointsOfInterest: []*seedpb.PointOfInterest{
-					{Id: "p1", X: 3, Y: 4},
-				},
-				BiomePaths: &seedpb.BiomePathsCompact{
-					Paths: []*seedpb.BiomePath{
-						{
-							Name: "B1",
-							Polygons: []*seedpb.Polygon{
-								{Points: []*seedpb.Point{{X: 1, Y: 2}, {X: 3, Y: 4}}},
-							},
-						},
-					},
-				},
+				Id:               "A1",
+				SizeX:            10,
+				SizeY:            20,
+				Geysers:          []*seedpb.Geyser{{Id: "g1", X: 1, Y: 2}},
+				PointsOfInterest: []*seedpb.PointOfInterest{{Id: "p1", X: 3, Y: 4}},
+				BiomePaths:       "3:1 2 2 2",
 			},
 		},
 	}
@@ -93,7 +80,7 @@ func TestDecodeSeedProto(t *testing.T) {
 	if len(a.POIs) != 1 || a.POIs[0].ID != "p1" {
 		t.Fatalf("unexpected pois: %+v", a.POIs)
 	}
-	if len(a.BiomePaths.Paths) != 1 || a.BiomePaths.Paths[0].Name != "B1" {
+	if len(a.BiomePaths.Paths) != 1 || a.BiomePaths.Paths[0].Name != "Sandstone" {
 		t.Fatalf("unexpected biome paths: %+v", a.BiomePaths)
 	}
 	bp := a.BiomePaths.Paths[0]
