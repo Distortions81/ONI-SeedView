@@ -14,8 +14,29 @@ message Geyser {
   int32 activeCyclesRounded = 9;
 }
 
+enum PointOfInterestType {
+  Headquarters = 0;
+  WarpConduitSender = 1;
+  WarpConduitReceiver = 2;
+  WarpPortal = 3;
+  WarpReceiver = 4;
+  GeneShuffler = 5;
+  MassiveHeatSink = 6;
+  SapTree = 7;
+  GravitasPedestal = 8;
+  PropSurfaceSatellite1 = 9;
+  PropSurfaceSatellite2 = 10;
+  PropSurfaceSatellite3 = 11;
+  TemporalTearOpener = 12;
+  CryoTank = 13;
+  PropFacilityStatue = 14;
+  GeothermalVentEntity = 15;
+  GeothermalControllerEntity = 16;
+  POICeresTechUnlock = 17;
+}
+
 message PointOfInterest {
-  string id = 1;
+  PointOfInterestType id = 1;
   int32 x = 2;
   int32 y = 3;
 }
