@@ -58,6 +58,7 @@ var names = nameTables{
 		"Barren":              "Barren",
 		"Space":               "Space",
 		"FrozenWastes":        "Tundra",
+		"CrystalCaverns":      "Crystal Caverns",
 		"BoggyMarsh":          "Marsh",
 		"ToxicJungle":         "Toxic Jungle",
 		"Ocean":               "Ocean",

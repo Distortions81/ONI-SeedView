@@ -119,7 +119,7 @@ func decodeSeedProto(protoData []byte) (*SeedData, error) {
 	seed := &SeedData{}
 	for _, a := range pb.Asteroids {
 		ast := Asteroid{
-			ID:    a.Id,
+			ID:    asteroidNameFromID(a.Id),
 			SizeX: int(a.SizeX),
 			SizeY: int(a.SizeY),
 		}
@@ -159,6 +159,7 @@ func parseBiomePaths(s string) BiomePathsCompact {
 	}
 	zoneNames := map[int]string{
 		0:  "FrozenWastes",
+		1:  "CrystalCaverns",
 		2:  "BoggyMarsh",
 		3:  "Sandstone",
 		4:  "ToxicJungle",

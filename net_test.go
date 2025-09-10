@@ -50,7 +50,7 @@ func TestDecodeSeedProto(t *testing.T) {
 	pb := &seedpb.Cluster{
 		Asteroids: []*seedpb.Asteroid{
 			{
-				Id:               "A1",
+				Id:               0,
 				SizeX:            10,
 				SizeY:            20,
 				Geysers:          []*seedpb.Geyser{{Id: 0, X: 1, Y: 2}},
@@ -71,7 +71,7 @@ func TestDecodeSeedProto(t *testing.T) {
 		t.Fatalf("expected 1 asteroid, got %d", len(seed.Asteroids))
 	}
 	a := seed.Asteroids[0]
-	if a.ID != "A1" || a.SizeX != 10 || a.SizeY != 20 {
+	if a.ID != "Terra" || a.SizeX != 10 || a.SizeY != 20 {
 		t.Fatalf("unexpected asteroid: %+v", a)
 	}
 	if len(a.Geysers) != 1 || a.Geysers[0].ID != "steam" {

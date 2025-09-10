@@ -191,7 +191,7 @@ func (x *PointOfInterest) GetY() int32 {
 
 type Asteroid struct {
 	state              protoimpl.MessageState `protogen:"open.v1"`
-	Id                 string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id                 int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	OffsetX            int32                  `protobuf:"varint,2,opt,name=offsetX,proto3" json:"offsetX,omitempty"`
 	OffsetY            int32                  `protobuf:"varint,3,opt,name=offsetY,proto3" json:"offsetY,omitempty"`
 	SizeX              int32                  `protobuf:"varint,4,opt,name=sizeX,proto3" json:"sizeX,omitempty"`
@@ -234,11 +234,11 @@ func (*Asteroid) Descriptor() ([]byte, []int) {
 	return file_data_pb_seed_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *Asteroid) GetId() string {
+func (x *Asteroid) GetId() int32 {
 	if x != nil {
 		return x.Id
 	}
-	return ""
+	return 0
 }
 
 func (x *Asteroid) GetOffsetX() int32 {
@@ -361,7 +361,7 @@ const file_data_pb_seed_proto_rawDesc = "" +
 	"\x01x\x18\x02 \x01(\x05R\x01x\x12\f\n" +
 	"\x01y\x18\x03 \x01(\x05R\x01y\"\xb9\x02\n" +
 	"\bAsteroid\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x18\n" +
 	"\aoffsetX\x18\x02 \x01(\x05R\aoffsetX\x12\x18\n" +
 	"\aoffsetY\x18\x03 \x01(\x05R\aoffsetY\x12\x14\n" +
 	"\x05sizeX\x18\x04 \x01(\x05R\x05sizeX\x12\x14\n" +
