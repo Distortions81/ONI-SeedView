@@ -16,6 +16,9 @@ func TestFetchSeedProtoDecompressesGzip(t *testing.T) {
 		if got := r.Header.Get("Accept"); got != AcceptProtoHeader {
 			t.Fatalf("unexpected Accept header: %s", got)
 		}
+		if got := r.Header.Get("Accept-Encoding"); got != GzipEncoding {
+			t.Fatalf("unexpected Accept-Encoding header: %s", got)
+		}
 		w.Header().Set("Content-Encoding", GzipEncoding)
 		gz := gzip.NewWriter(w)
 		gz.Write([]byte("hello"))
