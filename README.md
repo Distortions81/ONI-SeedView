@@ -25,6 +25,17 @@ Oni-SeedView is a small viewer for **Oxygen Not Included** seed data. It fetches
 
 See [docs/HEADLESS.md](docs/HEADLESS.md) for running without a display and [docs/WEBASSEMBLY.md](docs/WEBASSEMBLY.md) for the web build.
 
+## Protobuf
+
+Protobuf types live in [`data/pb/seed.proto`](data/pb/seed.proto). After modifying the
+schema run:
+
+```bash
+protoc --go_out=. --go_opt=paths=source_relative data/pb/seed.proto
+```
+
+to regenerate the Go definitions.
+
 ## Controls
 
 - **Arrow keys/WASD** – pan the camera.

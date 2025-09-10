@@ -7,8 +7,7 @@ import (
 	"testing"
 
 	"google.golang.org/protobuf/proto"
-
-	"oni-view/seedproto"
+	seedpb "oni-view/data/pb"
 )
 
 // TestFetchSeedProtoDecompressesGzip verifies that fetchSeedProto handles gzip responses.
@@ -40,19 +39,28 @@ func TestFetchSeedProtoDecompressesGzip(t *testing.T) {
 
 // TestDecodeSeedProto verifies protobuf decoding into SeedData.
 func TestDecodeSeedProto(t *testing.T) {
-	pb := &seedproto.SeedDataProto{
-		Asteroids: []*seedproto.AsteroidProto{
+	pb := &seedpb.Cluster{
+		Asteroids: []*seedpb.Asteroid{
 			{
 				Id:    "A1",
 				SizeX: 10,
 				SizeY: 20,
-				Geysers: []*seedproto.GeyserProto{
+				Geysers: []*seedpb.Geyser{
 					{Id: "g1", X: 1, Y: 2},
 				},
-				PointsOfInterest: []*seedproto.PointOfInterestProto{
+				PointsOfInterest: []*seedpb.PointOfInterest{
 					{Id: "p1", X: 3, Y: 4},
 				},
-				BiomePaths: "bp",
+				BiomePaths: &seedpb.BiomePathsCompact{
+					Paths: []*seedpb.BiomePath{
+						{
+							Name: "B1",
+							Polygons: []*seedpb.Polygon{
+								{Points: []*seedpb.Point{{X: 1, Y: 2}, {X: 3, Y: 4}}},
+							},
+						},
+					},
+				},
 			},
 		},
 	}
@@ -77,7 +85,7 @@ func TestDecodeSeedProto(t *testing.T) {
 	if len(a.POIs) != 1 || a.POIs[0].ID != "p1" {
 		t.Fatalf("unexpected pois: %+v", a.POIs)
 	}
-	if a.BiomePaths != "bp" {
-		t.Fatalf("unexpected biomePaths: %s", a.BiomePaths)
+	if len(a.BiomePaths.Paths) != 1 || a.BiomePaths.Paths[0].Name != "B1" {
+		t.Fatalf("unexpected biome paths: %+v", a.BiomePaths)
 	}
 }
