@@ -52,6 +52,7 @@ func fetchSeedProto(coordinate string) ([]byte, error) {
 	url := seedProtoBaseURL + coordinate
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("Accept", AcceptProtoHeader)
+	req.Header.Set("Accept-Encoding", GzipEncoding)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
