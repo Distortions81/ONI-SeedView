@@ -118,7 +118,7 @@
     <div id="message"></div>
   </div>
   <script>
-  const protoURL = "https://oni-data.stefanoltmann.de/COORDINATE/";
+  const protoURL = "https://oni-data.stefanoltmann.de/";
   function seedFromURL() {
     const search = window.location.search.slice(1);
     for (const part of search.split('&')) {
@@ -160,7 +160,7 @@
     if (!seed) return;
     document.getElementById('message').textContent = 'Checking…';
     try {
-      const url = protoURL.replace('COORDINATE', encodeURIComponent(seed));
+      const url = protoURL + encodeURIComponent(seed);
       const resp = await fetch(url, { headers: { 'Accept': 'application/protobuf', 'Accept-Encoding': 'gzip' } });
       if (resp.ok) {
         if (resp.body && typeof resp.body.cancel === 'function') {

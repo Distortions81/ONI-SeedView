@@ -12,7 +12,9 @@ import (
 
 // TestFetchSeedProtoDecompressesGzip verifies that fetchSeedProto handles gzip responses.
 func TestFetchSeedProtoDecompressesGzip(t *testing.T) {
+	var reqPath string
 	handler := func(w http.ResponseWriter, r *http.Request) {
+		reqPath = r.URL.Path
 		if got := r.Header.Get("Accept"); got != AcceptProtoHeader {
 			t.Fatalf("unexpected Accept header: %s", got)
 		}
@@ -28,7 +30,7 @@ func TestFetchSeedProtoDecompressesGzip(t *testing.T) {
 	defer srv.Close()
 
 	old := seedProtoBaseURL
-	seedProtoBaseURL = srv.URL + "/COORDINATE/"
+	seedProtoBaseURL = srv.URL + "/"
 	defer func() { seedProtoBaseURL = old }()
 
 	body, err := fetchSeedProto("test")
@@ -37,6 +39,9 @@ func TestFetchSeedProtoDecompressesGzip(t *testing.T) {
 	}
 	if string(body) != "hello" {
 		t.Fatalf("unexpected body: %s", body)
+	}
+	if reqPath != "/test" {
+		t.Fatalf("unexpected path: %s", reqPath)
 	}
 }
 
