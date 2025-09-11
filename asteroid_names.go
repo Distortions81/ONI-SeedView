@@ -75,9 +75,89 @@ var asteroidNames = map[int32]string{
 	69: "Warp Oily Sandy Swamp",
 }
 
+var asteroidAliases = map[string]string{
+	"SandstoneDefault":                   asteroidNames[0],
+	"CeresBaseGameAsteroid":              asteroidNames[1],
+	"CeresBaseGameShatteredAsteroid":     asteroidNames[2],
+	"Oceania":                            asteroidNames[3],
+	"SandstoneFrozen":                    asteroidNames[4],
+	"ForestLush":                         asteroidNames[5],
+	"ForestDefault":                      asteroidNames[6],
+	"Volcanic":                           asteroidNames[7],
+	"Badlands":                           asteroidNames[8],
+	"ForestHot":                          asteroidNames[9],
+	"Oasis":                              asteroidNames[10],
+	"VanillaSandstoneDefault":            asteroidNames[11],
+	"MediumRadioactiveVanillaWarpPlanet": asteroidNames[12],
+	"CeresClassicAsteroid":               asteroidNames[13],
+	"MediumSwampy":                       asteroidNames[14],
+	"VanillaOceania":                     asteroidNames[15],
+	"MediumForestyWasteland":             asteroidNames[16],
+	"VanillaSwampDefault":                asteroidNames[17],
+	"MediumForestyRadioactiveVanillaWarpPlanet": asteroidNames[18],
+	"VanillaSandstoneFrozen":                    asteroidNames[19],
+	"VanillaForestDefault":                      asteroidNames[20],
+	"MediumSandyRadioactiveVanillaWarpPlanet":   asteroidNames[21],
+	"VanillaArboria":                            asteroidNames[22],
+	"VanillaVolcanic":                           asteroidNames[23],
+	"VanillaBadlands":                           asteroidNames[24],
+	"VanillaAridio":                             asteroidNames[25],
+	"MediumSandySwamp":                          asteroidNames[26],
+	"VanillaOasis":                              asteroidNames[27],
+	"TerraMoonlet":                              asteroidNames[28],
+	"IdealLandingSite":                          asteroidNames[29],
+	"WarpOilySwamp":                             asteroidNames[30],
+	"RegolithMoonlet":                           asteroidNames[31],
+	"CeresSpacedOutAsteroid":                    asteroidNames[32],
+	"SwampyLandingSite":                         asteroidNames[33],
+	"OilRichWarpTarget":                         asteroidNames[34],
+	"ForestMoonlet":                             asteroidNames[35],
+	"SwampMoonlet":                              asteroidNames[36],
+	"MetalHeavyLandingSite":                     asteroidNames[37],
+	"MiniBadlands":                              asteroidNames[38],
+	"MiniMetallicSwampyStart":                   asteroidNames[39],
+	"MiniForestFrozenWarp":                      asteroidNames[40],
+	"MiniFlipped":                               asteroidNames[41],
+	"MiniRadioactiveOcean":                      asteroidNames[42],
+	"MiniBadlandsStart":                         asteroidNames[43],
+	"MiniRadioactiveOceanWarp":                  asteroidNames[44],
+	"MiniMetallicSwampy":                        asteroidNames[45],
+	"MiniForestFrozen":                          asteroidNames[46],
+	"MiniBadlandsWarp":                          asteroidNames[47],
+	"MiniForestFrozenStart":                     asteroidNames[48],
+	"MiniFlippedStart":                          asteroidNames[49],
+	"MiniRadioactiveOceanStart":                 asteroidNames[50],
+	"MiniFlippedWarp":                           asteroidNames[51],
+	"TundraMoonlet":                             asteroidNames[52],
+	"MarshyMoonlet":                             asteroidNames[53],
+	"NiobiumMoonlet":                            asteroidNames[54],
+	"MooMoonlet":                                asteroidNames[55],
+	"WaterMoonlet":                              asteroidNames[56],
+	"MiniRegolithMoonlet":                       asteroidNames[57],
+	"MixingCeresAsteroid":                       asteroidNames[58],
+	"CeresClassicShatteredAsteroid":             asteroidNames[59],
+	"MiniShatteredStartAsteroid":                asteroidNames[60],
+	"MiniShatteredWarpAsteroid":                 asteroidNames[61],
+	"MiniShatteredGeoAsteroid":                  asteroidNames[62],
+	"PrehistoricBaseGameAsteroid":               asteroidNames[63],
+	"PrehistoricClassicAsteroid":                asteroidNames[64],
+	"PrehistoricSpacedOutAsteroid":              asteroidNames[65],
+	"PrehistoricShatteredBaseGameAsteroid":      asteroidNames[66],
+	"PrehistoricShatteredClassicAsteroid":       asteroidNames[67],
+	"MixingPrehistoricAsteroid":                 asteroidNames[68],
+	"WarpOilySandySwamp":                        asteroidNames[69],
+}
+
 func asteroidNameFromID(id int32) string {
 	if name, ok := asteroidNames[id]; ok {
 		return name
 	}
 	return fmt.Sprintf("Asteroid %d", id)
+}
+
+func normalizeAsteroidID(id string) string {
+	if name, ok := asteroidAliases[id]; ok {
+		return name
+	}
+	return id
 }

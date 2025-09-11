@@ -51,13 +51,13 @@ func asteroidFromURL() (string, bool) {
 	for _, part := range strings.Split(search, "&") {
 		if strings.HasPrefix(part, "asteroid=") {
 			id, _ := url.QueryUnescape(strings.TrimPrefix(part, "asteroid="))
-			return id, true
+			return normalizeAsteroidID(id), true
 		}
 	}
 	hash := strings.TrimPrefix(loc.Get("hash").String(), "#")
 	if strings.HasPrefix(hash, "asteroid=") {
 		id, _ := url.QueryUnescape(strings.TrimPrefix(hash, "asteroid="))
-		return id, true
+		return normalizeAsteroidID(id), true
 	}
 	return "", false
 }
