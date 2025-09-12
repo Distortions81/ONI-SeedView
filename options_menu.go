@@ -30,6 +30,8 @@ func (g *Game) optionsMenuSize() (int, int) {
 		"HiDPI",
 		"FPS: 60.0",
 		"Version: " + ClientVersion,
+		"GitHub: Distortions81/ONI-SeedView",
+		"License: MIT-Copyright 2025 Carl Frank Otto III...",
 		"Close",
 	}
 	maxW := 0
@@ -126,6 +128,14 @@ func (g *Game) drawOptionsMenu(dst *ebiten.Image) {
 	y += menuSpacing()
 
 	drawText(img, "Version: "+ClientVersion, pad, y, false)
+	y += menuSpacing()
+
+	// GitHub link (clickable area handled in clickOptionsMenu)
+	drawText(img, "GitHub: Distortions81/ONI-SeedView", pad, y, false)
+	y += menuSpacing()
+
+	// License line (not clickable)
+	drawText(img, "License: MIT-Copyright 2025 Carl Frank Otto III", pad, y, false)
 	y += menuSpacing()
 
 	btn := image.Rect(uiScaled(4), y-uiScaled(4), w-uiScaled(4), y-uiScaled(4)+menuButtonHeight())
@@ -269,6 +279,17 @@ func (g *Game) clickOptionsMenu(mx, my int) bool {
 	y += menuSpacing()
 
 	// Version (not clickable)
+	y += menuSpacing()
+
+	// GitHub link (clickable)
+	r = image.Rect(uiScaled(4), y-uiScaled(4), w-uiScaled(4), y-uiScaled(4)+menuButtonHeight())
+	if r.Overlaps(image.Rect(mx, my, mx+1, my+1)) {
+		openExternalURL("https://github.com/Distortions81/ONI-SeedView")
+		return true
+	}
+	y += menuSpacing()
+
+	// License (not clickable)
 	y += menuSpacing()
 
 	// Close

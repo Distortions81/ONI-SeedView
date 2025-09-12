@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	ClientVersion     = "v0.2.0"
+	ClientVersion     = "v0.2.1"
 	ProtoBaseURL      = "https://oni-data.stefanoltmann.de/"
 	AcceptProtoHeader = "application/protobuf"
 	GzipEncoding      = "gzip"
