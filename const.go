@@ -12,7 +12,7 @@ const (
 	ProtoBaseURL  = "https://mni.stefan-oltmann.de/map/"
 	// IgnoreSeedProtoCertErrors makes fetchSeedProto skip TLS certificate validation.
 	// Default is true so clients remain resilient to self-signed certificates.
-	IgnoreSeedProtoCertErrors = true
+	IgnoreSeedProtoCertErrors = false
 	AcceptProtoHeader         = "application/protobuf"
 	GzipEncoding              = "gzip"
 	PanSpeed                  = 15
