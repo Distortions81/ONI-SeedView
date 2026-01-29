@@ -2,6 +2,7 @@ package main
 
 import (
 	"compress/gzip"
+	"crypto/tls"
 	"fmt"
 	"io"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 )
 
 var seedProtoBaseURL = ProtoBaseURL
+var seedProtoHTTPClient = newSeedProtoHTTPClient()
 
 // geyserTypeFromID maps numeric geyser IDs to their string descriptors.
 func geyserTypeFromID(id int32) string {
@@ -85,7 +87,7 @@ func fetchSeedProto(coordinate string) ([]byte, error) {
 	req.Header.Set("Accept", AcceptProtoHeader)
 	req.Header.Set("Accept-Encoding", GzipEncoding)
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := seedProtoHTTPClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("request failed: %v", err)
 	}
@@ -147,6 +149,19 @@ func decodeSeedProto(protoData []byte) (*SeedData, error) {
 		seed.Asteroids = append(seed.Asteroids, ast)
 	}
 	return seed, nil
+}
+
+func newSeedProtoHTTPClient() *http.Client {
+	if IgnoreSeedProtoCertErrors {
+		return &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: true,
+				},
+			},
+		}
+	}
+	return http.DefaultClient
 }
 
 // parseBiomePaths decodes the compact biome path string format into a

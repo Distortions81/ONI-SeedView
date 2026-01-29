@@ -8,11 +8,14 @@ import (
 )
 
 const (
-	ClientVersion     = "v0.2.1"
-	ProtoBaseURL      = "https://oni-data.stefanoltmann.de/"
-	AcceptProtoHeader = "application/protobuf"
-	GzipEncoding      = "gzip"
-	PanSpeed          = 15
+	ClientVersion = "v0.2.2"
+	ProtoBaseURL  = "https://mni.stefan-oltmann.de/map/"
+	// IgnoreSeedProtoCertErrors makes fetchSeedProto skip TLS certificate validation.
+	// Default is true so clients remain resilient to self-signed certificates.
+	IgnoreSeedProtoCertErrors = true
+	AcceptProtoHeader         = "application/protobuf"
+	GzipEncoding              = "gzip"
+	PanSpeed                  = 15
 	// CameraMargin controls how far the world can be panned
 	// beyond the visible screen in pixels.
 	CameraMargin    = -64

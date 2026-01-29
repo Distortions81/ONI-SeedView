@@ -24,7 +24,7 @@ This document explains how the Oni-SeedView repository is organized. It expands 
 - `colors.go` and `const.go` – Color definitions and user‑interface constants.
 - `parse.go` – Converts biome path strings into coordinate lists.
 - `types.go` – Data structures for geysers, POIs and asteroids.
-- `net.go` – Performs HTTP requests to `https://oni-data.stefanoltmann.de/COORDINATE` and decodes protobuf data via Go's `google.golang.org/protobuf`.
+- `net.go` – Performs HTTP requests to `https://mni.stefanoltmann.de/map/COORDINATE` and decodes protobuf data via Go's `google.golang.org/protobuf`.
 - `fonts.go` – Handles font loading and size adjustments.
 - `text_draw.go`, `textutil.go` – Text rendering utilities.
 - `touch_input.go`, `mobile_detect.go` – Touch gesture handling and simple mobile detection.
