@@ -2,6 +2,8 @@
 
 Oni-SeedView is a small viewer for **Oxygen Not Included** seed data. It fetches information from [Maps Not Included](https://mapsnotincluded.org) and renders an interactive map using the [Ebiten](https://ebiten.org/) game engine.
 
+# Maps not included took down their API, so the program no longer functions =/
+
 ![Screenshot](screenshot.png)
 
 - ~5k lines of Go code
