@@ -5,7 +5,7 @@ go 1.24.3
 require (
 	github.com/hajimehoshi/ebiten/v2 v2.9.8
 	golang.org/x/image v0.35.0
-	google.golang.org/protobuf v1.36.11
+	google.golang.org/protobuf v1.36.12
 )
 
 require (
